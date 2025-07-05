@@ -9,11 +9,9 @@ import 'react-toastify/dist/ReactToastify.css';
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-
-    if (user && token) {
-      dispatch(setCredentials({ user: JSON.parse(user), token }));
+    const userInfoFromStorage = localStorage.getItem('userInfo');
+    if (userInfoFromStorage) {
+      dispatch(setCredentials(JSON.parse(userInfoFromStorage)));
     }
   }, []);
 

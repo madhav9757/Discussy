@@ -8,7 +8,7 @@ const CommentInput = ({ postId, parentId = null }) => {
   const [createComment, { isLoading }] = useCreateCommentMutation();
 
   const { data: comments = [] } = useGetCommentsByPostIdQuery(postId);
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.auth.userInfo);
 
   const hasAlreadyCommented = comments.some(
     (comment) => comment.createdBy?._id === user?._id

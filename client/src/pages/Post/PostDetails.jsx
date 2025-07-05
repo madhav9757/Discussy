@@ -25,9 +25,9 @@ const PostDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.auth.userInfo);
 
-  const { data: post, isLoading, isError } = useGetPostByIdQuery(id);
+  const { data: post, isLoading, isError, refetch } = useGetPostByIdQuery(id);
   const { data: comments = [], isLoading: loadingComments } = useGetCommentsByPostIdQuery(id);
 
   const [upvoteCount, setUpvoteCount] = useState(0);
@@ -111,7 +111,7 @@ const PostDetailsPage = () => {
           <p className="loading">Loading comments...</p>
         ) : comments.length > 0 ? (
           comments.map((comment) => (
-            <CommentItem key={comment._id} comment={comment} />
+            <CommentItem comment={comment} onRefresh={refetch} key={comment._id} />
           ))
         ) : (
           <p className="no-comments">No comments yet. Be the first to share your thoughts!</p>

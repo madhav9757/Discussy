@@ -1,6 +1,6 @@
 import Comment from '../models/Comment.js';
-import Post from '../models/Post.js';    
-import User from '../models/User.js';     
+import Post from '../models/Post.js';
+import User from '../models/User.js';
 
 /**
  * @desc Get all comments for a specific post
@@ -237,11 +237,13 @@ export const toggleCommentVote = async (req, res) => {
 
         await comment.save();
 
-        res.status(200).json({
-            message: 'Vote updated successfully.',
-            upvotes: comment.upvotes.length,
-            downvotes: comment.downvotes.length
+        return res.status(200).json({
+            message: "Vote updated successfully.",
+            upvotes: updateComment.upvotes,
+            downvotes: updateComment.downvotes,
+            commentId: updateComment._id,
         });
+
 
     } catch (error) {
         console.error('Error toggling comment vote:', error);

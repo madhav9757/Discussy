@@ -11,16 +11,14 @@ import {
 } from '../../../app/api/commentsApi';
 import './CommentItem.css'
 
-const CommentItem = ({ comment }) => {
-    const user = useSelector((state) => state.auth.user);
-    const isCurrentUser = user && comment.createdBy?._id === user._id;
+const CommentItem = ({ comment, onRefresh }) => {
+    const user = useSelector((state) => state.auth.userInfo);
+    const isCurrentUser = user && String(comment.createdBy?._id) === String(user._id);
     const [vote] = useToggleCommentVoteMutation();
     const [delComment] = useDeleteCommentMutation();
     const [updateComment] = useUpdateCommentMutation();
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
-    console.log('Is current user comment:', isCurrentUser);
-    console.log('Redux user:', user);
 
     const handleVote = async (type) => {
         try {
@@ -38,11 +36,25 @@ const CommentItem = ({ comment }) => {
 
     const handleEditSave = async () => {
         if (editContent.trim() === '') return;
-        await updateComment({ commentId: comment._id, content: editContent, postId: comment.postId });
-        setIsEditing(false);
+        try {
+            await updateComment({
+                commentId: comment._id,
+                content: editContent,
+                postId: comment.postId,
+            }).unwrap();
+
+            setIsEditing(false);
+            onRefresh();
+        } catch (err) {
+            console.error('Edit failed:', err);
+        }
     };
 
-    const currentUserVote = comment.votes?.find((v) => v.userId === user?._id);
+    const currentUserVote = comment.upvotes.includes(user._id)
+        ? 'upvote'
+        : comment.downvotes.includes(user._id)
+            ? 'downvote'
+            : null;
 
     return (
         <div className={`comment-box-enhanced ${isCurrentUser ? 'highlighted-comment' : ''}`}>
@@ -53,10 +65,14 @@ const CommentItem = ({ comment }) => {
             </div>
 
             {isEditing ? (
-                <>
-                    <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} />
-                    <button onClick={handleEditSave}>Save</button>
-                </>
+                <div className="edit-mode">
+                    <textarea
+                        className="edit-textarea"
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                    />
+                    <button className="save-edit-btn" onClick={handleEditSave}>Save</button>
+                </div>
             ) : (
                 <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                     {comment.content}
@@ -64,33 +80,32 @@ const CommentItem = ({ comment }) => {
             )}
 
             <div className="comment-actions">
-                <button
-                    className={`comment-vote-btn ${currentUserVote?.type === 'upvote' ? 'upvoted' : ''}`}
-                    onClick={() => handleVote('upvote')}
-                >
-                    <FaThumbsUp />
-                </button>
-                <span className="vote-count">
-                    {comment.votes?.filter((v) => v.type === 'upvote').length || 0}
-                </span>
+                <div className="vote-group">
+                    <button
+                        className={`comment-vote-btn ${currentUserVote === 'upvote' ? 'upvoted' : ''}`}
+                        onClick={() => handleVote('upvote')}
+                    >
+                        <FaThumbsUp />
+                    </button>
+                    <span className="vote-count">{comment.upvotes.length}</span>
 
-                <button
-                    className={`comment-vote-btn ${currentUserVote?.type === 'downvote' ? 'downvoted' : ''}`}
-                    onClick={() => handleVote('downvote')}
-                >
-                    <FaThumbsDown />
-                </button>
-                <span className="vote-count">
-                    {comment.votes?.filter((v) => v.type === 'downvote').length || 0}
-                </span>
+                    <button
+                        className={`comment-vote-btn ${currentUserVote === 'downvote' ? 'downvoted' : ''}`}
+                        onClick={() => handleVote('downvote')}
+                    >
+                        <FaThumbsDown />
+                    </button>
+                    <span className="vote-count">{comment.downvotes.length}</span>
+                </div>
 
                 {user?._id === comment.createdBy?._id && (
-                    <>
-                        <button onClick={() => setIsEditing(!isEditing)}><FaEdit /></button>
-                        <button onClick={handleDelete}><FaTrash /></button>
-                    </>
+                    <div className="edit-delete-group">
+                        <button onClick={() => setIsEditing(!isEditing)} className="icon-btn"><FaEdit /></button>
+                        <button onClick={handleDelete} className="icon-btn"><FaTrash /></button>
+                    </div>
                 )}
             </div>
+
         </div>
     );
 };

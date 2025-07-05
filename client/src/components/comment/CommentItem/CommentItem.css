@@ -67,11 +67,11 @@
 }
 
 .comment-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid #444;
 }
 
 .comment-vote-btn {
@@ -118,6 +118,13 @@
     text-align: center;
     color: #ccc;
     font-weight: 600;
+}
+
+.vote-group,
+.edit-delete-group {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
 }
 
 .no-comments {
@@ -168,4 +175,57 @@
     font-size: 0.75rem;
     color: #4ad991;
     font-weight: 600;
+}
+
+.icon-btn {
+  background: none;
+  border: 1px solid #666;
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  color: #bbb;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.icon-btn:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #aaa;
+}
+
+.edit-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.edit-textarea {
+  width: 92%;
+  min-height: 80px;
+  padding: 0.75rem;
+  margin: auto;
+  border: 1px solid #555;
+  border-radius: 6px;
+  background-color: #1f1f1f;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.save-edit-btn {
+  align-self: flex-end;
+  background-color: #4ad991;
+  color: #111;
+  padding: 0.4rem 0.9rem;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.save-edit-btn:hover {
+  background-color: #38c77d;
 }

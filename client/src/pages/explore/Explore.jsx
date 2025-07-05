@@ -16,7 +16,7 @@ const Explore = () => {
       <h2 className="section-title"><Flame size={22} color="#f87171" /> Trending Posts</h2>
       <div className="card-grid">
         {posts.length > 0 ? posts.map(post => (
-          <PostCard post={post} />
+          <PostCard key={post._id} post={post} />
         )) : (
           <p className="empty-text">No trending posts yet.</p>
         )}

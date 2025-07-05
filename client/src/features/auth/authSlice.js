@@ -69,7 +69,6 @@ const authSlice = createSlice({
     clearAuthError: (state) => {
       state.error = null;
     },
-    // ✅ Add this to fix the error
     setCredentials: (state, action) => {
       state.userInfo = action.payload;
       localStorage.setItem('userInfo', JSON.stringify(action.payload));
@@ -117,6 +116,5 @@ const authSlice = createSlice({
   },
 });
 
-// ✅ Add setCredentials to the export
 export const { clearAuthError, setCredentials } = authSlice.actions;
 export default authSlice.reducer;
