@@ -1,0 +1,45 @@
+/* App.css or index.css */
+
+/* Reset + Box model */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* Full height layout */
+html, body, #root {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #0f2027;
+  color: white;
+}
+
+/* Prevent selection highlights */
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+/* Smooth transitions for UI changes */
+button, input, a {
+  transition: all 0.25s ease;
+}
+
+/* Button reset */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+/* Link styling */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Scrollbar hidden just in case */
+::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,78 @@
+.about-container {
+    padding: 2rem 1rem;
+    max-width: 900px;
+    margin: auto;
+    font-family: 'Inter', sans-serif;
+    color: #e4e4e4;
+    line-height: 1.6;
+}
+
+.about-box {
+    background-color: #1e1e1e;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
+}
+
+.about-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #facc15;
+}
+
+.about-description {
+    margin-bottom: 2rem;
+    color: #ccc;
+}
+
+.about-section {
+    margin-bottom: 2rem;
+}
+
+.about-section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #7abaff;
+}
+
+.about-section ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    color: #bbb;
+}
+
+.about-section p {
+    color: #ccc;
+}
+
+.github-link {
+    color: #7abaff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.github-link:hover {
+    text-decoration: underline;
+}
+
+.icon {
+    color: #facc15;
+    font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+    .about-box {
+        padding: 1.5rem;
+    }
+
+    .about-title {
+        font-size: 1.7rem;
+    }
+
+    .about-section h2 {
+        font-size: 1rem;
+    }
+}
