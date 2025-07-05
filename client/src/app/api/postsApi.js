@@ -1,27 +1,68 @@
 import { discusslyApi } from './discusslyApi';
 
-const extendedApi = discusslyApi.injectEndpoints({
+const extendedPostsApi = discusslyApi.injectEndpoints({
   endpoints: (builder) => ({
-    getPosts: builder.query({
+    // Get all posts
+    getAllPosts: builder.query({
       query: () => '/posts',
       providesTags: ['Post'],
     }),
+
+    // Get post by ID
     getPostById: builder.query({
       query: (id) => `/posts/${id}`,
       providesTags: (result, error, id) => [{ type: 'Post', id }],
     }),
-    toggleVote: builder.mutation({
-      query: ({ postId, type }) => ({
-        url: `/posts/${postId}/vote`,
-        method: 'PATCH',
-        body: { type },
-        credentials: 'include',
+
+    // Create post
+    createPost: builder.mutation({
+      query: (data) => ({
+        url: '/posts',
+        method: 'POST',
+        body: data,
       }),
+      invalidatesTags: ['Post'],
     }),
 
-    // Add more post-related endpoints here
+    // Update post
+    updatePost: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/posts/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Post', id },
+        'Post',
+      ],
+    }),
+
+    // Delete post
+    deletePost: builder.mutation({
+      query: (id) => ({
+        url: `/posts/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Post'],
+    }),
+
+    // Toggle vote
+    toggleVote: builder.mutation({
+      query: ({ id, type }) => ({
+        url: `/posts/${id}/vote`,
+        method: 'PATCH',
+        body: { type }, // type = "upvote" or "downvote"
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'Post', id }],
+    }),
   }),
-  overrideExisting: false,
 });
 
-export const { useGetPostsQuery, useGetPostByIdQuery, useToggleVoteMutation } = extendedApi;
+export const {
+  useGetAllPostsQuery,
+  useGetPostByIdQuery,
+  useCreatePostMutation,
+  useUpdatePostMutation,
+  useDeletePostMutation,
+  useToggleVoteMutation,
+} = extendedPostsApi;
