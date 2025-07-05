@@ -1,85 +1,98 @@
 import React, { useState } from 'react';
-import { FaThumbsUp, FaThumbsDown } from 'react-icons/fa';
+import { FaThumbsUp, FaThumbsDown, FaTrash, FaEdit } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-
-import 'highlight.js/styles/github-dark.css';
-import './CommentItem.css'; 
+import { useSelector } from 'react-redux';
+import {
+    useToggleCommentVoteMutation,
+    useDeleteCommentMutation,
+    useUpdateCommentMutation,
+} from '../../../app/api/commentsApi';
+import './CommentItem.css'
 
 const CommentItem = ({ comment }) => {
-  const [voteState, setVoteState] = useState(null); 
-  const [votes, setVotes] = useState({
-    upvotes: comment.upvotes || 0,
-    downvotes: comment.downvotes || 0,
-  });
+    const user = useSelector((state) => state.auth.user);
+    const isCurrentUser = user && comment.createdBy?._id === user._id;
+    const [vote] = useToggleCommentVoteMutation();
+    const [delComment] = useDeleteCommentMutation();
+    const [updateComment] = useUpdateCommentMutation();
+    const [isEditing, setIsEditing] = useState(false);
+    const [editContent, setEditContent] = useState(comment.content);
+    console.log('Is current user comment:', isCurrentUser);
+    console.log('Redux user:', user);
 
-  const handleUpvote = () => {
-    if (voteState === 'up') {
-      setVoteState(null);
-      setVotes((v) => ({ ...v, upvotes: v.upvotes - 1 }));
-      // await removeVote(comment._id)
-    } else {
-      setVoteState('up');
-      setVotes((v) => ({
-        upvotes: v.upvotes + 1,
-        downvotes: voteState === 'down' ? v.downvotes - 1 : v.downvotes,
-      }));
-      // await voteOnComment(comment._id, 'up')
-    }
-  };
+    const handleVote = async (type) => {
+        try {
+            await vote({ commentId: comment._id, type }).unwrap();
+        } catch (err) {
+            console.error('Vote failed:', err);
+        }
+    };
 
-  const handleDownvote = () => {
-    if (voteState === 'down') {
-      setVoteState(null);
-      setVotes((v) => ({ ...v, downvotes: v.downvotes - 1 }));
-      // await removeVote(comment._id)
-    } else {
-      setVoteState('down');
-      setVotes((v) => ({
-        downvotes: v.downvotes + 1,
-        upvotes: voteState === 'up' ? v.upvotes - 1 : v.upvotes,
-      }));
-      // await voteOnComment(comment._id, 'down')
-    }
-  };
+    const handleDelete = async () => {
+        if (window.confirm('Delete this comment?')) {
+            await delComment({ commentId: comment._id, postId: comment.postId });
+        }
+    };
 
-  return (
-    <div className="comment-box-enhanced">
-      <div className="comment-header">
-        <strong>{comment.createdBy?.username || 'Anonymous'}</strong> ·{' '}
-        <em>{new Date(comment.createdAt).toLocaleString()}</em>
-      </div>
+    const handleEditSave = async () => {
+        if (editContent.trim() === '') return;
+        await updateComment({ commentId: comment._id, content: editContent, postId: comment.postId });
+        setIsEditing(false);
+    };
 
-      <div className="comment-content">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeHighlight]}
-        >
-          {comment.content}
-        </ReactMarkdown>
-      </div>
+    const currentUserVote = comment.votes?.find((v) => v.userId === user?._id);
 
-      <div className="comment-actions">
-        <button
-          onClick={handleUpvote}
-          className={`comment-vote-btn ${voteState === 'up' ? 'upvoted' : ''}`}
-        >
-          <FaThumbsUp />
-        </button>
-        <span className="vote-count">{votes.upvotes}</span>
+    return (
+        <div className={`comment-box-enhanced ${isCurrentUser ? 'highlighted-comment' : ''}`}>
+            <div className="comment-header">
+                <strong>{comment.createdBy?.username || 'Anonymous'}</strong>
+                {isCurrentUser && <span className="user-badge">• you</span>}
+                <em>{new Date(comment.createdAt).toLocaleString()}</em>
+            </div>
 
-        <button
-          onClick={handleDownvote}
-          className={`comment-vote-btn ${voteState === 'down' ? 'downvoted' : ''}`}
-        >
-          <FaThumbsDown />
-        </button>
-        <span className="vote-count">{votes.downvotes}</span>
-      </div>
-    </div>
-  );
+            {isEditing ? (
+                <>
+                    <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} />
+                    <button onClick={handleEditSave}>Save</button>
+                </>
+            ) : (
+                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                    {comment.content}
+                </ReactMarkdown>
+            )}
+
+            <div className="comment-actions">
+                <button
+                    className={`comment-vote-btn ${currentUserVote?.type === 'upvote' ? 'upvoted' : ''}`}
+                    onClick={() => handleVote('upvote')}
+                >
+                    <FaThumbsUp />
+                </button>
+                <span className="vote-count">
+                    {comment.votes?.filter((v) => v.type === 'upvote').length || 0}
+                </span>
+
+                <button
+                    className={`comment-vote-btn ${currentUserVote?.type === 'downvote' ? 'downvoted' : ''}`}
+                    onClick={() => handleVote('downvote')}
+                >
+                    <FaThumbsDown />
+                </button>
+                <span className="vote-count">
+                    {comment.votes?.filter((v) => v.type === 'downvote').length || 0}
+                </span>
+
+                {user?._id === comment.createdBy?._id && (
+                    <>
+                        <button onClick={() => setIsEditing(!isEditing)}><FaEdit /></button>
+                        <button onClick={handleDelete}><FaTrash /></button>
+                    </>
+                )}
+            </div>
+        </div>
+    );
 };
 
 export default CommentItem;
-

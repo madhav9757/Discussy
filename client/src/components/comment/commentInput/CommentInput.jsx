@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
-import { useCreateCommentMutation } from '../../../app/api/commentsApi';
+import { useCreateCommentMutation, useGetCommentsByPostIdQuery } from '../../../app/api/commentsApi';
+import { useSelector } from 'react-redux';
 import './CommentInput.css';
 
 const CommentInput = ({ postId, parentId = null }) => {
   const [content, setContent] = useState('');
   const [createComment, { isLoading }] = useCreateCommentMutation();
+
+  const { data: comments = [] } = useGetCommentsByPostIdQuery(postId);
+  const user = useSelector((state) => state.auth.user);
+
+  const hasAlreadyCommented = comments.some(
+    (comment) => comment.createdBy?._id === user?._id
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,6 +26,14 @@ const CommentInput = ({ postId, parentId = null }) => {
     }
   };
 
+  if (hasAlreadyCommented) {
+    return (
+      <div className="already-commented-message">
+        📝 You have already posted a comment on this post.
+      </div>
+    );
+  }
+
   return (
     <form className="comment-input-form" onSubmit={handleSubmit}>
       <textarea
@@ -28,7 +44,11 @@ const CommentInput = ({ postId, parentId = null }) => {
         rows={3}
         disabled={isLoading}
       />
-      <button className="comment-submit-btn" type="submit" disabled={isLoading || !content.trim()}>
+      <button
+        className="comment-submit-btn"
+        type="submit"
+        disabled={isLoading || !content.trim()}
+      >
         {isLoading ? 'Posting...' : 'Post Comment'}
       </button>
     </form>

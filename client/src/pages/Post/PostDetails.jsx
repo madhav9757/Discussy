@@ -5,9 +5,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github-dark.css';
-
+import { useSelector } from 'react-redux';
 import './PostDetails.css';
-
 import CommentInput from '../../components/comment/commentInput/CommentInput.jsx';
 import CommentItem from '../../components/comment/CommentItem/CommentItem.jsx';
 
@@ -25,6 +24,8 @@ const formatDateTime = (isoString) => {
 const PostDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const user = useSelector((state) => state.auth.user);
 
   const { data: post, isLoading, isError } = useGetPostByIdQuery(id);
   const { data: comments = [], isLoading: loadingComments } = useGetCommentsByPostIdQuery(id);
@@ -100,7 +101,11 @@ const PostDetailsPage = () => {
       {/* Comments Section */}
       <div className="comments-section">
         <h3>Comments</h3>
-        <CommentInput postId={id} />
+        {user && !comments.some(c => c.createdBy?._id === user._id) ? (
+          <CommentInput postId={id} />
+        ) : (
+          <p className="already-commented-msg">You’ve already commented on this post.</p>
+        )}
 
         {loadingComments ? (
           <p className="loading">Loading comments...</p>

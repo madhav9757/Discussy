@@ -7,9 +7,9 @@ const extendedApi = discusslyApi.injectEndpoints({
       providesTags: (result, error, postId) =>
         result
           ? [
-              ...result.map(({ _id }) => ({ type: 'Comments', id: _id })),
-              { type: 'Comments', id: postId },
-            ]
+            ...result.map(({ _id }) => ({ type: 'Comments', id: _id })),
+            { type: 'Comments', id: postId },
+          ]
           : [{ type: 'Comments', id: postId }],
     }),
     createComment: builder.mutation({
@@ -22,17 +22,19 @@ const extendedApi = discusslyApi.injectEndpoints({
         { type: 'Comments', id: postId },
       ],
     }),
+
     updateComment: builder.mutation({
-      query: ({ commentId, content }) => ({
+      query: ({ commentId, postId, content }) => ({
         url: `/comments/${commentId}`,
         method: 'PUT',
         body: { content },
       }),
-      invalidatesTags: (result, error, { commentId }) => [
+      invalidatesTags: (result, error, { commentId, postId }) => [
         { type: 'Comments', id: commentId },
-        { type: 'Comments', id: result?.postId },
+        { type: 'Comments', id: postId },
       ],
     }),
+
     deleteComment: builder.mutation({
       query: ({ commentId }) => ({
         url: `/comments/${commentId}`,
@@ -43,19 +45,20 @@ const extendedApi = discusslyApi.injectEndpoints({
         { type: 'Comments', id: postId },
       ],
     }),
+
     toggleCommentVote: builder.mutation({
-      query: ({ commentId, type }) => ({
+      query: ({ commentId, postId, type }) => ({
         url: `/comments/${commentId}/vote`,
         method: 'POST',
         body: { type },
       }),
-      invalidatesTags: (result, error, { commentId }) => [
+      invalidatesTags: (result, error, { commentId, postId }) => [
         { type: 'Comments', id: commentId },
-        { type: 'Comments', id: result?.postId },
+        { type: 'Comments', id: postId },
       ],
     }),
+    overrideExisting: false,
   }),
-  overrideExisting: false,
 });
 
 export const {
