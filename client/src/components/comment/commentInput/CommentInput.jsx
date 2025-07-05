@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCreateCommentMutation } from '../../app/api/commentsApi';
+import { useCreateCommentMutation } from '../../../app/api/commentsApi';
 import './CommentInput.css';
 
 const CommentInput = ({ postId, parentId = null }) => {

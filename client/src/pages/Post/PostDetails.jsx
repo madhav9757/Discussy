@@ -5,8 +5,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github-dark.css';
+
 import './PostDetails.css';
-import CommentInput from '../../components/commentInput/CommentInput.jsx';
+
+import CommentInput from '../../components/comment/commentInput/CommentInput.jsx';
+import CommentItem from '../../components/comment/CommentItem/CommentItem.jsx';
+
 import { useGetPostByIdQuery } from '../../app/api/postsApi';
 import { useGetCommentsByPostIdQuery } from '../../app/api/commentsApi';
 
@@ -21,6 +25,7 @@ const formatDateTime = (isoString) => {
 const PostDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+
   const { data: post, isLoading, isError } = useGetPostByIdQuery(id);
   const { data: comments = [], isLoading: loadingComments } = useGetCommentsByPostIdQuery(id);
 
@@ -35,22 +40,22 @@ const PostDetailsPage = () => {
   }, [post]);
 
   const handleUpvote = () => {
-    // Integrate backend mutation here
+    // TODO: Integrate with backend
     setUpvoteCount((prev) => prev + 1);
   };
 
   const handleDownvote = () => {
-    // Integrate backend mutation here
+    // TODO: Integrate with backend
     setDownvoteCount((prev) => prev + 1);
   };
 
   if (isLoading) return <div className="loading">Loading post...</div>;
-  if (isError || !post) return <div className="error">Post not found.</div>;
+  if (isError || !post) return <div className="error">❌ Post not found or failed to load.</div>;
 
   return (
     <div className="post-details-container">
       <div className="post-box">
-        <button className="back-button" onClick={() => navigate(-1)}>
+        <button className="back-button" onClick={() => navigate(-1)} aria-label="Go back">
           <MdArrowBack size={20} style={{ marginRight: '6px' }} /> Back to Community
         </button>
 
@@ -69,59 +74,42 @@ const PostDetailsPage = () => {
         </div>
 
         <div className="post-content">
-          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+          >
             {post.content}
           </ReactMarkdown>
         </div>
 
         <div className="post-engagement">
           <div className="vote-controls">
-            <button className="vote-button upvote-button" onClick={handleUpvote}>
+            <button className="vote-button upvote-button" onClick={handleUpvote} aria-label="Upvote post">
               👍 {upvoteCount}
             </button>
-            <button className="vote-button downvote-button" onClick={handleDownvote}>
+            <button className="vote-button downvote-button" onClick={handleDownvote} aria-label="Downvote post">
               👎 {downvoteCount}
             </button>
           </div>
-          <button className="comment-button">
-            💬 Comments ({comments.length})
+          <button className="comment-button" aria-label="Scroll to comments">
+            💬 {comments.length === 0 ? 'No Comments Yet' : `Comments (${comments.length})`}
           </button>
         </div>
       </div>
 
       {/* Comments Section */}
       <div className="comments-section">
+        <h3>Comments</h3>
         <CommentInput postId={id} />
 
         {loadingComments ? (
           <p className="loading">Loading comments...</p>
         ) : comments.length > 0 ? (
-          comments.map((c) => (
-            <div key={c._id} className="comment-box-enhanced">
-              <div className="comment-header">
-                <strong>{c.createdBy?.username || 'Unknown User'}</strong> ·{' '}
-                <em>{formatDateTime(c.createdAt)}</em>
-              </div>
-
-              <div className="comment-content">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
-                >
-                  {c.content}
-                </ReactMarkdown>
-              </div>
-
-              <div className="comment-actions">
-                <button className="comment-vote-btn">👍</button>
-                <span className="vote-count">{c.upvotes?.length || 0}</span>
-                <button className="comment-vote-btn">👎</button>
-                <span className="vote-count">{c.downvotes?.length || 0}</span>
-              </div>
-            </div>
+          comments.map((comment) => (
+            <CommentItem key={comment._id} comment={comment} />
           ))
         ) : (
-          <p className="no-comments">No comments yet. Be the first to comment!</p>
+          <p className="no-comments">No comments yet. Be the first to share your thoughts!</p>
         )}
       </div>
     </div>
