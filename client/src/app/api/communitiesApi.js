@@ -35,6 +35,15 @@ const extendedApi = discusslyApi.injectEndpoints({
         { type: 'Community', id: communityId },
       ],
     }),
+
+    // 🗑️ Delete community
+    deleteCommunity: builder.mutation({
+      query: (communityId) => ({
+        url: `/communities/${communityId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Community'],
+    }),
   }),
   overrideExisting: false,
 });
@@ -45,4 +54,5 @@ export const {
   useGetCommunityByIdQuery,
   useJoinCommunityMutation,
   useLeaveCommunityMutation,
+  useDeleteCommunityMutation
 } = extendedApi;

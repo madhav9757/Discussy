@@ -75,22 +75,46 @@ export const joinCommunity = asyncHandler(async (req, res) => {
 
 
 export const leaveCommunity = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+    const { id } = req.params;
 
-  const community = await Community.findById(id);
-  if (!community) {
-    res.status(404);
-    throw new Error('Community not found');
-  }
+    const community = await Community.findById(id);
+    if (!community) {
+        res.status(404);
+        throw new Error('Community not found');
+    }
 
-  const index = community.members.indexOf(req.user._id);
-  if (index === -1) {
-    res.status(400);
-    throw new Error('You are not a member of this community');
-  }
+    const index = community.members.indexOf(req.user._id);
+    if (index === -1) {
+        res.status(400);
+        throw new Error('You are not a member of this community');
+    }
 
-  community.members.splice(index, 1);
-  await community.save();
+    community.members.splice(index, 1);
+    await community.save();
 
-  res.status(200).json({ message: 'Left community successfully' });
+    res.status(200).json({ message: 'Left community successfully' });
+});
+
+export const deleteCommunity = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const community = await Community.findById(id);
+    if (!community) {
+        res.status(404);
+        throw new Error('Community not found');
+    }
+
+    // Only the creator can delete
+    if (community.createdBy.toString() !== req.user._id.toString()) {
+        res.status(403);
+        throw new Error('Only the creator can delete this community');
+    }
+
+    // Delete all posts in this community
+    await Post.deleteMany({ community: id });
+
+    // Delete the community
+    await community.deleteOne();
+
+    res.status(200).json({ message: 'Community deleted successfully' });
 });

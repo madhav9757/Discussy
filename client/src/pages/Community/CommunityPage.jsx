@@ -5,6 +5,7 @@ import {
   useGetCommunityByIdQuery,
   useJoinCommunityMutation,
   useLeaveCommunityMutation,
+  useDeleteCommunityMutation
 } from "../../app/api/communitiesApi.js";
 import PostCard from '../../components/postCard/PostCard.jsx';
 import { useSelector } from "react-redux";
@@ -19,6 +20,23 @@ const CommunityPage = () => {
   const [leaveCommunity, { isLoading: isLeaving }] = useLeaveCommunityMutation();
 
   const [showMembersModal, setShowMembersModal] = useState(false);
+  const [deleteCommunity, { isLoading: isDeleting }] = useDeleteCommunityMutation();
+
+  const isCreator = user._id === community?.createdBy?._id;
+
+  const handleDeleteCommunity = async () => {
+    const confirmed = window.confirm("Are you sure you want to delete this community? This action cannot be undone.");
+    if (!confirmed) return;
+
+    try {
+      await deleteCommunity(community._id).unwrap();
+      toast.success("Community deleted successfully");
+      navigate("/"); // Redirect to homepage or community list
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast.error("Failed to delete the community");
+    }
+  };
 
   const currentUserId = user._id;
 
@@ -89,6 +107,15 @@ const CommunityPage = () => {
           {isMember && (
             <button className="action-button create-post" onClick={handleCreatePost}>
               ➕ Create Post
+            </button>
+          )}
+          {isCreator && (
+            <button
+              className="action-button delete"
+              onClick={handleDeleteCommunity}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "🗑️ Delete Community"}
             </button>
           )}
         </div>

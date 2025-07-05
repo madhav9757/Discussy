@@ -24,7 +24,6 @@ const formatDateTime = (isoString) => {
 const PostDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-
   const user = useSelector((state) => state.auth.userInfo);
 
   const { data: post, isLoading, isError, refetch } = useGetPostByIdQuery(id);
@@ -43,10 +42,10 @@ const PostDetailsPage = () => {
 
   const handleVote = async (type) => {
     try {
-      const res = await toggleVote({ postId: id, type }).unwrap();
+      const res = await toggleVote({ id , type }).unwrap();
       setUpvoteCount(res.upvotes);
       setDownvoteCount(res.downvotes);
-      refetch(); 
+      refetch();
     } catch (err) {
       console.error('Vote failed:', err);
     }
