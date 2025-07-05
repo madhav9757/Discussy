@@ -275,3 +275,13 @@
 .modal-close:hover {
   background-color: #666;
 }
+
+.you-badge {
+  margin-left: 6px;
+  background-color: #4ad99130;
+  color: #4ad991;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+}

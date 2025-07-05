@@ -10,9 +10,18 @@ const extendedApi = discusslyApi.injectEndpoints({
       query: (id) => `/posts/${id}`,
       providesTags: (result, error, id) => [{ type: 'Post', id }],
     }),
+    toggleVote: builder.mutation({
+      query: ({ postId, type }) => ({
+        url: `/posts/${postId}/vote`,
+        method: 'PATCH',
+        body: { type },
+        credentials: 'include',
+      }),
+    }),
+
     // Add more post-related endpoints here
   }),
   overrideExisting: false,
 });
 
-export const { useGetPostsQuery, useGetPostByIdQuery } = extendedApi;
+export const { useGetPostsQuery, useGetPostByIdQuery, useToggleVoteMutation } = extendedApi;

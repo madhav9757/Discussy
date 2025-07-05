@@ -51,3 +51,46 @@ export const getCommunityById = asyncHandler(async (req, res) => {
 
     res.status(200).json({ ...community.toObject(), posts });
 });
+
+
+export const joinCommunity = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const community = await Community.findById(id);
+    if (!community) {
+        res.status(404);
+        throw new Error('Community not found');
+    }
+
+    if (community.members.includes(req.user._id)) {
+        res.status(400);
+        throw new Error('Already a member of this community');
+    }
+
+    community.members.push(req.user._id);
+    await community.save();
+
+    res.status(200).json({ message: 'Joined community successfully' });
+});
+
+
+export const leaveCommunity = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const community = await Community.findById(id);
+  if (!community) {
+    res.status(404);
+    throw new Error('Community not found');
+  }
+
+  const index = community.members.indexOf(req.user._id);
+  if (index === -1) {
+    res.status(400);
+    throw new Error('You are not a member of this community');
+  }
+
+  community.members.splice(index, 1);
+  await community.save();
+
+  res.status(200).json({ message: 'Left community successfully' });
+});

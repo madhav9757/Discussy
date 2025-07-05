@@ -4,6 +4,7 @@ import AppRouter from './router.jsx';
 import Header from './components/header/Header.jsx';
 import { setCredentials } from './features/auth/authSlice.js';
 import { ToastContainer } from 'react-toastify';
+import { Toaster } from 'react-hot-toast';
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
     <>
       <Header />
       <AppRouter />
+      <Toaster position="top-center" />
       <ToastContainer position="top-right" autoClose={2000} />
     </>
   );

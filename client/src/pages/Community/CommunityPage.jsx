@@ -1,6 +1,11 @@
 import React, { useState } from "react";
+import toast from 'react-hot-toast';
 import { useParams, useNavigate } from "react-router-dom";
-import { useGetCommunityByIdQuery } from "../../app/api/communitiesApi.js";
+import {
+  useGetCommunityByIdQuery,
+  useJoinCommunityMutation,
+  useLeaveCommunityMutation,
+} from "../../app/api/communitiesApi.js";
 import PostCard from '../../components/postCard/PostCard.jsx';
 import { useSelector } from "react-redux";
 import "./CommunityPage.css";
@@ -10,10 +15,12 @@ const CommunityPage = () => {
   const navigate = useNavigate();
   const { data: community, isLoading, isError } = useGetCommunityByIdQuery(id);
   const { userInfo: user } = useSelector((state) => state.auth);
+  const [joinCommunity, { isLoading: isJoining }] = useJoinCommunityMutation();
+  const [leaveCommunity, { isLoading: isLeaving }] = useLeaveCommunityMutation();
 
   const [showMembersModal, setShowMembersModal] = useState(false);
 
-  const currentUserId = user.user._id;
+  const currentUserId = user._id;
 
   const formatDateTime = (isoString) => {
     if (!isoString) return "N/A";
@@ -29,13 +36,21 @@ const CommunityPage = () => {
 
   const isMember = community?.members?.some((member) => member._id === currentUserId) || false;
 
-  const handleJoinLeave = () => {
-    if (isMember) {
-      console.log("Leaving community:", community.name, "User ID:", currentUserId);
-    } else {
-      console.log("Joining community:", community.name, "User ID:", currentUserId);
+  const handleJoinLeave = async () => {
+    try {
+      if (isMember) {
+        await leaveCommunity(community._id).unwrap();
+        toast.success("Left the community");
+      } else {
+        await joinCommunity(community._id).unwrap();
+        toast.success("Joined the community");
+      }
+    } catch (err) {
+      console.error("Failed to join/leave:", err);
+      toast.error("Something went wrong");
     }
   };
+
 
   const handleCreatePost = () => {
     navigate(`/create-post?communityId=${community._id}`);
@@ -66,8 +81,9 @@ const CommunityPage = () => {
           <button
             className={`action-button ${isMember ? "leave" : "join"}`}
             onClick={handleJoinLeave}
+            disabled={isJoining || isLeaving}
           >
-            {isMember ? "Leave Community" : "Join Community"}
+            {isJoining || isLeaving ? "Processing..." : isMember ? "Leave Community" : "Join Community"}
           </button>
 
           {isMember && (
@@ -98,6 +114,8 @@ const CommunityPage = () => {
             <div className="members-list">
               {community.members.map((member, idx) => {
                 const isCreator = member._id === community.createdBy._id;
+                const isCurrentUser = member._id === user._id;
+
                 return (
                   <div key={idx} className="member-item">
                     <img
@@ -106,7 +124,10 @@ const CommunityPage = () => {
                       className="member-avatar"
                     />
                     <div className="member-details">
-                      <span className="member-name">{member.username}</span>
+                      <span className="member-name">
+                        {member.username}
+                        {isCurrentUser && <span className="you-badge">• you</span>}
+                      </span>
                       {isCreator && <span className="role-tag creator">Creator</span>}
                       {!isCreator && <span className="role-tag member">Member</span>}
                     </div>

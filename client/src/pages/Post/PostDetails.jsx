@@ -10,7 +10,7 @@ import './PostDetails.css';
 import CommentInput from '../../components/comment/commentInput/CommentInput.jsx';
 import CommentItem from '../../components/comment/CommentItem/CommentItem.jsx';
 
-import { useGetPostByIdQuery } from '../../app/api/postsApi';
+import { useGetPostByIdQuery, useToggleVoteMutation } from '../../app/api/postsApi';
 import { useGetCommentsByPostIdQuery } from '../../app/api/commentsApi';
 
 const formatDateTime = (isoString) => {
@@ -29,6 +29,7 @@ const PostDetailsPage = () => {
 
   const { data: post, isLoading, isError, refetch } = useGetPostByIdQuery(id);
   const { data: comments = [], isLoading: loadingComments } = useGetCommentsByPostIdQuery(id);
+  const [toggleVote] = useToggleVoteMutation();
 
   const [upvoteCount, setUpvoteCount] = useState(0);
   const [downvoteCount, setDownvoteCount] = useState(0);
@@ -40,15 +41,25 @@ const PostDetailsPage = () => {
     }
   }, [post]);
 
-  const handleUpvote = () => {
-    // TODO: Integrate with backend
-    setUpvoteCount((prev) => prev + 1);
+  const handleVote = async (type) => {
+    try {
+      const res = await toggleVote({ postId: id, type }).unwrap();
+      setUpvoteCount(res.upvotes);
+      setDownvoteCount(res.downvotes);
+      refetch(); 
+    } catch (err) {
+      console.error('Vote failed:', err);
+    }
   };
 
-  const handleDownvote = () => {
-    // TODO: Integrate with backend
-    setDownvoteCount((prev) => prev + 1);
-  };
+  const handleUpvote = () => handleVote('upvote');
+  const handleDownvote = () => handleVote('downvote');
+
+  const currentUserVote = post?.upvotes?.includes(user._id)
+    ? 'upvote'
+    : post?.downvotes?.includes(user._id)
+      ? 'downvote'
+      : null;
 
   if (isLoading) return <div className="loading">Loading post...</div>;
   if (isError || !post) return <div className="error">❌ Post not found or failed to load.</div>;
@@ -85,11 +96,17 @@ const PostDetailsPage = () => {
 
         <div className="post-engagement">
           <div className="vote-controls">
-            <button className="vote-button upvote-button" onClick={handleUpvote} aria-label="Upvote post">
-              👍 {upvoteCount}
+            <button
+              className={`vote-button upvote-button ${currentUserVote === 'upvote' ? 'active' : ''}`}
+              onClick={handleUpvote}
+            >
+              👍 {post.upvotes?.length || 0}
             </button>
-            <button className="vote-button downvote-button" onClick={handleDownvote} aria-label="Downvote post">
-              👎 {downvoteCount}
+            <button
+              className={`vote-button downvote-button ${currentUserVote === 'downvote' ? 'active' : ''}`}
+              onClick={handleDownvote}
+            >
+              👎 {post.downvotes?.length || 0}
             </button>
           </div>
           <button className="comment-button" aria-label="Scroll to comments">
