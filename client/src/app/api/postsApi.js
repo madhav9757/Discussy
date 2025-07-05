@@ -3,7 +3,7 @@ import { discusslyApi } from './discusslyApi';
 const extendedPostsApi = discusslyApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all posts
-    getAllPosts: builder.query({
+    getPosts: builder.query({
       query: () => '/posts',
       providesTags: ['Post'],
     }),
@@ -59,7 +59,7 @@ const extendedPostsApi = discusslyApi.injectEndpoints({
 });
 
 export const {
-  useGetAllPostsQuery,
+  useGetPostsQuery,
   useGetPostByIdQuery,
   useCreatePostMutation,
   useUpdatePostMutation,

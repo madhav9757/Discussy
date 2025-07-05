@@ -1,0 +1,91 @@
+/* Root container */
+.create-post-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4rem 1.5rem;
+  background-color: #f4f6f9;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Post form card */
+.post-form-box {
+  width: 100%;
+  max-width: 550px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.post-form-box:hover {
+  transform: translateY(-3px);
+}
+
+/* Title */
+.post-form-box h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #2c3e50;
+}
+
+/* Form elements */
+.post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.post-form select,
+.post-form input,
+.post-form textarea {
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background-color: #fdfdfd;
+  transition: border-color 0.3s;
+}
+
+.post-form select:focus,
+.post-form input:focus,
+.post-form textarea:focus {
+  outline: none;
+  border-color: #7e57c2;
+}
+
+/* Submit Button */
+.submit-btn {
+  background-color: #7e57c2;
+  color: white;
+  border: none;
+  padding: 0.9rem 1.2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #673ab7;
+}
+
+.submit-btn:disabled {
+  background-color: #bbb;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .post-form-box {
+    padding: 2rem 1.2rem;
+  }
+
+  .post-form-box h2 {
+    font-size: 1.5rem;
+  }
+}

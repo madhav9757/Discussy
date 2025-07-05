@@ -9,6 +9,7 @@ import Explore from './pages/explore/Explore';
 import CommunityPage from './pages/Community/CommunityPage.jsx'
 import PostDetails from './pages/Post/PostDetails.jsx';
 import AboutPage from './pages/About/AboutPage.jsx';
+import CreatePost from './features/posts/createPost/CreatePost.jsx';
 
 const AppRouter = () => {
   return (
@@ -22,6 +23,7 @@ const AppRouter = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/community/:id" element={<CommunityPage />} />
         <Route path="/posts/:id" element={<PostDetails />} />
+        <Route path="/community/:id/create-post" element={<CreatePost />} />
         {/* Example scrollable route */}
         {/* <Route path="/posts" element={<Layout scrollable><PostList /></Layout>} /> */}
       </Routes>

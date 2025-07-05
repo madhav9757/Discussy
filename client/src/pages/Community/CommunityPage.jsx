@@ -53,7 +53,7 @@ const CommunityPage = () => {
 
 
   const handleCreatePost = () => {
-    navigate(`/create-post?communityId=${community._id}`);
+    navigate(`/community/${community._id}/create-post`);
   };
 
   if (isLoading) return <div className="loading">Loading community...</div>;
