@@ -2,8 +2,8 @@
   "version": 2,
   "name": "discussly-frontend",
   "buildCommand": "npm run build",
-  "outputDirectory": "build",
-  "devCommand": "npm start",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
   "routes": [
     {
       "src": "/(.*)",
@@ -11,6 +11,7 @@
     }
   ],
   "env": {
+    "NODE_ENV":"production",
     "VITE_API_BASE_URL": "https://discussy.onrender.com"
   }
 }
