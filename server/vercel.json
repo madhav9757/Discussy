@@ -1,0 +1,25 @@
+{
+    "version": 2,
+    "name": "your-backend-app",
+    "outputDirectory": "dist",
+    "buildCommand": "npm install",
+    "devCommand": "npm start",
+    "builds": [
+        {
+            "src": "server.js",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "server.js"
+        }
+    ],
+    "env": {
+        "NODE_ENV": "production",
+        "PORT": "5000",
+        "MONGO_URI": "@mongo_uri",
+        "JWT_SECRET": "@jwt_secret"
+    }
+}
