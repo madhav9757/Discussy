@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useCreatePostMutation } from '../../../app/api/postsApi.js';
 import { useGetCommunityByIdQuery } from '../../../app/api/communitiesApi';
 import toast from 'react-hot-toast';
-import './CreatePost.css';
+import './createPost.css';
 
 const CreatePost = () => {
     const { id } = useParams();
