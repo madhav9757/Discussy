@@ -1,23 +1,24 @@
 import { discusslyApi } from './discusslyApi';
+import { POST_API_URL } from '../constant';
 
 const extendedPostsApi = discusslyApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all posts
     getPosts: builder.query({
-      query: () => '/posts',
+      query: () => POST_API_URL,
       providesTags: ['Post'],
     }),
 
     // Get post by ID
     getPostById: builder.query({
-      query: (id) => `/posts/${id}`,
+      query: (id) => `${POST_API_URL}/${id}`,
       providesTags: (result, error, id) => [{ type: 'Post', id }],
     }),
 
     // Create post
     createPost: builder.mutation({
       query: (data) => ({
-        url: '/posts',
+        url: POST_API_URL,
         method: 'POST',
         body: data,
       }),
@@ -27,7 +28,7 @@ const extendedPostsApi = discusslyApi.injectEndpoints({
     // Update post
     updatePost: builder.mutation({
       query: ({ id, ...data }) => ({
-        url: `/posts/${id}`,
+        url: `${POST_API_URL}/${id}`,
         method: 'PUT',
         body: data,
       }),
@@ -40,7 +41,7 @@ const extendedPostsApi = discusslyApi.injectEndpoints({
     // Delete post
     deletePost: builder.mutation({
       query: (id) => ({
-        url: `/posts/${id}`,
+        url: `${POST_API_URL}/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Post'],
@@ -49,7 +50,7 @@ const extendedPostsApi = discusslyApi.injectEndpoints({
     // Toggle vote
     toggleVote: builder.mutation({
       query: ({ id, type }) => ({
-        url: `/posts/${id}/vote`,
+        url: `${POST_API_URL}/${id}/vote`,
         method: 'PATCH',
         body: { type }, // type = "upvote" or "downvote"
       }),

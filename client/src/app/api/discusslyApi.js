@@ -1,10 +1,10 @@
-// services/api/discusslyApi.js
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { API_BASE_URL } from '../constant';
 
 export const discusslyApi = createApi({
   reducerPath: 'discusslyApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:5000/api',
+    baseUrl: API_BASE_URL,
     credentials: 'include',
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token');

@@ -1,20 +1,22 @@
 import { discusslyApi } from './discusslyApi';
+import { COMMENT_API_URL, POST_API_URL } from '../constant.js';
 
 const extendedApi = discusslyApi.injectEndpoints({
   endpoints: (builder) => ({
     getCommentsByPostId: builder.query({
-      query: (postId) => `/posts/${postId}/comments`,
+      query: (postId) => `${POST_API_URL}/${postId}/comments`,
       providesTags: (result, error, postId) =>
         result
           ? [
-            ...result.map(({ _id }) => ({ type: 'Comments', id: _id })),
-            { type: 'Comments', id: postId },
-          ]
+              ...result.map(({ _id }) => ({ type: 'Comments', id: _id })),
+              { type: 'Comments', id: postId },
+            ]
           : [{ type: 'Comments', id: postId }],
     }),
+
     createComment: builder.mutation({
       query: ({ postId, content, parentId = null }) => ({
-        url: `/posts/${postId}/comments`,
+        url: `${POST_API_URL}/${postId}/comments`,
         method: 'POST',
         body: { content, parentId },
       }),
@@ -25,7 +27,7 @@ const extendedApi = discusslyApi.injectEndpoints({
 
     updateComment: builder.mutation({
       query: ({ commentId, postId, content }) => ({
-        url: `/comments/${commentId}`,
+        url: `${COMMENT_API_URL}/${commentId}`,
         method: 'PUT',
         body: { content },
       }),
@@ -37,7 +39,7 @@ const extendedApi = discusslyApi.injectEndpoints({
 
     deleteComment: builder.mutation({
       query: ({ commentId }) => ({
-        url: `/comments/${commentId}`,
+        url: `${COMMENT_API_URL}/${commentId}`,
         method: 'DELETE',
       }),
       invalidatesTags: (result, error, { commentId, postId }) => [
@@ -48,7 +50,7 @@ const extendedApi = discusslyApi.injectEndpoints({
 
     toggleCommentVote: builder.mutation({
       query: ({ commentId, postId, type }) => ({
-        url: `/comments/${commentId}/vote`,
+        url: `${COMMENT_API_URL}/${commentId}/vote`,
         method: 'POST',
         body: { type },
       }),
@@ -57,8 +59,8 @@ const extendedApi = discusslyApi.injectEndpoints({
         { type: 'Comments', id: postId },
       ],
     }),
-    overrideExisting: false,
   }),
+  overrideExisting: false,
 });
 
 export const {

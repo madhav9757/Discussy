@@ -1,17 +1,16 @@
 {
   "version": 2,
-  "name": "your-frontend-app",
+  "name": "discussly-frontend",
   "buildCommand": "npm run build",
   "outputDirectory": "build",
   "devCommand": "npm start",
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/$1"
+      "dest": "/index.html"
     }
   ],
   "env": {
-    "NODE_ENV": "production",
-    "REACT_APP_API_BASE_URL": "https://your-backend-app-name.vercel.app/api"    
+    "VITE_API_BASE_URL": "https://discussy.onrender.com"
   }
 }
