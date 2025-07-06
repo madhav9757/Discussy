@@ -6,10 +6,11 @@ import RegisterPage from './features/auth/RegisterPage/RegisterPage';
 import Home from './pages/home/Home';
 import ProfilePage from './features/auth/profile/ProfilePage.jsx';
 import Explore from './pages/explore/Explore';
-import CommunityPage from './pages/Community/CommunityPage.jsx'
+import CommunityPage from './pages/Community/CommunityPage.jsx';
 import PostDetails from './pages/Post/PostDetails.jsx';
 import AboutPage from './pages/About/AboutPage.jsx';
 import CreatePost from './features/posts/createPost/CreatePost.jsx';
+import EditPostPage from './features/posts/updatePost/UpdatePost.jsx';
 
 const AppRouter = () => {
   return (
@@ -24,8 +25,7 @@ const AppRouter = () => {
         <Route path="/community/:id" element={<CommunityPage />} />
         <Route path="/posts/:id" element={<PostDetails />} />
         <Route path="/community/:id/create-post" element={<CreatePost />} />
-        {/* Example scrollable route */}
-        {/* <Route path="/posts" element={<Layout scrollable><PostList /></Layout>} /> */}
+        <Route path="/edit-post/:id" element={<EditPostPage />} /> 
       </Routes>
     </Layout>
   );

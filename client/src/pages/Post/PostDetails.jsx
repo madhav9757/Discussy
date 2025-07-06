@@ -10,7 +10,7 @@ import './PostDetails.css';
 import CommentInput from '../../components/comment/commentInput/CommentInput.jsx';
 import CommentItem from '../../components/comment/CommentItem/CommentItem.jsx';
 
-import { useGetPostByIdQuery, useToggleVoteMutation } from '../../app/api/postsApi';
+import { useGetPostByIdQuery, useToggleVoteMutation, useDeletePostMutation, useUpdatePostMutation } from '../../app/api/postsApi';
 import { useGetCommentsByPostIdQuery } from '../../app/api/commentsApi';
 
 const formatDateTime = (isoString) => {
@@ -40,9 +40,24 @@ const PostDetailsPage = () => {
     }
   }, [post]);
 
+  const [deletePost] = useDeletePostMutation();
+
+  const handleDeletePost = async () => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+    try {
+      await deletePost(post._id).unwrap();
+      toast.success("Post deleted successfully!");
+      navigate(`/community/${post.community._id}`);
+    } catch (err) {
+      console.error("Delete failed", err);
+      toast.error("Failed to delete post");
+    }
+  };
+
   const handleVote = async (type) => {
     try {
-      const res = await toggleVote({ id , type }).unwrap();
+      const res = await toggleVote({ id, type }).unwrap();
       setUpvoteCount(res.upvotes);
       setDownvoteCount(res.downvotes);
       refetch();
@@ -108,6 +123,16 @@ const PostDetailsPage = () => {
               👎 {post.downvotes?.length || 0}
             </button>
           </div>
+          {(user?._id === post.author._id || user?._id === post.community.createdBy) && (
+            <div className="post-actions">
+              <button className="edit-post-btn" onClick={() => navigate(`/edit-post/${post._id}`)}>
+                ✏️ Edit
+              </button>
+              <button className="delete-post-btn" onClick={handleDeletePost}>
+                🗑️ Delete
+              </button>
+            </div>
+          )}
           <button className="comment-button" aria-label="Scroll to comments">
             💬 {comments.length === 0 ? 'No Comments Yet' : `Comments (${comments.length})`}
           </button>

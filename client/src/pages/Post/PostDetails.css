@@ -176,3 +176,28 @@
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
+
+.post-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.edit-post-btn,
+.delete-post-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.edit-post-btn {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+}
+
+.delete-post-btn {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+}
