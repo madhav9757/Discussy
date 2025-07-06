@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import {API_BASE_URL} from '../../app/constant.js'
 
 // Load user from localStorage
 const userInfoFromStorage = localStorage.getItem('userInfo')
@@ -17,7 +18,7 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (formData, thunkAPI) => {
     try {
-      const res = await axios.post('/api/users/login', formData, {
+      const res = await axios.post(`${API_BASE_URL}/users/login`, formData, {
         withCredentials: true,
       });
       localStorage.setItem('userInfo', JSON.stringify(res.data.user));
@@ -35,7 +36,7 @@ export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (formData, thunkAPI) => {
     try {
-      const res = await axios.post('/api/users/register', formData, {
+      const res = await axios.post(`${API_BASE_URL}/users/register`, formData, {
         withCredentials: true,
       });
       localStorage.setItem('userInfo', JSON.stringify(res.data.user));
@@ -53,7 +54,7 @@ export const logoutUser = createAsyncThunk(
   'auth/logoutUser',
   async (_, thunkAPI) => {
     try {
-      await axios.post('/api/users/logout', {}, { withCredentials: true });
+      await axios.post(`${API_BASE_URL}/users/logout`, {}, { withCredentials: true });
       localStorage.removeItem('userInfo');
       return true;
     } catch (err) {
