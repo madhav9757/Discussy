@@ -1,5 +1,7 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import User from '../models/User.js';
+import Community from '../models/Community.js';
+import Post from '../models/Post.js';
 import bcrypt from 'bcryptjs';
 import { generateToken, cookieOptions } from '../utils/token.js';
 
@@ -79,15 +81,29 @@ export const login = asyncHandler(async (req, res) => {
 // @route   GET /api/users/profile
 // @access  Private
 export const getProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user.id).select('-passwordHash');
+  const user = await User.findById(req.user.id)
+    .select('-passwordHash')
+    .populate('joinedCommunities', 'name _id')
+    .populate('followers', 'username _id')
+    .populate('following', 'username _id');
 
   if (!user) {
     res.status(404);
     throw new Error('User not found');
   }
 
-  res.status(200).json(user);
-});
+  const createdCommunities = await Community.find({ createdBy: req.user.id }).select('name _id');
+
+  const posts = await Post.find({ author: req.user.id })
+    .select('title _id community createdAt')
+    .populate('community', 'name _id');
+
+  res.status(200).json({
+    ...user.toObject(),
+    createdCommunities,
+    posts, // ← added this
+  });
+})
 
 // @desc    Logout user (clear cookie)
 // @route   POST /api/users/logout
@@ -95,3 +111,60 @@ export const logout = (req, res) => {
   res.clearCookie('token', cookieOptions);
   res.status(200).json({ message: 'Logged out successfully' });
 };
+
+export const followUser = asyncHandler(async (req, res) => {
+  const { id: targetUserId } = req.params;
+  const currentUserId = req.user.id;
+
+  if (currentUserId === targetUserId) {
+    res.status(400);
+    throw new Error("You can't follow yourself");
+  }
+
+  const userToFollow = await User.findById(targetUserId);
+  const currentUser = await User.findById(currentUserId);
+
+  if (!userToFollow || !currentUser) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  if (userToFollow.followers.includes(currentUserId)) {
+    res.status(400);
+    throw new Error("Already following this user");
+  }
+
+  userToFollow.followers.push(currentUserId);
+  currentUser.following.push(targetUserId);
+
+  await userToFollow.save();
+  await currentUser.save();
+
+  res.status(200).json({ message: "Followed successfully" });
+});
+
+// Unfollow a user
+export const unfollowUser = asyncHandler(async (req, res) => {
+  const { id: targetUserId } = req.params;
+  const currentUserId = req.user.id;
+
+  const userToUnfollow = await User.findById(targetUserId);
+  const currentUser = await User.findById(currentUserId);
+
+  if (!userToUnfollow || !currentUser) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  userToUnfollow.followers = userToUnfollow.followers.filter(
+    (uid) => uid.toString() !== currentUserId
+  );
+  currentUser.following = currentUser.following.filter(
+    (uid) => uid.toString() !== targetUserId
+  );
+
+  await userToUnfollow.save();
+  await currentUser.save();
+
+  res.status(200).json({ message: "Unfollowed successfully" });
+});

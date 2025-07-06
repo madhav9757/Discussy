@@ -1,6 +1,7 @@
 import Community from '../models/Community.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import Post from '../models/Post.js';
+import User from '../models/User.js';
 
 export const getAllCommunities = asyncHandler(async (req, res) => {
     const communities = await Community.find().populate('createdBy');
@@ -62,13 +63,18 @@ export const joinCommunity = asyncHandler(async (req, res) => {
         throw new Error('Community not found');
     }
 
+    const user = await User.findById(req.user._id);
+
     if (community.members.includes(req.user._id)) {
         res.status(400);
         throw new Error('Already a member of this community');
     }
 
     community.members.push(req.user._id);
+    user.joinedCommunities.push(community._id);
+
     await community.save();
+    await user.save();
 
     res.status(200).json({ message: 'Joined community successfully' });
 });
@@ -78,6 +84,7 @@ export const leaveCommunity = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
     const community = await Community.findById(id);
+    const user = await User.findById(req.user._id);
     if (!community) {
         res.status(404);
         throw new Error('Community not found');
@@ -90,7 +97,10 @@ export const leaveCommunity = asyncHandler(async (req, res) => {
     }
 
     community.members.splice(index, 1);
+    user.joinedCommunities.pull(community._id);
+
     await community.save();
+    await user.save();
 
     res.status(200).json({ message: 'Left community successfully' });
 });
