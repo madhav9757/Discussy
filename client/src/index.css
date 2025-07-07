@@ -1,15 +1,1 @@
-/* Base reset and font */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html,
-body {
-  height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background-color: #f9fafb;
-  color: #111827;
-  scroll-behavior: smooth;
-}
+@import url('./App.css');

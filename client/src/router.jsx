@@ -1,6 +1,5 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout';
 import LoginPage from './features/auth/LoginPage/LoginPage';
 import RegisterPage from './features/auth/RegisterPage/RegisterPage';
 import Home from './pages/home/Home';
@@ -15,7 +14,6 @@ import UpdateProfile from './features/auth/profile/updateProfile/UpdateProfile.j
 
 const AppRouter = () => {
   return (
-    <Layout>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
@@ -29,7 +27,6 @@ const AppRouter = () => {
         <Route path="/edit-post/:id" element={<EditPostPage />} /> 
         <Route path="/profile/edit" element={<UpdateProfile />} />
       </Routes>
-    </Layout>
   );
 };
 

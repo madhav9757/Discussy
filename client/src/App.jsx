@@ -25,7 +25,6 @@ function App() {
       <Toaster position="top-center" />
       <ToastContainer position="top-right" autoClose={2000} />
     </div>
-
   );
 }
 
