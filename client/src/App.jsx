@@ -17,12 +17,15 @@ function App() {
   }, []);
 
   return (
-    <>
+    <div className="app-wrapper">
       <Header />
-      <AppRouter />
+      <main className="main-content">
+        <AppRouter />
+      </main>
       <Toaster position="top-center" />
       <ToastContainer position="top-right" autoClose={2000} />
-    </>
+    </div>
+
   );
 }
 

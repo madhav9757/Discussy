@@ -11,6 +11,7 @@ import PostDetails from './pages/Post/PostDetails.jsx';
 import AboutPage from './pages/About/AboutPage.jsx';
 import CreatePost from './features/posts/createPost/CreatePost.jsx';
 import EditPostPage from './features/posts/updatePost/UpdatePost.jsx';
+import UpdateProfile from './features/auth/profile/updateProfile/UpdateProfile.jsx';
 
 const AppRouter = () => {
   return (
@@ -26,6 +27,7 @@ const AppRouter = () => {
         <Route path="/posts/:id" element={<PostDetails />} />
         <Route path="/community/:id/create-post" element={<CreatePost />} />
         <Route path="/edit-post/:id" element={<EditPostPage />} /> 
+        <Route path="/profile/edit" element={<UpdateProfile />} />
       </Routes>
     </Layout>
   );

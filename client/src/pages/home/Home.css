@@ -1,78 +1,330 @@
+/* Reset and Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  overflow: hidden;
+}
+
+/* Home Container */
 .home-container {
-  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-  min-height: 100%;
-  color: white;
+  height: 100%;
+  width: 100vw;
+  background: #fafafa;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Home Box */
 .home-box {
-  text-align: center;
-  background: #1e1e2f;
-  padding: 3rem;
-  border-radius: 20px;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
-  max-width: 600px;
+  background: white;
+  border-radius: 16px;
+  padding: 3rem 2.5rem;
+  max-width: 900px;
   width: 100%;
+  height: fit-content;
+  max-height: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
+/* Title */
 .home-title {
-  font-size: 2.2rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  line-height: 1.2;
 }
 
-.home-title span {
-  color: #4f9efc;
+.title-icon {
+  color: #374151;
 }
 
+.brand-highlight {
+  color: #111827;
+  font-weight: 800;
+}
+
+/* Subtitle */
 .home-subtitle {
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
-  color: #ccc;
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin-bottom: 2.5rem;
+  line-height: 1.5;
+  font-weight: 400;
 }
 
+/* Features */
 .home-features {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .feature-card {
-  background: #2e2e42;
-  padding: 1rem 1.5rem;
+  background: #f9fafb;
   border-radius: 12px;
-  font-size: 0.95rem;
+  padding: 1.5rem 1rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  color: #eee;
-  border: 1px solid #444;
-  transition: transform 0.3s ease;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .feature-card:hover {
-  transform: scale(1.05);
+  background: #f3f4f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  color: #374151;
+  background: #e5e7eb;
+}
+
+.feature-content h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.feature-content p {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Home Button */
 .home-button {
-  display: inline-block;
-  padding: 0.9rem 2rem;
-  background: #4f9efc;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #111827;
   color: white;
-  font-weight: bold;
-  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
   text-decoration: none;
-  transition: background 0.3s ease;
+  transition: all 0.2s ease;
+  margin-bottom: 2rem;
 }
 
 .home-button:hover {
-  background: #3b82f6;
+  background: #1f2937;
+  transform: translateY(-1px);
+}
+
+.button-icon {
+  font-size: 1rem;
+}
+
+/* Stats Section */
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 2rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .home-container {
+    padding: 1rem;
+  }
+
+  .home-box {
+    padding: 2rem 1.5rem;
+    max-height: 95vh;
+    overflow-y: auto;
+  }
+
+  .home-title {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .home-subtitle {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .home-features {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .feature-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0.75rem;
+  }
+
+  .home-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stats-section {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding-top: 1.5rem;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .home-container {
+    padding: 0.5rem;
+  }
+
+  .home-box {
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+  }
+
+  .home-title {
+    font-size: 1.75rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .home-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .feature-card {
+    padding: 1rem 0.75rem;
+  }
+
+  .feature-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .feature-content h3 {
+    font-size: 0.95rem;
+  }
+
+  .feature-content p {
+    font-size: 0.8rem;
+  }
+
+  .home-button {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .stat-number {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .home-box {
+    padding: 2.5rem 2rem;
+  }
+
+  .home-features {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1200px) {
+  .home-box {
+    max-width: 1000px;
+    padding: 3.5rem 3rem;
+  }
+
+  .home-title {
+    font-size: 3rem;
+  }
+
+  .home-subtitle {
+    font-size: 1.25rem;
+  }
+
+  .feature-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .feature-icon {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+/* Focus states for accessibility */
+.home-button:focus,
+.feature-card:focus {
+  outline: 2px solid #374151;
+  outline-offset: 2px;
 }

@@ -1,45 +1,25 @@
-/* App.css or index.css */
-
-/* Reset + Box model */
-* {
-  margin: 0;
-  padding: 0;
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
-/* Full height layout */
-html, body, #root {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #0f2027;
-  color: white;
+.nav-header {
+  z-index: 1000;
 }
 
-/* Prevent selection highlights */
-body {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
+.main-content {
+  flex-grow: 1;
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-/* Smooth transitions for UI changes */
-button, input, a {
-  transition: all 0.25s ease;
+.Toastify__toast-container {
+  z-index: 1100 !important;
 }
 
-/* Button reset */
-button {
-  cursor: pointer;
-  border: none;
-  background: none;
-  outline: none;
-}
-
-/* Link styling */
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* Scrollbar hidden just in case */
-::-webkit-scrollbar {
-  display: none;
+[data-sonner-toaster] {
+  z-index: 1100 !important;
 }

@@ -168,3 +168,53 @@ export const unfollowUser = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: "Unfollowed successfully" });
 });
+
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
+export const updateProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id); // req.user.id comes from the protect middleware
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  const { username, email } = req.body;
+
+  // Validate if new username or email is already taken by *another* user
+  if (username && username !== user.username) {
+    const existingUserWithUsername = await User.findOne({ username });
+    if (existingUserWithUsername) {
+      res.status(400);
+      throw new Error('Username is already taken');
+    }
+    user.username = username;
+  }
+
+  if (email && email !== user.email) {
+    const existingUserWithEmail = await User.findOne({ email });
+    if (existingUserWithEmail) {
+      res.status(400);
+      throw new Error('Email is already in use');
+    }
+    user.email = email;
+  }
+
+  // You can add logic for updating other fields here, e.g., profile image
+  // if (req.body.image) {
+  //   user.image = req.body.image;
+  // }
+
+  await user.save(); // Save the updated user document
+
+  // Respond with the updated user data (excluding password hash)
+  res.status(200).json({
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    image: user.image, // Include image if you have it
+    // You might want to re-populate other fields if they are affected by the update
+    // For simplicity, we are only returning the basic updated fields here.
+  });
+});

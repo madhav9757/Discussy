@@ -26,12 +26,22 @@ const extendedApi = discusslyApi.injectEndpoints({
             }),
             invalidatesTags: ['Profile'],
         }),
+
+        updateProfile: builder.mutation({
+            query: (updatedProfileData) => ({
+                url: '/users/profile', // Or `/users/${userId}`
+                method: 'PUT',
+                body: updatedProfileData, // Send the updated data
+            }),
+            invalidatesTags: ['Profile'],
+        }),
+        overrideExisting: false,
     }),
-    overrideExisting: false,
 });
 
 export const {
     useGetProfileQuery,
     useFollowUserMutation,
     useUnfollowUserMutation,
+    useUpdateProfileMutation,
 } = extendedApi;
