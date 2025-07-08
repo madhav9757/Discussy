@@ -14,10 +14,10 @@ const Header = ({ searchQuery, onSearchChange }) => {
   const navigate = useNavigate();
   const { userInfo: user } = useSelector((state) => state.auth);
 
-  // Handle scroll effect
+  // Handle scroll effect for floating navbar
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 50);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -40,118 +40,95 @@ const Header = ({ searchQuery, onSearchChange }) => {
   }, [isMobileMenuOpen]);
 
   return (
-    <header className={`nav-header ${isScrolled ? 'scrolled' : ''}`}>
-      <div className="nav-container">
-        {/* Logo */}
-        <motion.div 
-          className="nav-logo-section"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <motion.div
-            whileHover={{ rotate: 360, scale: 1.1 }}
-            transition={{ duration: 0.6 }}
+    <>
+      <header className={`nav-header ${isScrolled ? 'scrolled' : ''}`}>
+        <div className="nav-container">
+          {/* Logo */}
+          <motion.div 
+            className="nav-logo-section"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
           >
             <MessageCircle className="logo-icon-svg" />
+            <Link to="/" className="nav-logo">Discussly</Link>
           </motion.div>
-          <Link to="/" className="nav-logo">Discussly</Link>
-        </motion.div>
 
-        {/* Desktop Nav */}
-        <nav className="nav-links">
-          <Link to="/" className="nav-link">Home</Link>
-          <Link to="/explore" className="nav-link">Explore</Link>
-          <Link to="/about" className="nav-link">About</Link>
-          {user && <Link to="/profile" className="nav-link">Profile</Link>}
-        </nav>
+          {/* Desktop Nav */}
+          <nav className="nav-links">
+            <Link to="/" className="nav-link">Home</Link>
+            <Link to="/explore" className="nav-link">Explore</Link>
+            <Link to="/about" className="nav-link">About</Link>
+            {user && <Link to="/profile" className="nav-link">Profile</Link>}
+          </nav>
 
-        {/* Desktop Search */}
-        <div className="desktop-search">
-          <div className="search-container">
-            <Search className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search discussions..."
-              value={searchQuery || ''}
-              onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-              className="search-input"
-            />
+          {/* Desktop Search */}
+          <div className="desktop-search">
+            <div className="search-container">
+              <Search className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search discussions..."
+                value={searchQuery || ''}
+                onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+                className="search-input"
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Desktop Auth */}
-        <div className="nav-auth">
-          <motion.button 
-            className="icon-btn notification-btn"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Bell className="icon" />
-            <span className="notification-badge">3</span>
-          </motion.button>
+          {/* Desktop Auth */}
+          <div className="nav-auth">
+            <button className="icon-btn notification-btn">
+              <Bell className="icon" />
+              <span className="notification-badge">3</span>
+            </button>
 
-          <motion.button 
-            className="btn new-discussion-btn"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Plus className="btn-icon" />
-            <span className="btn-text">New Discussion</span>
-          </motion.button>
+            <button className="btn new-discussion-btn">
+              <Plus className="btn-icon" />
+              <span className="btn-text">New Discussion</span>
+            </button>
 
-          {!user ? (
-            <div className="auth-buttons">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            {!user ? (
+              <div className="auth-buttons">
                 <Link to="/login" className="btn login-btn">
                   <LogIn className="btn-icon" /> 
                   <span className="btn-text">Login</span>
                 </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link to="/register" className="btn register-btn">
                   <UserCircle className="btn-icon" /> 
                   <span className="btn-text">Register</span>
                 </Link>
-              </motion.div>
-            </div>
-          ) : (
-            <motion.div 
-              className="user-box"
-              whileHover={{ scale: 1.02 }}
-            >
-              <motion.img
-                src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.username}`}
-                alt="avatar"
-                className="user-avatar"
-                whileHover={{ scale: 1.1 }}
-              />
-              <span className="user-name">{user.username}</span>
-              <motion.button 
-                onClick={handleLogout} 
-                className="btn logout-btn"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <LogOut className="btn-icon" />
-              </motion.button>
-            </motion.div>
-          )}
-        </div>
+              </div>
+            ) : (
+              <div className="user-box">
+                <img
+                  src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.username}`}
+                  alt="avatar"
+                  className="user-avatar"
+                />
+                <span className="user-name">{user.username}</span>
+                <button 
+                  onClick={handleLogout} 
+                  className="btn logout-btn"
+                >
+                  <LogOut className="btn-icon" />
+                </button>
+              </div>
+            )}
+          </div>
 
-        {/* Hamburger Menu */}
-        <motion.button
-          className={`hamburger-menu ${isMobileMenuOpen ? 'open' : ''}`}
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle mobile menu"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <div className="hamburger-bar"></div>
-          <div className="hamburger-bar"></div>
-          <div className="hamburger-bar"></div>
-        </motion.button>
-      </div>
+          {/* Hamburger Menu */}
+          <button
+            className={`hamburger-menu ${isMobileMenuOpen ? 'open' : ''}`}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle mobile menu"
+          >
+            <div className="hamburger-bar"></div>
+            <div className="hamburger-bar"></div>
+            <div className="hamburger-bar"></div>
+          </button>
+        </div>
+      </header>
 
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
@@ -162,21 +139,19 @@ const Header = ({ searchQuery, onSearchChange }) => {
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 250, damping: 30 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             >
               <div className="mobile-nav-header">
                 <div className="mobile-logo">
                   <MessageCircle className="mobile-logo-icon" />
                   <span>Discussly</span>
                 </div>
-                <motion.button 
+                <button 
                   className="close-btn" 
                   onClick={closeMobileMenu}
-                  whileHover={{ rotate: 90 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   <X className="close-icon" />
-                </motion.button>
+                </button>
               </div>
 
               <div className="mobile-search">
@@ -194,8 +169,8 @@ const Header = ({ searchQuery, onSearchChange }) => {
 
               <nav className="mobile-nav-content">
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
                 >
                   <Link to="/" className="mobile-nav-link" onClick={closeMobileMenu}>
@@ -204,8 +179,8 @@ const Header = ({ searchQuery, onSearchChange }) => {
                 </motion.div>
                 
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.15 }}
                 >
                   <Link to="/explore" className="mobile-nav-link" onClick={closeMobileMenu}>
@@ -214,8 +189,8 @@ const Header = ({ searchQuery, onSearchChange }) => {
                 </motion.div>
                 
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
                 >
                   <Link to="/about" className="mobile-nav-link" onClick={closeMobileMenu}>
@@ -225,8 +200,8 @@ const Header = ({ searchQuery, onSearchChange }) => {
                 
                 {user && (
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.25 }}
                   >
                     <Link to="/profile" className="mobile-nav-link" onClick={closeMobileMenu}>
@@ -238,8 +213,8 @@ const Header = ({ searchQuery, onSearchChange }) => {
                 <div className="mobile-nav-divider" />
 
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 }}
                 >
                   <button className="mobile-nav-link new-discussion-mobile">
@@ -248,8 +223,8 @@ const Header = ({ searchQuery, onSearchChange }) => {
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.35 }}
                 >
                   <button className="mobile-nav-link notifications-mobile">
@@ -262,8 +237,8 @@ const Header = ({ searchQuery, onSearchChange }) => {
                   {!user ? (
                     <>
                       <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.4 }}
                       >
                         <Link to="/login" className="btn login-btn mobile-auth-btn" onClick={closeMobileMenu}>
@@ -271,8 +246,8 @@ const Header = ({ searchQuery, onSearchChange }) => {
                         </Link>
                       </motion.div>
                       <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.45 }}
                       >
                         <Link to="/register" className="btn register-btn mobile-auth-btn" onClick={closeMobileMenu}>
@@ -282,8 +257,8 @@ const Header = ({ searchQuery, onSearchChange }) => {
                     </>
                   ) : (
                     <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.4 }}
                     >
                       <button onClick={handleLogout} className="btn logout-btn mobile-logout-btn">
@@ -306,7 +281,7 @@ const Header = ({ searchQuery, onSearchChange }) => {
           </>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 };
 
