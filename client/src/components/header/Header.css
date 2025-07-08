@@ -327,15 +327,15 @@
 .mobile-nav-overlay {
   position: fixed;
   top: 0;
-  right: -100%;
-  width: 100%;
+  right: -00%;
+  width: 100vh;
   max-width: 20rem;
   height: 100vh;
   background: white;
   z-index: 1001;
   transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .mobile-nav-overlay.open {
