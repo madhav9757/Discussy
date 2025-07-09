@@ -1,26 +1,19 @@
-// src/components/UserListModal/UserListModal.jsx (Updated)
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './UserListModal.css'; // Your existing CSS
+import { motion, AnimatePresence } from 'framer-motion';
+import './UserListModal.css';
 
-// Helper component for the Follow/Unfollow button
 const FollowUnfollowButton = ({
     targetUser,
     currentUserId,
-    viewerFollowingIds, // Array of IDs the current user is following
+    viewerFollowingIds,
     handleFollow,
     handleUnfollow,
     isLoadingFollow,
     isLoadingUnfollow
 }) => {
-    // Do not show button if the target user is the current logged-in user
-    if (targetUser._id === currentUserId) {
-        return null;
-    }
-
-    // Determine if the current user (viewer) is already following the targetUser
-    const isFollowing = viewerFollowingIds && viewerFollowingIds.includes(targetUser._id);
-
+    if (targetUser._id === currentUserId) return null;
+    const isFollowing = viewerFollowingIds?.includes(targetUser._id);
     const handleClick = () => {
         if (isFollowing) {
             handleUnfollow(targetUser._id);
@@ -35,66 +28,86 @@ const FollowUnfollowButton = ({
             onClick={handleClick}
             disabled={isLoadingFollow || isLoadingUnfollow}
         >
-            {isLoadingFollow || isLoadingUnfollow ? '...' : (isFollowing ? 'Unfollow' : 'Follow')}
+            {isLoadingFollow || isLoadingUnfollow ? '...' : isFollowing ? 'Unfollow' : 'Follow'}
         </button>
     );
 };
-
 
 const UserListModal = ({
     isOpen,
     onClose,
     title,
     users,
-    currentUserId, // ID of the currently logged-in user
-    viewerFollowingIds, // Array of IDs that currentUserId is following
-    followUser, // RTK Query mutation function
-    unfollowUser, // RTK Query mutation function
-    isLoadingFollow, // Loading state from follow mutation
-    isLoadingUnfollow // Loading state from unfollow mutation
+    currentUserId,
+    viewerFollowingIds,
+    followUser,
+    unfollowUser,
+    isLoadingFollow,
+    isLoadingUnfollow
 }) => {
-    if (!isOpen) return null;
-
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                    <h2 className="modal-title">{title}</h2>
-                    <button className="modal-close-btn" onClick={onClose}>
-                        &times;
-                    </button>
-                </div>
-                <div className="modal-body">
-                    {users && users.length > 0 ? (
-                        <ul className="modal-list">
-                            {users.map((user) => (
-                                <li key={user._id} className="modal-list-item">
-                                    <img
-                                        src={user.image || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.username}`}
-                                        alt={`${user.username} Avatar`}
-                                        className="modal-list-avatar"
-                                    />
-                                    <Link to={`/user/${user._id}`} className="modal-list-link" onClick={onClose}>
-                                        {user.username}
-                                    </Link>
-                                    <FollowUnfollowButton
-                                        targetUser={user}
-                                        currentUserId={currentUserId}
-                                        viewerFollowingIds={viewerFollowingIds}
-                                        handleFollow={followUser} // Pass the mutation function directly
-                                        handleUnfollow={unfollowUser} // Pass the mutation function directly
-                                        isLoadingFollow={isLoadingFollow}
-                                        isLoadingUnfollow={isLoadingUnfollow}
-                                    />
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="modal-empty-message">No {title.toLowerCase()} to display.</p>
-                    )}
-                </div>
-            </div>
-        </div>
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    className="modal-overlay"
+                    onClick={onClose}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                >
+                    <motion.div
+                        className="modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                        initial={{ y: -50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -50, opacity: 0 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    >
+                        <div className="modal-header">
+                            <h2 className="modal-title">{title}</h2>
+                            <button className="modal-close-btn" onClick={onClose}>
+                                &times;
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            {users && users.length > 0 ? (
+                                <ul className="modal-list">
+                                    {users.map((user) => (
+                                        <li key={user._id} className="modal-list-item">
+                                            <img
+                                                src={user.image || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.username}`}
+                                                alt={`${user.username} Avatar`}
+                                                className="modal-list-avatar"
+                                            />
+                                            <Link
+                                                to={`/user/${user._id}`}
+                                                className="modal-list-link"
+                                                onClick={onClose}
+                                            >
+                                                {user.username}
+                                                {user._id === currentUserId && <span className="badge you">You</span>}
+                                                {user.isCreator && <span className="badge creator">Creator</span>}
+                                            </Link>
+                                            <FollowUnfollowButton
+                                                targetUser={user}
+                                                currentUserId={currentUserId}
+                                                viewerFollowingIds={viewerFollowingIds}
+                                                handleFollow={followUser}
+                                                handleUnfollow={unfollowUser}
+                                                isLoadingFollow={isLoadingFollow}
+                                                isLoadingUnfollow={isLoadingUnfollow}
+                                            />
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="modal-empty-message">No {title.toLowerCase()} to display.</p>
+                            )}
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };
 

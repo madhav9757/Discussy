@@ -1,426 +1,459 @@
-/* src/pages/ProfilePage/ProfilePage.css */
 
-/* ==================================== */
-/* Global Page Layout (GitHub-like)     */
-/* ==================================== */
+/* ProfilePage.css - Modern responsive design with semantic tokens */
+
 .github-profile-page-wrapper {
   display: flex;
-  flex-direction: row;
-  /* Default to row for desktop */
-  justify-content: center;
-  /* Center the entire content block */
-  gap: 2rem;
-  /* Space between sidebar and main content */
-  padding: 2rem;
-  min-height: calc(100vh - 60px);
-  /* Adjust for header */
-  background-color: #0d1117;
-  /* GitHub dark theme background */
-  color: #c9d1d9;
-  /* Default text color for GitHub dark theme */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  /* GitHub-like font stack */
+  min-height: 100vh;
+  background: hsl(var(--background));
+  font-family: system-ui, -apple-system, sans-serif;
+  color: hsl(var(--foreground));
 }
 
-/* Limit content width for large screens */
-.github-profile-page-wrapper>* {
-  max-width: 960px;
-  /* Adjust based on desired overall page width */
-}
-
-/* ==================================== */
-/* Left Sidebar (Profile Summary)       */
-/* ==================================== */
+/* Sidebar Styles */
 .profile-sidebar {
-  flex: 0 0 280px;
-  /* Fixed width sidebar, no grow/shrink */
+  width: 280px;
+  padding: 2rem;
+  background: hsl(var(--card));
+  border-right: 1px solid hsl(var(--border));
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  /* Align content to the left within sidebar */
-  padding-right: 1rem;
-  /* Space from main content */
+  align-items: center;
+  text-align: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
 .sidebar-profile-image {
-  width: 250px;
-  /* Larger image in sidebar */
-  height: 250px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
+  margin-bottom: 1.5rem;
   object-fit: cover;
-  border: 1px solid #30363d;
-  /* Subtle border */
-  margin-bottom: 1rem;
+  border: 3px solid hsl(var(--border));
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sidebar-profile-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 .sidebar-username {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #e6edf3;
-  /* Brighter for username */
-  margin-bottom: 0.5rem;
-  width: 100%;
-  word-break: break-word;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: hsl(var(--foreground));
+  letter-spacing: -0.025em;
 }
 
 .sidebar-edit-link {
+  text-decoration: none;
   width: 100%;
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
 }
 
 .sidebar-edit-btn {
-  width: 100%;
-  background-color: #21262d;
-  /* GitHub button background */
-  color: #c9d1d9;
-  border: 1px solid #30363d;
-  /* GitHub button border */
-  border-radius: 6px;
-  padding: 0.6rem 1rem;
-  font-size: 0.9rem;
-  font-weight: 500;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+  width: 100%;
+  margin-bottom: 2rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
 .sidebar-edit-btn:hover {
-  background-color: #30363d;
-  border-color: #8b949e;
+  background: hsl(var(--primary) / 0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
 
-/* Sidebar Stats (Followers, Following, Communities, Posts, Joined Date) */
+.sidebar-edit-btn:active {
+  transform: translateY(0);
+}
+
+.sidebar-edit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .sidebar-stats {
   width: 100%;
-  border-top: 1px solid #30363d;
-  /* Separator */
-  padding-top: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  /* Space between stat items */
+  gap: 0.5rem;
 }
 
 .stat-link,
 .stat-item {
   display: flex;
   align-items: center;
-  font-size: 0.9rem;
-  color: #8b949e;
-  /* Muted text color */
+  justify-content: flex-start;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
   text-decoration: none;
+  color: hsl(var(--foreground));
+  transition: all 0.2s ease;
+  background: transparent;
+  border: 1px solid transparent;
 }
 
 .stat-link:hover {
-  color: #58a6ff;
-  /* GitHub link blue on hover */
-  text-decoration: underline;
-  /* Add underline for better professional clarity */
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border-color: hsl(var(--border));
+  transform: translateX(4px);
+}
+
+.stat-item {
+  cursor: default;
+  color: hsl(var(--muted-foreground));
 }
 
 .stat-icon {
-  font-size: 1.1rem;
-  margin-right: 0.5rem;
-  color: #8b949e;
-  min-width: 1.1em;
-  /* Ensure icon doesn't shrink, maintains alignment */
-  text-align: center;
-  /* Center emojis if used */
+  margin-right: 0.75rem;
+  font-size: 1.25rem;
+  min-width: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.stat-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
 
-/* ==================================== */
-/* Right Main Content Area              */
-/* ==================================== */
+/* Main Content Styles */
 .profile-main-content {
   flex: 1;
-  /* Takes remaining space */
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  /* Space between content sections */
-  padding-top: 0.5rem;
-  /* Align with sidebar content top */
+  padding: 2rem;
+  max-width: 100%;
+  overflow: hidden;
 }
 
-.content-section {
-  background-color: #0d1117;
-  /* Same as page background for a flatter look */
-  border: 1px solid #30363d;
-  /* Subtle section border */
-  border-radius: 6px;
-  box-shadow: none;
-  /* No box shadow for GitHub look */
+.profile-tabs-header {
+  display: flex;
+  border-bottom: 1px solid hsl(var(--border));
+  margin-bottom: 2rem;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.profile-tabs-header::-webkit-scrollbar {
+  display: none;
+}
+
+.profile-tabs-header button {
   padding: 1rem 1.5rem;
-  /* Padding inside content sections */
-  overflow: hidden;
-  /* For collapsible content */
-}
-
-/* Header for collapsible sections in main content */
-.content-section .section-header {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #e6edf3;
-  margin-bottom: 0;
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid #30363d;
+  border: none;
+  background: transparent;
   cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: color 0.2s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  border-radius: 0.5rem 0.5rem 0 0;
 }
 
-.content-section .section-header:hover {
-  color: #8b949e;
+.profile-tabs-header button:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
 }
 
-/* Collapse Icon (arrow) */
-.content-section .collapse-icon {
-  font-size: 0.9rem;
-  color: #8b949e;
-  transition: transform 0.3s ease;
+.profile-tabs-header .active-tab {
+  color: hsl(var(--primary));
+  border-bottom-color: hsl(var(--primary));
+  background: hsl(var(--accent));
+  font-weight: 600;
 }
 
-.content-section .collapse-icon.open {
-  transform: rotate(180deg);
-}
-
-/* Collapsible Content Area */
-.collapsible-content {
-  overflow: hidden;
-  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.collapsible-content.open {
-  max-height: 500px;
-  /* Adjust as needed - ensure it's large enough for content */
-  padding-top: 1rem;
-  /* Padding when open */
+.tab-content {
+  background: hsl(var(--card));
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
 }
 
 .content-list {
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-.content-list-item {
-  padding: 0.7rem 0;
-  border-bottom: 1px dashed #30363d;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.content-list-item:last-child {
-  border-bottom: none;
+.content-list li {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  transition: all 0.2s ease;
 }
 
-.content-link {
-  color: #58a6ff;
+.content-list li:hover {
+  border-color: hsl(var(--primary) / 0.3);
+  background: hsl(var(--accent));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.content-list a {
   text-decoration: none;
+  color: hsl(var(--primary));
+  font-weight: 600;
   font-size: 1rem;
+  line-height: 1.5;
   transition: color 0.2s ease;
-  flex-grow: 1;
-  margin-right: 1rem;
 }
 
-.content-link:hover {
-  color: #8b949e;
+.content-list a:hover {
+  color: hsl(var(--primary) / 0.8);
   text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .post-date {
-  font-size: 0.85rem;
-  color: #8b949e;
-  white-space: nowrap;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  font-weight: 400;
+  margin-left: 0.5rem;
+  font-style: italic;
 }
 
-.no-items-message {
-  font-size: 0.95rem;
-  color: #8b949e;
+/* Empty States */
+.tab-content p {
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
   text-align: center;
-  padding: 1rem;
-  border: 1px dashed #30363d;
-  border-radius: 4px;
-  background-color: #161b22;
-  margin-top: 1rem;
+  padding: 3rem 1rem;
+  font-size: 1.1rem;
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 0.5rem;
+  border: 2px dashed hsl(var(--border));
 }
 
-/* ==================================== */
-/* Loading/Error States                 */
-/* ==================================== */
+/* Loading and Error States */
 .profile-loading,
 .profile-error {
+  padding: 3rem 2rem;
   text-align: center;
-  padding: 2rem;
   font-size: 1.1rem;
-  color: #8b949e;
-  min-height: calc(100vh - 60px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #0d1117;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--card));
+  border-radius: 0.75rem;
+  margin: 2rem;
+  border: 1px solid hsl(var(--border));
 }
 
 .profile-error {
-  color: #f85149;
+  color: hsl(var(--destructive));
+  background: hsl(var(--destructive) / 0.05);
+  border-color: hsl(var(--destructive) / 0.2);
 }
 
-/* ==================================== */
-/* Responsive Adjustments               */
-/* ==================================== */
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .profile-sidebar {
+    width: 240px;
+    padding: 1.5rem;
+  }
+  
+  .sidebar-profile-image {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .sidebar-username {
+    font-size: 1.5rem;
+  }
+  
+  .profile-main-content {
+    padding: 1.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   .github-profile-page-wrapper {
     flex-direction: column;
-    gap: 1.5rem;
-    padding: 1rem;
   }
 
   .profile-sidebar {
-    flex: none;
     width: 100%;
-    padding-right: 0;
-    align-items: center;
+    border-right: none;
+    border-bottom: 1px solid hsl(var(--border));
+    padding: 1.5rem;
+    flex-direction: row;
+    text-align: left;
+    gap: 1.5rem;
+    align-items: flex-start;
   }
 
   .sidebar-profile-image {
-    width: 150px;
-    height: 150px;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0;
+    flex-shrink: 0;
   }
 
   .sidebar-username {
-    font-size: 1.6rem;
-    text-align: center;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
   }
 
-  .sidebar-edit-link {
-    max-width: 250px;
+  .sidebar-edit-btn {
+    margin-bottom: 1rem;
+    max-width: 200px;
   }
 
   .sidebar-stats {
-    flex-direction: row;
-    /* Make stats inline for better space */
-    justify-content: center;
-    flex-wrap: wrap;
-    /* Allow wrapping */
-    gap: 0.8rem 1.5rem;
-    /* Space between wrapped items */
-    padding-top: 1rem;
+    gap: 0.25rem;
   }
 
   .stat-link,
   .stat-item {
-    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
   }
 
   .stat-icon {
     font-size: 1rem;
+    margin-right: 0.5rem;
+  }
+
+  .stat-text {
+    font-size: 0.875rem;
   }
 
   .profile-main-content {
-    padding-top: 0;
+    padding: 1rem;
   }
 
-  .content-section {
-    padding: 0.8rem 1rem;
-    border-radius: 4px;
+  .profile-tabs-header {
+    margin-bottom: 1rem;
   }
 
-  .content-section .section-header {
-    font-size: 1.1rem;
-    padding-bottom: 0.6rem;
+  .profile-tabs-header button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
   }
 
-  .content-list-item {
-    padding: 0.6rem 0;
+  .tab-content {
+    padding: 1rem;
   }
 
-  .content-link {
+  .content-list li {
+    padding: 0.75rem;
+  }
+
+  .content-list a {
     font-size: 0.95rem;
-  }
-
-  .post-date {
-    font-size: 0.8rem;
-  }
-
-  .no-items-message {
-    padding: 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .collapsible-content.open {
-    padding-top: 0.8rem;
   }
 }
 
 @media (max-width: 480px) {
-  .github-profile-page-wrapper {
-    padding: 0.8rem;
-    gap: 1rem;
+  .profile-sidebar {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    padding: 1rem;
   }
 
   .sidebar-profile-image {
-    width: 120px;
-    height: 120px;
+    width: 70px;
+    height: 70px;
+    margin-bottom: 1rem;
   }
 
   .sidebar-username {
-    font-size: 1.4rem;
+    font-size: 1.125rem;
+    margin-bottom: 0.75rem;
   }
 
   .sidebar-edit-btn {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.85rem;
+    width: 100%;
+    max-width: none;
+    margin-bottom: 1rem;
   }
 
   .sidebar-stats {
-    gap: 0.6rem 1rem;
-    padding-top: 0.8rem;
-    font-size: 0.8rem;
+    width: 100%;
   }
 
-  .stat-link,
-  .stat-item {
-    font-size: 0.8rem;
+  .profile-main-content {
+    padding: 0.75rem;
   }
 
-  .stat-icon {
-    font-size: 0.9rem;
+  .profile-tabs-header button {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.8125rem;
   }
 
-  .content-section {
-    padding: 0.6rem 0.8rem;
+  .tab-content {
+    padding: 0.75rem;
   }
 
-  .content-section .section-header {
-    font-size: 1rem;
-    padding-bottom: 0.5rem;
+  .content-list li {
+    padding: 0.625rem;
   }
 
-  .content-list-item {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0.5rem 0;
-  }
-
-  .content-link {
-    font-size: 0.9rem;
-    margin-right: 0;
-    margin-bottom: 0.2rem;
+  .content-list a {
+    font-size: 0.875rem;
   }
 
   .post-date {
     font-size: 0.75rem;
+    display: block;
+    margin-left: 0;
+    margin-top: 0.25rem;
   }
+}
 
-  .collapsible-content.open {
-    padding-top: 0.6rem;
+/* Focus states for accessibility */
+.sidebar-edit-btn:focus,
+.stat-link:focus,
+.profile-tabs-header button:focus,
+.content-list a:focus {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Smooth animations */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Print styles */
+@media print {
+  .github-profile-page-wrapper {
+    display: block;
+  }
+  
+  .profile-sidebar {
+    width: 100%;
+    border: none;
+    page-break-after: avoid;
+  }
+  
+  .sidebar-edit-btn {
+    display: none;
+  }
+  
+  .stat-link:hover {
+    transform: none;
   }
 }

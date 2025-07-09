@@ -172,6 +172,9 @@ export const unfollowUser = asyncHandler(async (req, res) => {
 // @desc    Update user profile
 // @route   PUT /api/users/profile
 // @access  Private
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
 export const updateProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id); // req.user.id comes from the protect middleware
 
@@ -180,12 +183,12 @@ export const updateProfile = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 
-  const { username, email } = req.body;
+  const { username, email, image, bio, isPrivate } = req.body;
 
   // Validate if new username or email is already taken by *another* user
   if (username && username !== user.username) {
     const existingUserWithUsername = await User.findOne({ username });
-    if (existingUserWithUsername) {
+    if (existingUserWithUsername && existingUserWithUsername._id.toString() !== user._id.toString()) {
       res.status(400);
       throw new Error('Username is already taken');
     }
@@ -194,27 +197,64 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   if (email && email !== user.email) {
     const existingUserWithEmail = await User.findOne({ email });
-    if (existingUserWithEmail) {
+    if (existingUserWithEmail && existingUserWithEmail._id.toString() !== user._id.toString()) {
       res.status(400);
       throw new Error('Email is already in use');
     }
     user.email = email;
   }
 
-  // You can add logic for updating other fields here, e.g., profile image
-  // if (req.body.image) {
-  //   user.image = req.body.image;
-  // }
+  if (image !== undefined) {
+    user.image = image;
+  }
 
-  await user.save(); // Save the updated user document
+  if (bio !== undefined) {
+    user.bio = bio;
+  }
 
-  // Respond with the updated user data (excluding password hash)
+  if (typeof isPrivate === 'boolean') {
+    user.isPrivate = isPrivate;
+  }
+
+  await user.save();
+
   res.status(200).json({
     _id: user._id,
     username: user.username,
     email: user.email,
-    image: user.image, // Include image if you have it
-    // You might want to re-populate other fields if they are affected by the update
-    // For simplicity, we are only returning the basic updated fields here.
+    image: user.image,
+    bio: user.bio,
+    isPrivate: user.isPrivate
+  });
+});
+
+
+// @desc    Get user profile by ID (public view)
+// @route   GET /api/users/:id
+// @access  Public
+export const getUserById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id)
+    .select('-passwordHash')
+    .populate('joinedCommunities', 'name _id')
+    .populate('followers', 'username _id')
+    .populate('following', 'username _id');
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  const createdCommunities = await Community.find({ createdBy: id }).select('name _id');
+
+  const posts = await Post.find({ author: id })
+    .select('title _id community createdAt')
+    .populate('community', 'name _id');
+
+  res.status(200).json({
+    ...user.toObject(),
+    createdCommunities,
+    posts,
   });
 });

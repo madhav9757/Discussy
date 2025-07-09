@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { logoutUser } from '../../features/auth/authSlice';
+import { useDispatch } from 'react-redux';
 import {
   MessageCircle, Search, Plus, Bell, UserCircle, LogIn, LogOut,
   Home, Compass, Info, X
@@ -12,10 +14,10 @@ const Header = ({ searchQuery, onSearchChange }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { userInfo: user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    // Replace with actual logout dispatch
-    console.log('Logout clicked');
+    dispatch(logoutUser());
     setIsMobileMenuOpen(false);
     navigate('/login');
   };
