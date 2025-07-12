@@ -1,206 +1,295 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { logoutUser } from '../../features/auth/authSlice';
-import { useDispatch } from 'react-redux';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
-  MessageCircle, Search, Plus, Bell, UserCircle, LogIn, LogOut,
-  Home, Compass, Info, X
+  MessageCircle,
+  Search,
+  Plus,
+  Bell,
+  UserCircle,
+  LogIn,
+  LogOut,
+  Home,
+  Compass,
+  Info,
+  Sun,
+  Moon,
+  X
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import './Header.css';
 
 const Header = ({ searchQuery, onSearchChange }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Initialize dark mode from local storage or system preference
+    const savedMode = localStorage.getItem('darkMode');
+    return savedMode ? JSON.parse(savedMode) : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
-  const { userInfo: user } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
+  const location = useLocation();
+
+  // Mock user state - replace with your actual auth logic
+  // For demonstration, let's simulate a logged-in user
+  const user = { username: 'john_doe' }; // Change to null to see logged-out state
 
   const handleLogout = () => {
-    dispatch(logoutUser());
+    // Replace with your actual logout logic
+    console.log('User logged out');
+    // For demo, we'll just set user to null, in a real app, clear token/session
+    // setUser(null);
     setIsMobileMenuOpen(false);
     navigate('/login');
   };
 
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
-  // Scroll lock when menu is open
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  // Handle scroll effect for header
   useEffect(() => {
-    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'auto';
-    return () => (document.body.style.overflow = 'auto');
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20); // More noticeable scroll effect
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Handle dark mode and save to local storage
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    closeMobileMenu();
+  }, [location.pathname]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isMobileMenuOpen]);
 
+  const isActiveRoute = (path) => location.pathname === path;
+
   return (
-    <header className="nav-header">
-      <div className="nav-container">
-        {/* Logo */}
-        <div className="nav-logo-section">
-          <MessageCircle className="logo-icon-svg" />
-          <Link to="/" className="nav-logo">Discussly</Link>
-        </div>
+    <>
+      <header className={`header ${isScrolled ? 'header--scrolled' : ''}`}>
+        <div className="header__container">
+          {/* Logo */}
+          <Link to="/" className="header__logo" onClick={closeMobileMenu}>
+            <MessageCircle className="header__logo-icon" />
+            <span className="header__logo-text">Discussly</span>
+          </Link>
 
-        {/* Desktop Nav */}
-        <nav className="nav-links">
-          <Link to="/" className="nav-link">Home</Link>
-          <Link to="/explore" className="nav-link">Explore</Link>
-          <Link to="/about" className="nav-link">About</Link>
-          {user && <Link to="/profile" className="nav-link">Profile</Link>}
-        </nav>
-
-        {/* Desktop Search */}
-        <div className="desktop-search">
-          <div className="search-container">
-            <Search className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search discussions..."
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="search-input"
-            />
-          </div>
-        </div>
-
-        {/* Desktop Auth */}
-        <div className="nav-auth">
-          <button className="icon-btn notification-btn">
-            <Bell className="icon" />
-            <span className="notification-badge">3</span>
-          </button>
-
-          <button className="btn new-discussion-btn">
-            <Plus className="btn-icon" />
-            <span className="btn-text">New Discussion</span>
-          </button>
-
-          {!user ? (
-            <div className="auth-buttons">
-              <Link to="/login" className="btn login-btn">
-                <LogIn className="btn-icon" /> Login
+          {/* Desktop Navigation */}
+          <nav className="header__nav">
+            <Link
+              to="/"
+              className={`header__nav-link ${isActiveRoute('/') ? 'header__nav-link--active' : ''}`}
+            >
+              Home
+            </Link>
+            <Link
+              to="/explore"
+              className={`header__nav-link ${isActiveRoute('/explore') ? 'header__nav-link--active' : ''}`}
+            >
+              Explore
+            </Link>
+            <Link
+              to="/about"
+              className={`header__nav-link ${isActiveRoute('/about') ? 'header__nav-link--active' : ''}`}
+            >
+              About
+            </Link>
+            {user && (
+              <Link
+                to="/profile"
+                className={`header__nav-link ${isActiveRoute('/profile') ? 'header__nav-link--active' : ''}`}
+              >
+                Profile
               </Link>
-              <Link to="/register" className="btn register-btn">
-                <UserCircle className="btn-icon" /> Register
-              </Link>
-            </div>
-          ) : (
-            <div className="user-box">
-              <img
-                src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.username}`}
-                alt="avatar"
-                className="user-avatar"
+            )}
+          </nav>
+
+          {/* Search Bar */}
+          <div className="header__search">
+            <div className="search-input">
+              <Search className="search-input__icon" />
+              <input
+                type="text"
+                placeholder="Search discussions..."
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="search-input__field"
               />
-              <span className="user-name">{user.username}</span>
-              <button onClick={handleLogout} className="btn logout-btn">
-                <LogOut className="btn-icon" />
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="header__actions">
+            <button className="header__action-btn header__action-btn--notification" aria-label="Notifications">
+              <Bell className="header__action-icon" />
+              <span className="notification-badge">3</span>
+            </button>
+
+            <Link to="/new-post" className="header__action-btn header__action-btn--primary">
+              <Plus className="header__action-icon" />
+              <span className="header__action-text">New Post</span>
+            </Link>
+
+            <button
+              className="header__action-btn header__action-btn--theme-toggle"
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDarkMode ? <Sun className="header__action-icon" /> : <Moon className="header__action-icon" />}
+            </button>
+
+            {!user ? (
+              <div className="header__auth">
+                <Link to="/login" className="header__auth-btn header__auth-btn--login">
+                  <LogIn className="header__action-icon" />
+                  Login
+                </Link>
+                <Link to="/register" className="header__auth-btn header__auth-btn--register">
+                  <UserCircle className="header__action-icon" />
+                  Register
+                </Link>
+              </div>
+            ) : (
+              <div className="header__user">
+                <img
+                  src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.username}`}
+                  alt={`${user.username}'s avatar`}
+                  className="header__user-avatar"
+                />
+                <span className="header__user-name">{user.username}</span>
+                <button onClick={handleLogout} className="header__action-btn header__action-btn--logout" aria-label="Logout">
+                  <LogOut className="header__action-icon" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            className={`header__menu-toggle ${isMobileMenuOpen ? 'header__menu-toggle--active' : ''}`}
+            onClick={toggleMobileMenu}
+            aria-label="Toggle mobile menu"
+          >
+            <span className="header__menu-toggle-line"></span>
+            <span className="header__menu-toggle-line"></span>
+            <span className="header__menu-toggle-line"></span>
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        <div className={`mobile-menu ${isMobileMenuOpen ? 'mobile-menu--open' : ''}`}>
+          <div className="mobile-menu__overlay" onClick={closeMobileMenu} aria-hidden="true"></div>
+
+          <div className="mobile-menu__content">
+            <div className="mobile-menu__header">
+              <Link to="/" className="mobile-menu__logo" onClick={closeMobileMenu}>
+                <MessageCircle className="mobile-menu__logo-icon" />
+                <span>Discussly</span>
+              </Link>
+              <button className="mobile-menu__close" onClick={closeMobileMenu} aria-label="Close mobile menu">
+                <X size={24} />
               </button>
             </div>
-          )}
-        </div>
 
-        {/* Hamburger Menu */}
-        <button
-          className={`hamburger-menu ${isMobileMenuOpen ? 'open' : ''}`}
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle mobile menu"
-        >
-          <div className="hamburger-bar"></div>
-          <div className="hamburger-bar"></div>
-          <div className="hamburger-bar"></div>
-        </button>
-      </div>
-
-      {/* Mobile Sidebar Overlay */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div
-              className="mobile-nav-overlay"
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 250, damping: 30 }}
-            >
-              <div className="mobile-nav-header">
-                <div className="mobile-logo">
-                  <MessageCircle className="mobile-logo-icon" />
-                  <span>Discussly</span>
-                </div>
-                <button className="close-btn" onClick={closeMobileMenu}>
-                  <X className="close-icon" />
-                </button>
+            <div className="mobile-menu__search">
+              <div className="search-input">
+                <Search className="search-input__icon" />
+                <input
+                  type="text"
+                  placeholder="Search discussions..."
+                  value={searchQuery}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="search-input__field"
+                />
               </div>
+            </div>
 
-              <div className="mobile-search">
-                <div className="search-container">
-                  <Search className="search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search discussions..."
-                    value={searchQuery}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    className="search-input"
-                  />
-                </div>
-              </div>
+            <nav className="mobile-menu__nav">
+              <Link to="/" className="mobile-menu__nav-link" onClick={closeMobileMenu}>
+                <Home className="mobile-menu__nav-icon" />
+                Home
+              </Link>
+              <Link to="/explore" className="mobile-menu__nav-link" onClick={closeMobileMenu}>
+                <Compass className="mobile-menu__nav-icon" />
+                Explore
+              </Link>
+              <Link to="/about" className="mobile-menu__nav-link" onClick={closeMobileMenu}>
+                <Info className="mobile-menu__nav-icon" />
+                About
+              </Link>
+              {user && (
+                <Link to="/profile" className="mobile-menu__nav-link" onClick={closeMobileMenu}>
+                  <UserCircle className="mobile-menu__nav-icon" />
+                  Profile
+                </Link>
+              )}
+            </nav>
 
-              <nav className="mobile-nav-content">
-                <Link to="/" className="mobile-nav-link" onClick={closeMobileMenu}>
-                  <Home className="mobile-nav-icon" /> Home
-                </Link>
-                <Link to="/explore" className="mobile-nav-link" onClick={closeMobileMenu}>
-                  <Compass className="mobile-nav-icon" /> Explore
-                </Link>
-                <Link to="/about" className="mobile-nav-link" onClick={closeMobileMenu}>
-                  <Info className="mobile-nav-icon" /> About
-                </Link>
-                {user && (
-                  <Link to="/profile" className="mobile-nav-link" onClick={closeMobileMenu}>
-                    <UserCircle className="mobile-nav-icon" /> Profile
+            <div className="mobile-menu__actions">
+              <Link to="/new-post" className="mobile-menu__action-btn" onClick={closeMobileMenu}>
+                <Plus className="mobile-menu__action-icon" />
+                New Post
+              </Link>
+
+              <button className="mobile-menu__action-btn">
+                <Bell className="mobile-menu__action-icon" />
+                Notifications
+                <span className="notification-badge">3</span>
+              </button>
+
+              <button
+                className="mobile-menu__action-btn"
+                onClick={() => setIsDarkMode(!isDarkMode)}
+              >
+                {isDarkMode ? <Sun className="mobile-menu__action-icon" /> : <Moon className="mobile-menu__action-icon" />}
+                {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+              </button>
+            </div>
+
+            <div className="mobile-menu__auth">
+              {!user ? (
+                <>
+                  <Link to="/login" className="mobile-menu__auth-btn mobile-menu__auth-btn--login" onClick={closeMobileMenu}>
+                    <LogIn />
+                    Login
                   </Link>
-                )}
-
-                <div className="mobile-nav-divider" />
-
-                <button className="mobile-nav-link new-discussion-mobile">
-                  <Plus className="mobile-nav-icon" /> New Discussion
+                  <Link to="/register" className="mobile-menu__auth-btn mobile-menu__auth-btn--register" onClick={closeMobileMenu}>
+                    <UserCircle />
+                    Register
+                  </Link>
+                </>
+              ) : (
+                <button onClick={handleLogout} className="mobile-menu__auth-btn mobile-menu__auth-btn--logout">
+                  <LogOut />
+                  Logout
                 </button>
-
-                <button className="mobile-nav-link notifications-mobile">
-                  <Bell className="mobile-nav-icon" /> Notifications
-                  <span className="mobile-notification-badge">3</span>
-                </button>
-
-                <div className="mobile-auth-buttons">
-                  {!user ? (
-                    <>
-                      <Link to="/login" className="btn login-btn mobile-auth-btn" onClick={closeMobileMenu}>
-                        <LogIn className="btn-icon" /> Login
-                      </Link>
-                      <Link to="/register" className="btn register-btn mobile-auth-btn" onClick={closeMobileMenu}>
-                        <UserCircle className="btn-icon" /> Register
-                      </Link>
-                    </>
-                  ) : (
-                    <button onClick={handleLogout} className="btn logout-btn mobile-logout-btn">
-                      <LogOut className="btn-icon" /> Logout
-                    </button>
-                  )}
-                </div>
-              </nav>
-            </motion.div>
-
-            {/* Optional dark background overlay */}
-            <motion.div
-              className="mobile-overlay-bg"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.3 }}
-              exit={{ opacity: 0 }}
-              onClick={closeMobileMenu}
-            />
-          </>
-        )}
-      </AnimatePresence>
-    </header>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+    </>
   );
 };
 

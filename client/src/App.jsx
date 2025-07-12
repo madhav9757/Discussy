@@ -1,4 +1,4 @@
-import React, { use, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import AppRouter from './router.jsx';
 import Header from './components/header/Header.jsx';
@@ -9,22 +9,22 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const dispatch = useDispatch();
+
   useEffect(() => {
     const getUserInfoFromStorage = () => {
       try {
         const userInfo = localStorage.getItem('userInfo');
         const token = localStorage.getItem('token');
-        
+
         if (userInfo && userInfo !== 'undefined' && token && token !== 'undefined') {
           return {
             user: JSON.parse(userInfo),
-            token: token
+            token
           };
         }
         return null;
       } catch (error) {
         console.warn('Failed to parse user data from localStorage:', error);
-        // Clean up invalid data
         localStorage.removeItem('userInfo');
         localStorage.removeItem('token');
         return null;
@@ -35,7 +35,7 @@ function App() {
     if (userData) {
       dispatch(setCredentials(userData));
     }
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="app-wrapper">
