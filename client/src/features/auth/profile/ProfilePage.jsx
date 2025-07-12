@@ -33,6 +33,7 @@ const ProfilePage = () => {
     isLoading: isLoadingProfile,
     isError: isErrorProfile,
   } = useGetProfileQuery(undefined, { skip: !isOwnProfile });
+  console.log(profileData);
 
   const {
     data: otherUserData,
