@@ -9,9 +9,9 @@
   overflow: hidden;
   background: linear-gradient(135deg, 
     var(--bg-primary) 0%, 
-    var(--primary-light) 25%, 
-    var(--bg-secondary) 50%, 
-    var(--primary-light) 75%, 
+    var(--bg-secondary) 25%, 
+    var(--bg-tertiary) 50%, 
+    var(--bg-secondary) 75%, 
     var(--bg-primary) 100%
   );
   background-size: 400% 400%;
@@ -39,8 +39,8 @@
   position: absolute;
   border-radius: var(--radius-full);
   background: linear-gradient(135deg, 
-    rgba(79, 158, 252, 0.1), 
-    rgba(79, 158, 252, 0.05)
+    rgba(59, 130, 246, 0.1), 
+    rgba(59, 130, 246, 0.05)
   );
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -96,13 +96,13 @@
   z-index: 2;
   max-width: 1000px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius-2xl);
   padding: var(--spacing-3xl);
   box-shadow: var(--shadow-2xl);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--gray-200);
   text-align: center;
 }
 
@@ -121,11 +121,11 @@
 
 .title-icon {
   color: var(--primary-color);
-  filter: drop-shadow(0 4px 8px rgba(79, 158, 252, 0.3));
+  filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
 }
 
 .brand-highlight {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -139,7 +139,7 @@
   left: 0;
   width: 100%;
   height: 3px;
-  background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+  background: var(--primary-gradient);
   border-radius: var(--radius-sm);
   opacity: 0.7;
 }
@@ -179,7 +179,7 @@
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  background: var(--primary-gradient);
   transform: scaleX(0);
   transition: all var(--transition-slow);
 }
@@ -206,7 +206,7 @@
 }
 
 .feature-icon.trending {
-  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  background: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
 .feature-icon.create {
@@ -214,7 +214,7 @@
 }
 
 .feature-icon.community {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  background: var(--primary-gradient);
 }
 
 .feature-card:hover .feature-icon {
@@ -240,7 +240,7 @@
   align-items: center;
   gap: var(--spacing-md);
   padding: var(--spacing-lg) var(--spacing-2xl);
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  background: var(--primary-gradient);
   color: var(--white);
   text-decoration: none;
   border-radius: var(--radius-full);
@@ -431,7 +431,7 @@
   width: 100%;
   height: 100%;
   background-image: 
-    radial-gradient(circle at 20% 20%, rgba(79, 158, 252, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 40% 60%, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
   animation: particleMove 20s linear infinite;
@@ -446,12 +446,12 @@
 /* Accessibility Improvements */
 .home-button:focus {
   outline: none;
-  box-shadow: 0 0 0 4px rgba(79, 158, 252, 0.4);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
 }
 
 .feature-card:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(79, 158, 252, 0.3);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
 /* Print Styles */
@@ -522,5 +522,48 @@
   
   .button-icon {
     animation: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .home-container {
+    background: linear-gradient(135deg, 
+      var(--dark-bg-primary) 0%, 
+      var(--dark-bg-secondary) 25%, 
+      var(--dark-bg-tertiary) 50%, 
+      var(--dark-bg-secondary) 75%, 
+      var(--dark-bg-primary) 100%
+    );
+  }
+
+  .home-box {
+    background: var(--dark-bg-card);
+    border-color: var(--gray-600);
+  }
+
+  .home-title {
+    color: var(--dark-text-primary);
+  }
+
+  .home-subtitle {
+    color: var(--dark-text-secondary);
+  }
+
+  .feature-card {
+    background: var(--dark-bg-secondary);
+    border-color: var(--gray-600);
+  }
+
+  .feature-card:hover {
+    border-color: var(--primary-color);
+  }
+
+  .feature-content h3 {
+    color: var(--dark-text-primary);
+  }
+
+  .feature-content p {
+    color: var(--dark-text-secondary);
   }
 }
