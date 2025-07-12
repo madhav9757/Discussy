@@ -5,18 +5,32 @@ import { API_BASE_URL } from '../../app/constant.js';
 import { discusslyApi } from '../../app/api/discusslyApi.js'; // <-- IMPORTANT: Make sure this path is correct
 
 // Load user info from localStorage on app start
-const userInfoFromStorage = localStorage.getItem('userInfo')
-  ? JSON.parse(localStorage.getItem('userInfo'))
-  : null;
+const getUserInfoFromStorage = () => {
+  try {
+    const userInfo = localStorage.getItem('userInfo');
+    return userInfo && userInfo !== 'undefined' ? JSON.parse(userInfo) : null;
+  } catch (error) {
+    console.warn('Failed to parse userInfo from localStorage:', error);
+    localStorage.removeItem('userInfo'); // Clean up invalid data
+    return null;
+  }
+};
 
 // Load token from localStorage on app start (crucial for authenticated requests)
-const tokenFromStorage = localStorage.getItem('token')
-  ? localStorage.getItem('token')
-  : null;
+const getTokenFromStorage = () => {
+  try {
+    const token = localStorage.getItem('token');
+    return token && token !== 'undefined' ? token : null;
+  } catch (error) {
+    console.warn('Failed to get token from localStorage:', error);
+    localStorage.removeItem('token'); // Clean up invalid data
+    return null;
+  }
+};
 
 const initialState = {
-  userInfo: userInfoFromStorage,
-  token: tokenFromStorage, // Store the token in Redux state
+  userInfo: getUserInfoFromStorage(),
+  token: getTokenFromStorage(), // Store the token in Redux state
   isLoading: false,
   error: null,
 };
@@ -39,8 +53,12 @@ export const loginUser = createAsyncThunk(
       }
 
       // Store both userInfo and token in localStorage
-      localStorage.setItem('userInfo', JSON.stringify(res.data.user));
-      localStorage.setItem('token', res.data.token);
+      try {
+        localStorage.setItem('userInfo', JSON.stringify(res.data.user));
+        localStorage.setItem('token', res.data.token);
+      } catch (error) {
+        console.warn('Failed to save login data to localStorage:', error);
+      }
 
       // Manually invalidate the RTK Query cache for the 'User' tag.
       // This tells RTK Query that any cached 'User' data (like from useGetProfileQuery) is stale
@@ -52,8 +70,12 @@ export const loginUser = createAsyncThunk(
     } catch (err) {
       console.error("Login Thunk Error:", err);
       // Clean up localStorage on failed login attempts to avoid stale data
-      localStorage.removeItem('userInfo');
-      localStorage.removeItem('token');
+      try {
+        localStorage.removeItem('userInfo');
+        localStorage.removeItem('token');
+      } catch (error) {
+        console.warn('Failed to clear localStorage:', error);
+      }
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || err.message || 'Login failed'
       );
@@ -79,8 +101,12 @@ export const registerUser = createAsyncThunk(
       }
 
       // Store both userInfo and token in localStorage
-      localStorage.setItem('userInfo', JSON.stringify(res.data.user));
-      localStorage.setItem('token', res.data.token);
+      try {
+        localStorage.setItem('userInfo', JSON.stringify(res.data.user));
+        localStorage.setItem('token', res.data.token);
+      } catch (error) {
+        console.warn('Failed to save registration data to localStorage:', error);
+      }
 
       // Manually invalidate the RTK Query cache for the 'User' tag
       thunkAPI.dispatch(discusslyApi.util.invalidateTags(['User']));
@@ -90,8 +116,12 @@ export const registerUser = createAsyncThunk(
     } catch (err) {
       console.error("Register Thunk Error:", err);
       // Clean up localStorage on failed registration attempts
-      localStorage.removeItem('userInfo');
-      localStorage.removeItem('token');
+      try {
+        localStorage.removeItem('userInfo');
+        localStorage.removeItem('token');
+      } catch (error) {
+        console.warn('Failed to clear localStorage:', error);
+      }
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || err.message || 'Registration failed'
       );
@@ -108,8 +138,12 @@ export const logoutUser = createAsyncThunk(
       await axios.post(`${API_BASE_URL}/users/logout`, {}, { withCredentials: true });
 
       // Remove both userInfo and token from localStorage
-      localStorage.removeItem('userInfo');
-      localStorage.removeItem('token');
+      try {
+        localStorage.removeItem('userInfo');
+        localStorage.removeItem('token');
+      } catch (error) {
+        console.warn('Failed to clear localStorage on logout:', error);
+      }
 
       // Manually invalidate the RTK Query cache for the 'User' tag
       thunkAPI.dispatch(discusslyApi.util.invalidateTags(['User']));
@@ -118,8 +152,12 @@ export const logoutUser = createAsyncThunk(
     } catch (err) {
       console.error("Logout Thunk Error:", err);
       // Even if logout fails on the backend, ensure local state is cleared
-      localStorage.removeItem('userInfo');
-      localStorage.removeItem('token');
+      try {
+        localStorage.removeItem('userInfo');
+        localStorage.removeItem('token');
+      } catch (error) {
+        console.warn('Failed to clear localStorage on logout error:', error);
+      }
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || err.message || 'Logout failed'
       );
@@ -137,11 +175,20 @@ const authSlice = createSlice({
     // This reducer can be used to set credentials from other sources if needed
     // (e.g., if you fetch user info from a non-auth endpoint and want to populate auth state)
     setCredentials: (state, action) => {
-      state.userInfo = action.payload.user;
-      state.token = action.payload.token;
-      // Ensure localStorage is updated here too, if this reducer is used directly
-      localStorage.setItem('userInfo', JSON.stringify(action.payload.user));
-      localStorage.setItem('token', action.payload.token);
+      const { user, token } = action.payload;
+      
+      if (user && token) {
+        state.userInfo = user;
+        state.token = token;
+        
+        // Safely store in localStorage
+        try {
+          localStorage.setItem('userInfo', JSON.stringify(user));
+          localStorage.setItem('token', token);
+        } catch (error) {
+          console.warn('Failed to save user data to localStorage:', error);
+        }
+      }
       // You might also dispatch invalidateTags(['User']) here if this action can imply a new user context
     },
   },
