@@ -1,247 +1,494 @@
+/*
+  Home.css
+
+  This file defines the styling for the Home component, creating an engaging
+  landing page with a modern aesthetic, responsive layout, and animations.
+
+  Principles applied:
+  - Flexbox and CSS Grid for flexible and responsive layouts.
+  - CSS Variables for consistent theming (light/dark mode).
+  - Subtle shadows, gradients, and border-radius for depth and modern feel.
+  - Keyframe animations for background decorative elements.
+  - Media queries for full responsiveness across device sizes.
+  - Integration with Framer Motion animations (CSS properties like transform, opacity).
+*/
+
+/* ===================================== */
+/* 1. Base Container & Layout            */
+/* ===================================== */
+
 .home-container {
-  min-height: 100vh;
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  position: relative;
-  background: linear-gradient(120deg, #e0e7ef 0%, #f1f5f9 60%, #dbeafe 100%);
-  overflow-x: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    min-height: 100vh; /* Full viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, var(--color-background) 0%, var(--color-surface) 100%); /* Subtle gradient background */
+    color: var(--color-text-primary);
+    position: relative;
+    overflow: hidden; /* Hide overflowing background shapes */
+    padding: var(--header-height) var(--padding-inline) 30px var(--padding-inline); /* Padding to account for fixed header */
+    box-sizing: border-box; /* Include padding in height */
 }
 
-.background-decoration {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
+/* Ensure content is pushed below the fixed header */
+.home-container::before {
+    content: '';
+    display: block;
+    height: var(--header-height); /* Spacer for fixed header */
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none; /* Allow clicks to pass through */
 }
 
-.floating-shape {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(30px);
-  opacity: 0.5;
-  mix-blend-mode: lighten;
-  animation: float 7s ease-in-out infinite alternate;
-}
-
-.shape-1 { top: 10%; left: 8%; width: 120px; height: 120px; background: #38bdf8; animation-delay: 0s; }
-.shape-2 { top: 75%; left: 80%; width: 160px; height: 160px; background: #fbbf24; animation-delay: 1s; }
-.shape-3 { top: 45%; left: 3%; width: 90px; height: 90px; background: #34d399; animation-delay: 2s; }
-.shape-4 { top: 15%; left: 70%; width: 80px; height: 80px; background: #f472b6; animation-delay: 1.5s; }
-.shape-5 { top: 80%; left: 18%; width: 80px; height: 80px; background: #a78bfa; animation-delay: 2.2s; }
-
-@keyframes float {
-  to {
-    transform: translateY(-30px) scale(1.08);
-    opacity: 0.6;
-  }
-}
-
+/* Main content box styling */
 .home-box {
-  position: relative;
-  z-index: 2;
-  padding: 2.5rem 2.2rem 2rem 2.2rem;
-  border-radius: 32px;
-  max-width: 540px;
-  width: 100%;
-  margin: 40px 0;
-  box-shadow: 0 8px 36px 0 rgba(144, 202, 249, 0.18);
+    background-color: var(--color-background);
+    border-radius: 20px; /* More rounded corners for the main box */
+    box-shadow: 0 15px 40px var(--color-shadow); /* Deeper shadow */
+    padding: 40px 50px;
+    text-align: center;
+    max-width: 900px; /* Max width for content */
+    width: 100%;
+    z-index: 10; /* Ensure it's above background decorations */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px; /* Space between sections */
 }
 
-.glassmorphism {
-  background: rgba(241, 245, 249, 0.65);
-  border: 1.5px solid rgba(203, 213, 225, 0.44);
-  backdrop-filter: blur(9px) saturate(1.5) brightness(0.98);
-}
+/* ===================================== */
+/* 2. Hero Section (Title & Subtitle)  */
+/* ===================================== */
 
 .home-title-wrapper {
-  margin-bottom: 0.62rem;
+    /* Used for Framer Motion animation */
+    width: 100%;
 }
 
 .home-title {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 2.1rem;
-  font-weight: 800;
-  letter-spacing: -.01em;
-  color: #0f172a;
+    font-size: 3.2rem; /* Large, impactful title */
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px; /* Space between icon and text */
+    line-height: 1.2;
 }
 
 .title-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(120deg, #0ea5e9 60%, #38bdf8 100%);
-  border-radius: 14px;
-  box-shadow: 0 4px 18px 0 #bae6fd91;
-  width: 50px;
-  height: 50px;
+    display: inline-flex; /* Keep icon and text aligned */
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-primary-dark)); /* Gradient for icon background */
+    border-radius: 50%;
+    padding: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0; /* Prevent icon from shrinking */
 }
 
 .title-icon {
-  color: #fff;
+    color: white; /* Icon color */
+    width: 40px;
+    height: 40px;
 }
 
 .brand-highlight {
-  background: linear-gradient(90deg, #0ea5e9, #60a5fa, #fbbf24);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  font-family: inherit;
-  font-size: 2.08rem;
-  letter-spacing: 0.01em;
+    color: var(--color-primary);
 }
 
 .home-subtitle {
-  font-size: 1.1rem;
-  font-weight: 400;
-  margin: 0 0 1.5rem 0;
-  color: #475569;
-  line-height: 1.5;
+    font-size: 1.3rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+    max-width: 700px;
+    line-height: 1.6;
 }
+
+/* ===================================== */
+/* 3. Feature Cards Section            */
+/* ===================================== */
 
 .home-features {
-  margin: 1.2rem 0 2.2rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.feature-card-motion-wrapper {
-  width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid for features */
+    gap: 25px; /* Space between feature cards */
+    width: 100%;
+    margin-top: 20px;
 }
 
 .feature-card-link {
-  text-decoration: none;
+    text-decoration: none;
+    color: inherit;
+    display: block; /* Make the link cover the entire card */
+    height: 100%;
 }
 
 .feature-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 1.3rem;
-  padding: 1.08rem 1.15rem;
-  border-radius: 18px;
-  background: rgba(236, 241, 249, 0.79);
-  box-shadow: 0 2px 12px 0 rgba(191, 219, 254, 0.08);
-  transition: border 0.2s;
-  border: 1.5px solid transparent;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 15px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align content to the left */
+    gap: 15px;
+    text-align: left;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    cursor: pointer;
+    height: 100%; /* Ensure cards in a row have equal height */
+    box-sizing: border-box;
 }
 
 .feature-card:hover {
-  border-color: #38bdf8;
+    background-color: var(--color-hover-bg);
 }
 
 .feature-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 11px;
-  width: 48px;
-  height: 48px;
-  font-size: 1.08rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
 }
 
 .feature-icon--trending {
-  background: linear-gradient(120deg, #f472b6 60%, #fbbf24 100%);
-  color: #fff;
+    background: linear-gradient(45deg, #f87171, #ef4444); /* Red gradient */
 }
 
 .feature-icon--create {
-  background: linear-gradient(120deg, #0ea5e9 60%, #38bdf8 100%);
-  color: #fff;
+    background: linear-gradient(45deg, #34d399, #10b981); /* Green gradient */
 }
 
 .feature-icon--community {
-  background: linear-gradient(120deg, #fbbf24 60%, #34d399 100%);
-  color: #fff;
+    background: linear-gradient(45deg, #60a5fa, #3b82f6); /* Blue gradient */
+}
+
+.feature-icon svg {
+    width: 28px;
+    height: 28px;
 }
 
 .feature-content h3 {
-  color: #0f172a;
-  margin-bottom: 0.15rem;
-  font-size: 1.13rem;
-  font-weight: 700;
-  letter-spacing: -0.012em;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
 }
 
 .feature-content p {
-  color: #64748b;
-  font-size: .97rem;
-  font-weight: 400;
-  margin: 0;
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    margin: 5px 0 0 0;
+    line-height: 1.5;
 }
+
+/* ===================================== */
+/* 4. Call to Action Buttons           */
+/* ===================================== */
 
 .home-cta-buttons {
-  margin-top: 2rem;
-  display: flex;
-  gap: 1.08rem;
-  flex-wrap: wrap;
-}
-
-.home-button-motion-wrapper {
-  display: inline-flex;
+    display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+    justify-content: center;
+    gap: 20px; /* Space between buttons */
+    margin-top: 30px;
+    width: 100%;
 }
 
 .home-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.64rem;
-  font-size: 1.07rem;
-  font-weight: 600;
-  padding: 0.75rem 1.68rem;
-  border-radius: 14px;
-  background: #fff;
-  color: #2563eb;
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  box-shadow: 0 2px 12px 0 rgba(59, 130, 246, 0.07);
-  transition: color 0.18s, background 0.18s, box-shadow 0.16s;
-  position: relative;
-  outline: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 30px;
+    border-radius: 30px; /* Pill shape */
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 .home-button--primary {
-  background: linear-gradient(90deg, #0ea5e9 45%, #fbbf24 100%);
-  color: #fff;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+    color: white;
+    border: none;
+    box-shadow: 0 8px 20px rgba(79, 158, 252, 0.3);
+}
+
+.home-button--primary:hover {
+    background: linear-gradient(90deg, var(--color-primary-dark), var(--color-primary));
 }
 
 .home-button--secondary {
-  background: linear-gradient(90deg, #e0e7ef 45%, #cbd5e1 100%);
-  color: #334155;
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
-.home-button:active {
-  filter: brightness(0.96);
+.home-button--secondary:hover {
+    background-color: var(--color-hover-bg);
+    border-color: var(--color-primary); /* Highlight border on hover */
+    color: var(--color-primary); /* Change text color on hover */
 }
 
 .button-icon {
-  font-size: 1.19em;
+    font-size: 1.4rem; /* Larger emoji icons */
 }
 
-/* Responsive styles */
-@media (max-width: 768px) {
-  .home-box {
-    max-width: 96vw;
-    padding: 1.3rem 1rem 1.1rem 1rem;
-  }
-  .home-title { font-size: 1.45rem; }
-  .brand-highlight { font-size: 1.32rem; }
-  .feature-card { flex-direction: column; gap: 0.7rem; }
-  .feature-icon { width: 38px; height: 38px; }
-  .home-cta-buttons { flex-direction: column; gap: 0.7rem; }
+/* ===================================== */
+/* 5. Background Decorative Shapes     */
+/* ===================================== */
+
+.background-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allow interaction with content below */
+    overflow: hidden; /* Ensure shapes don't cause scrollbars */
 }
 
-@media (max-width: 460px) {
-  .home-box {
-    padding: 0.9rem 0.24rem;
-    border-radius: 15px;
-  }
-  .feature-card { padding: 0.7rem 0.6rem; }
-  .feature-content h3 { font-size: 1rem; }
-  .feature-content p { font-size: .915rem; }
+.floating-shape {
+    position: absolute;
+    background: var(--color-primary); /* Default color, can be overridden */
+    border-radius: 50%;
+    opacity: 0.1; /* Subtle opacity */
+    filter: blur(50px); /* Soft blur effect */
+    animation: float 20s infinite ease-in-out alternate;
+}
+
+/* Specific shape sizes, colors, and positions */
+.shape-1 {
+    width: 200px;
+    height: 200px;
+    top: 10%;
+    left: 5%;
+    background: #facc15; /* Amber */
+    animation-delay: 0s;
+    animation-duration: 25s;
+}
+
+.shape-2 {
+    width: 150px;
+    height: 150px;
+    bottom: 15%;
+    right: 10%;
+    background: #34d399; /* Emerald */
+    animation-delay: 5s;
+    animation-duration: 20s;
+}
+
+.shape-3 {
+    width: 250px;
+    height: 250px;
+    top: 30%;
+    right: 20%;
+    background: #a78bfa; /* Violet */
+    animation-delay: 10s;
+    animation-duration: 30s;
+}
+
+.shape-4 {
+    width: 180px;
+    height: 180px;
+    top: 60%;
+    left: 15%;
+    background: #f87171; /* Red */
+    animation-delay: 8s;
+    animation-duration: 22s;
+}
+
+.shape-5 {
+    width: 120px;
+    height: 120px;
+    bottom: 5%;
+    left: 30%;
+    background: #60a5fa; /* Blue */
+    animation-delay: 3s;
+    animation-duration: 18s;
+}
+
+/* Keyframe animation for floating effect */
+@keyframes float {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(20px, -20px) scale(1.05);
+    }
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+}
+
+/* ===================================== */
+/* 6. Responsive Adjustments             */
+/* ===================================== */
+
+/* Tablets and larger mobile devices */
+@media (max-width: 992px) {
+    .home-box {
+        padding: 30px 40px;
+        gap: 25px;
+    }
+
+    .home-title {
+        font-size: 2.5rem;
+        gap: 10px;
+    }
+
+    .title-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .home-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .home-features {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .feature-card {
+        padding: 20px;
+        gap: 12px;
+    }
+
+    .feature-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .feature-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .feature-content h3 {
+        font-size: 1.2rem;
+    }
+
+    .feature-content p {
+        font-size: 0.9rem;
+    }
+
+    .home-cta-buttons {
+        flex-direction: column; /* Stack buttons vertically on smaller screens */
+        gap: 15px;
+    }
+
+    .home-button {
+        width: 100%; /* Full width for stacked buttons */
+        max-width: 300px; /* Limit max width even when stacked */
+        font-size: 1rem;
+        padding: 12px 25px;
+    }
+
+    /* Adjust floating shapes for smaller screens */
+    .floating-shape {
+        filter: blur(30px);
+        opacity: 0.08;
+    }
+    .shape-1 { width: 150px; height: 150px; top: 8%; left: 3%; }
+    .shape-2 { width: 120px; height: 120px; bottom: 10%; right: 5%; }
+    .shape-3 { width: 200px; height: 200px; top: 25%; right: 15%; }
+    .shape-4 { width: 140px; height: 140px; top: 55%; left: 10%; }
+    .shape-5 { width: 100px; height: 100px; bottom: 3%; left: 25%; }
+}
+
+/* Smaller mobile devices */
+@media (max-width: 600px) {
+    .home-container {
+        padding: calc(var(--header-height) + 10px) var(--padding-inline) 20px var(--padding-inline);
+    }
+
+    .home-box {
+        padding: 25px 20px;
+        gap: 20px;
+    }
+
+    .home-title {
+        font-size: 2rem;
+        flex-direction: column; /* Stack icon and text for very small screens */
+        gap: 5px;
+    }
+
+    .title-icon-wrapper {
+        padding: 8px;
+        width: 48px;
+        height: 48px;
+    }
+
+    .title-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .home-subtitle {
+        font-size: 1rem;
+    }
+
+    .home-features {
+        grid-template-columns: 1fr; /* Single column layout for features */
+        gap: 15px;
+    }
+
+    .feature-card {
+        padding: 18px;
+        gap: 10px;
+    }
+
+    .feature-icon {
+        width: 45px;
+        height: 45px;
+    }
+
+    .feature-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .feature-content h3 {
+        font-size: 1.1rem;
+    }
+
+    .feature-content p {
+        font-size: 0.85rem;
+    }
+
+    .home-cta-buttons {
+        gap: 10px;
+    }
+
+    .home-button {
+        padding: 10px 20px;
+        font-size: 0.95rem;
+    }
+
+    .button-icon {
+        font-size: 1.2rem;
+    }
+
+    /* Adjust floating shapes for very small screens */
+    .floating-shape {
+        filter: blur(20px);
+        opacity: 0.06;
+    }
+    .shape-1 { width: 100px; height: 100px; top: 5%; left: 0%; }
+    .shape-2 { width: 80px; height: 80px; bottom: 8%; right: 0%; }
+    .shape-3 { width: 150px; height: 150px; top: 20%; right: 10%; }
+    .shape-4 { width: 100px; height: 100px; top: 50%; left: 5%; }
+    .shape-5 { width: 70px; height: 70px; bottom: 2%; left: 20%; }
 }

@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Rocket, Flame, Users, PenTool, MessageCircle } from 'lucide-react'; // Added MessageCircle for consistency
-import { Link } from 'react-router-dom'; // Import Link for proper navigation
+import { Rocket, Flame, Users, PenTool } from 'lucide-react'; // MessageCircle removed as it's not used
+// Link is no longer directly used for buttons, but kept if needed elsewhere for different navigation patterns
+import { Link } from 'react-router-dom';
 import './Home.css';
 
 const Home = () => {
@@ -68,7 +69,7 @@ const Home = () => {
         <div className="floating-shape shape-1"></div>
         <div className="floating-shape shape-2"></div>
         <div className="floating-shape shape-3"></div>
-        <div className="floating-shape shape-4"></div> {/* Added more shapes */}
+        <div className="floating-shape shape-4"></div>
         <div className="floating-shape shape-5"></div>
       </div>
 
@@ -91,7 +92,7 @@ const Home = () => {
               transition={{ duration: 0.6, type: "spring", stiffness: 200 }}
               className="title-icon-wrapper"
             >
-              <Rocket size={40} className="title-icon" /> {/* Increased size */}
+              <Rocket size={40} className="title-icon" />
             </motion.div>
             Welcome to <span className="brand-highlight">Discussly</span>
           </h1>
@@ -113,7 +114,8 @@ const Home = () => {
           animate="visible"
         >
           {/* Trending Posts Feature Card */}
-          <Link to="/explore" className="feature-card-link"> {/* Link to explore page */}
+          {/* Link wraps motion.div correctly here, as motion.div gets the animation props */}
+          <Link to="/explore" className="feature-card-link">
             <motion.div
               className="feature-card"
               variants={featureCardVariants}
@@ -121,7 +123,7 @@ const Home = () => {
               transition={{ duration: 0.3, ease: "easeOut" }}
             >
               <div className="feature-icon feature-icon--trending">
-                <Flame size={28} /> {/* Increased icon size */}
+                <Flame size={28} />
               </div>
               <div className="feature-content">
                 <h3>Trending Posts</h3>
@@ -131,7 +133,7 @@ const Home = () => {
           </Link>
 
           {/* Create & Discuss Feature Card */}
-          <Link to="/new-post" className="feature-card-link"> {/* Link to new post page */}
+          <Link to="/new-post" className="feature-card-link">
             <motion.div
               className="feature-card"
               variants={featureCardVariants}
@@ -149,7 +151,7 @@ const Home = () => {
           </Link>
 
           {/* Join Communities Feature Card */}
-          <Link to="/communities" className="feature-card-link"> {/* Link to communities page */}
+          <Link to="/communities" className="feature-card-link">
             <motion.div
               className="feature-card"
               variants={featureCardVariants}
@@ -172,28 +174,29 @@ const Home = () => {
           className="home-cta-buttons"
           variants={textItemVariants} // Using textItemVariants for a slight delay
         >
-          <Link
-            to="/register" // Link to registration page
+          {/* Changed Link to motion.a and used href */}
+          <motion.a
+            href="/register" // Navigates to registration page
             className="home-button home-button--primary"
-            as={motion.a} // Use as prop to make Link behave like motion.a
             variants={buttonVariants}
             whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(79, 158, 252, 0.4)" }}
             whileTap={{ scale: 0.95 }}
           >
             <span className="button-icon">✨</span>
             Join Discussly
-          </Link>
-          <Link
-            to="/explore" // Link to explore page
+          </motion.a>
+
+          {/* Changed Link to motion.a and used href */}
+          <motion.a
+            href="/explore" // Navigates to explore page
             className="home-button home-button--secondary"
-            as={motion.a}
             variants={buttonVariants}
             whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(160, 174, 192, 0.2)" }}
             whileTap={{ scale: 0.95 }}
           >
             <span className="button-icon">🔍</span>
             Explore Posts
-          </Link>
+          </motion.a>
         </motion.div>
       </motion.div>
     </div>
