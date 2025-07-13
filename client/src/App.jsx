@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import AppRouter from './router.jsx';
@@ -6,6 +7,9 @@ import { setCredentials } from './features/auth/authSlice.js';
 import { ToastContainer } from 'react-toastify';
 import { Toaster } from 'react-hot-toast';
 import 'react-toastify/dist/ReactToastify.css';
+
+// Import ThemeProvider
+import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   const dispatch = useDispatch();
@@ -38,14 +42,16 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div className="app-wrapper">
-      <Header />
-      <main className="main-content">
-        <AppRouter />
-      </main>
-      <Toaster position="top-center" />
-      <ToastContainer position="top-right" autoClose={2000} />
-    </div>
+    <ThemeProvider> {/* Wrap your entire application with ThemeProvider */}
+      <div className="app-wrapper">
+        <Header />
+        <main className="main-content">
+          <AppRouter />
+        </main>
+        <Toaster position="top-center" />
+        <ToastContainer position="top-right" autoClose={2000} />
+      </div>
+    </ThemeProvider>
   );
 }
 

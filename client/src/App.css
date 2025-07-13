@@ -47,14 +47,6 @@
   }
 }
 
-/* Remove default margin for body/app-root */
-body, #root {
-  margin: 0;
-  padding: 0;
-  background: none;
-  min-width: 0;
-}
-
 .Toastify__toast-container {
   z-index: 10000;
   width: 98vw;   /* Toasts never overflow mobile */

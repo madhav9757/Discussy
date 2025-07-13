@@ -1,0 +1,35 @@
+/* Default (Light) Theme */
+:root {
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --primary-color: #007bff;
+  /* Add more variables for other elements like borders, shadows, etc. */
+}
+
+/* Dark Theme */
+body.dark {
+  --background-color: #1a1a1a;
+  --text-color: #e0e0e0;
+  --primary-color: #00bcd4; /* Example: A different primary color for dark mode */
+}
+
+/* Apply variables to general elements */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-color);
+}
+
+button {
+  background-color: var(--primary-color);
+  color: var(--text-color); /* Or a specific button text color */
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

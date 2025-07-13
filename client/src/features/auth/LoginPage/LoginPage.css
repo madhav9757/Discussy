@@ -1,419 +1,696 @@
-/* Enhanced Login Page Styles */
-.login-container {
-  min-height: 100vh;
-  background: var(--dark-bg-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-xl);
-  position: relative;
-  overflow: hidden;
+/*
+  LoginPage.css
+
+  Final enhanced styles for the login page, focusing on:
+  - Glassmorphism design with strong visual identity.
+  - Dynamic background animations for an immersive feel.
+  - Seamless integration with Framer Motion for smooth UI interactions.
+  - Robust light/dark theme toggling for user preference.
+  - Clear and immediate input validation feedback (error/success).
+  - Comprehensive responsive design for various screen sizes.
+  - Accessibility considerations (focus states, reduced motion).
+  - Semantic use of CSS variables for easy theming and maintenance.
+*/
+
+/* ===================================== */
+/* 1. CSS Variables (Global Design Tokens) */
+/* - Define your core color palette, spacing, typography, etc.
+       - The `:root` block defines the default (dark) theme.
+       - The `body.light-theme` block overrides variables for the light theme.
+*/
+/* ===================================== */
+:root {
+    /* Colors - Dark Theme (Default) */
+    --dark-bg-primary: #1a202c; /* Deep dark background */
+    --color-primary: #6366f1; /* Indigo 500 */
+    --primary-color: var(--color-primary); /* Alias */
+    --primary-hover: #4f46e5; /* Indigo 600 */
+    --primary-dark: #4338ca; /* Indigo 700 */
+    --primary-gradient: linear-gradient(135deg, var(--color-primary), #8b5cf6); /* Indigo to Violet */
+    --text-primary: #e2e8f0; /* Light text on dark background */
+    --text-secondary: #a0aec0; /* Slightly muted text */
+    --text-muted: #718096; /* Placeholder/disabled text */
+    --text-white: #ffffff; /* For buttons etc. */
+
+    --color-surface: #2d3748; /* For UI elements like the theme toggle button background */
+    --color-hover-bg: rgba(255, 255, 255, 0.15); /* Hover background for elements like toggle button */
+    --color-border: rgba(255, 255, 255, 0.1); /* Default border for elements like toggle button */
+
+    --error-color: #ef4444; /* Red 500 */
+    --warning-color: #f59e0b; /* Amber 500 */
+    --success-color: #10b981; /* Green 500 */
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
+    --spacing-2xl: 32px;
+    --spacing-3xl: 48px;
+    --spacing-4xl: 64px;
+    --spacing-5xl: 80px;
+
+    /* Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+
+    /* Font Weights */
+    --font-light: 300;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-extrabold: 800;
+
+    /* Font Sizes */
+    --text-xs: 0.75rem; /* 12px */
+    --text-sm: 0.875rem; /* 14px */
+    --text-base: 1rem; /* 16px */
+    --text-lg: 1.125rem; /* 18px */
+    --text-xl: 1.25rem; /* 20px */
+    --text-2xl: 1.5rem; /* 24px */
+    --text-3xl: 1.875rem; /* 30px */
+
+    /* Transitions */
+    --transition-fast: 0.15s ease-out;
+    --transition-normal: 0.3s ease-in-out;
+    --transition-slow: 0.5s ease-in-out;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+    --shadow-glass: 0 25px 50px rgba(0, 0, 0, 0.2);
+    --shadow-glow: 0 0 15px rgba(99, 102, 241, 0.4);
 }
 
+/* ===================================== */
+/* Light Theme Variables (Overrides)     */
+/* ===================================== */
+body.light-theme {
+    /* Colors */
+    --dark-bg-primary: #f8fafc; /* Light background */
+    --text-primary: #1e293b; /* Dark text */
+    --text-secondary: #64748b; /* Muted dark text */
+    --text-muted: #94a3b8; /* Placeholder/disabled light text on light bg */
+
+    --color-surface: #ffffff; /* White cards/boxes */
+    --color-hover-bg: rgba(0, 0, 0, 0.05); /* Light hover background */
+    --color-border: rgba(0, 0, 0, 0.1); /* Darker border for elements like toggle button */
+
+    /* Shadows might need adjustment for light mode to be subtle */
+    --shadow-glass: 0 20px 40px rgba(0, 0, 0, 0.06); /* Lighter shadow for glass */
+    --shadow-glow: 0 0 10px rgba(99, 102, 241, 0.2); /* Lighter glow */
+}
+
+
+/* ===================================== */
+/* 2. Base Page Layout & Background      */
+/* ===================================== */
+.login-container {
+    min-height: 100vh;
+    background: var(--dark-bg-primary); /* Uses theme variable */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    position: relative;
+    overflow: hidden; /* Crucial to contain the moving background */
+    transition: background-color var(--transition-slow) ease-in-out; /* Smooth theme transition */
+}
+
+/* Background animation bubbles/gradients */
 .login-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 60%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
-  animation: backgroundMove 20s ease-in-out infinite;
-  pointer-events: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%), /* Primary color subtle glow */
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%), /* Secondary color subtle glow */
+        radial-gradient(circle at 40% 60%, rgba(6, 182, 212, 0.08) 0%, transparent 50%); /* Tertiary subtle glow */
+    animation: backgroundMove 25s ease-in-out infinite alternate; /* Slower, smoother, alternating animation */
+    pointer-events: none; /* Ensure it doesn't block interaction */
+    z-index: 1; /* Below the login box */
+    transition: background-image var(--transition-slow) ease-in-out; /* Smooth theme transition */
 }
 
 @keyframes backgroundMove {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(180deg); }
+    0% { transform: translateY(0) translateX(0) scale(1); }
+    25% { transform: translateY(-10px) translateX(10px) scale(1.02); }
+    50% { transform: translateY(10px) translateX(-10px) scale(0.98); }
+    75% { transform: translateY(-5px) translateX(5px) scale(1.01); }
+    100% { transform: translateY(0) translateX(0) scale(1); }
 }
 
+/* ===================================== */
+/* 3. Login Box (Glassmorphism Card)     */
+/* ===================================== */
 .login-box {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  padding: var(--spacing-4xl);
-  border-radius: var(--radius-2xl);
-  max-width: 450px;
-  width: 100%;
-  color: var(--text-primary);
-  box-shadow: var(--shadow-glass);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-  overflow: hidden;
+    /* Default (Dark Theme) */
+    background: rgba(255, 255, 255, 0.08); /* Slightly more opaque for better glass effect */
+    backdrop-filter: blur(40px); /* Stronger blur */
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.15); /* More visible border */
+    box-shadow: var(--shadow-glass); /* Defined in variables */
+
+    padding: var(--spacing-4xl);
+    border-radius: var(--radius-2xl);
+    max-width: 480px; /* Slightly wider for more spacious inputs */
+    width: 100%;
+    color: var(--text-primary); /* Uses theme variable */
+    position: relative;
+    overflow: hidden; /* Contains the top gradient line */
+    z-index: 2; /* Above the background animation */
+    /* Framer motion handles initial/animate for login-box */
+    transition: background var(--transition-slow), border-color var(--transition-slow), box-shadow var(--transition-slow), color var(--transition-slow);
 }
 
+/* Light Theme overrides for Login Box */
+body.light-theme .login-box {
+    background: rgba(255, 255, 255, 0.7); /* More opaque, but still slightly transparent */
+    border: 1px solid rgba(0, 0, 0, 0.08); /* Darker border */
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05); /* Lighter shadow for box */
+    color: var(--text-primary); /* Uses theme variable */
+}
+
+/* Top accent line on login box */
 .login-box::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--primary-gradient);
-  border-radius: var(--radius-full);
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px; /* Thicker line */
+    background: var(--primary-gradient);
+    border-radius: var(--radius-full);
+    z-index: 3; /* Ensure it's above other box content */
 }
 
+/* ===================================== */
+/* 4. Login Title & Icons                */
+/* ===================================== */
 .login-title {
-  font-size: var(--text-2xl);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  justify-content: center;
-  margin-bottom: var(--spacing-3xl);
-  font-weight: var(--font-bold);
-  color: var(--text-primary);
+    font-size: var(--text-3xl); /* Larger title */
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    justify-content: center;
+    margin-bottom: var(--spacing-3xl);
+    font-weight: var(--font-extrabold); /* Bolder */
+    color: var(--text-primary); /* Uses theme variable */
+    letter-spacing: -0.02em; /* Tighter kerning */
+    transition: color var(--transition-normal);
 }
 
 .login-title svg {
-  color: var(--primary-color);
-  filter: drop-shadow(0 4px 8px rgba(99, 102, 241, 0.3));
+    color: var(--primary-color);
+    filter: drop-shadow(0 6px 12px rgba(99, 102, 241, 0.4)); /* Stronger icon shadow */
+    transition: filter var(--transition-normal), color var(--transition-normal);
 }
 
+/* Light Theme overrides for Login Title Icons */
+body.light-theme .login-title svg {
+    filter: drop-shadow(0 4px 8px rgba(99, 102, 241, 0.2)); /* Lighter shadow for icon */
+}
+
+/* ===================================== */
+/* 5. Form Structure & Input Fields      */
+/* ===================================== */
 .login-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg); /* Space between form groups */
+}
+
+.input-group {
+    position: relative; /* For error message/success indicator positioning */
+    margin-bottom: var(--spacing-md); /* Space between input groups */
 }
 
 .login-form label {
-  font-weight: var(--font-medium);
-  display: block;
-  margin-bottom: var(--spacing-sm);
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    display: block;
+    margin-bottom: var(--spacing-xs); /* Less space, closer to input */
+    color: var(--text-secondary); /* Uses theme variable */
+    font-size: var(--text-sm);
+    text-transform: uppercase; /* Subtle uppercase for labels */
+    letter-spacing: 0.05em;
+    transition: color var(--transition-normal);
 }
 
 .input-icon {
-  position: relative;
-  display: flex;
-  align-items: center;
+    position: relative;
+    display: flex; /* For aligning input and icon */
+    align-items: center;
 }
 
 .input-icon input {
-  width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
-  padding-right: var(--spacing-4xl);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
-  color: var(--text-primary);
-  font-size: var(--text-base);
-  outline: none;
-  transition: all var(--transition-normal);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+    /* Default (Dark Theme) */
+    background: rgba(255, 255, 255, 0.05); /* Lighter background for input */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary); /* Uses theme variable */
+
+    width: 100%;
+    padding: var(--spacing-md) var(--spacing-lg);
+    padding-right: var(--spacing-4xl); /* Space for icon */
+    border-radius: var(--radius-lg);
+    font-size: var(--text-base);
+    outline: none;
+    transition: all var(--transition-normal);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* Light Theme overrides for Inputs */
+body.light-theme .input-icon input {
+    background: rgba(240, 244, 248, 0.6); /* Very light background for input */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-primary); /* Dark text */
 }
 
 .input-icon input:focus {
-  border-color: var(--primary-color);
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), var(--shadow-lg);
-  transform: translateY(-1px);
+    /* Default (Dark Theme) */
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.1); /* Slightly more visible on focus */
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* More prominent focus ring */
+    transform: translateY(-2px); /* Subtle lift on focus */
+}
+
+/* Light Theme overrides for Input Focus */
+body.light-theme .input-icon input:focus {
+    background: rgba(240, 244, 248, 0.8);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); /* Lighter focus shadow */
 }
 
 .input-icon input::placeholder {
-  color: var(--text-muted);
+    color: var(--text-muted); /* Uses theme variable */
 }
 
 .input-icon svg {
-  position: absolute;
-  right: var(--spacing-lg);
-  color: var(--text-muted);
-  transition: color var(--transition-normal);
-  pointer-events: none;
+    position: absolute;
+    right: var(--spacing-lg);
+    color: var(--text-muted); /* Uses theme variable */
+    transition: color var(--transition-normal);
+    cursor: pointer; /* For clickable icons like password toggle */
 }
 
 .input-icon input:focus + svg {
-  color: var(--primary-color);
+    color: var(--primary-color);
 }
 
-.login-btn {
-  width: 100%;
-  margin-top: var(--spacing-xl);
-  padding: var(--spacing-lg);
-  background: var(--primary-gradient);
-  border: none;
-  border-radius: var(--radius-lg);
-  color: var(--text-white);
-  font-weight: var(--font-semibold);
-  cursor: pointer;
-  font-size: var(--text-base);
-  transition: all var(--transition-normal);
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-}
 
-.login-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left var(--transition-slow);
-}
+/* ===================================== */
+/* 6. Form Validation & Feedback         */
+/* ===================================== */
 
-.login-btn:hover::before {
-  left: 100%;
-}
-
-.login-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--primary-hover), var(--primary-dark));
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow);
-}
-
-.login-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.login-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
+/* Error Text */
 .error-text {
-  color: var(--error-color);
-  font-size: var(--text-sm);
-  margin-top: var(--spacing-sm);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm);
-  background: rgba(239, 68, 68, 0.1);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--error-color); /* Uses theme variable */
+    font-size: var(--text-sm);
+    margin-top: var(--spacing-xs); /* Closer to the input */
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md); /* More padding */
+    background: rgba(239, 68, 68, 0.15); /* Slightly darker error background */
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(239, 68, 68, 0.3); /* Stronger border for errors */
+    animation: fadeIn 0.3s ease-out; /* Fade in animation for error messages */
+    transition: background var(--transition-normal), border-color var(--transition-normal), color var(--transition-normal);
 }
 
 .error-text::before {
-  content: '⚠️';
-  font-size: var(--text-xs);
+    content: '🚨'; /* More noticeable alert icon */
+    font-size: var(--text-xs); /* Adjust icon size */
 }
 
-.login-footer {
-  text-align: center;
-  margin-top: var(--spacing-2xl);
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.register-link {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: var(--font-medium);
-  transition: color var(--transition-normal);
-}
-
-.register-link:hover {
-  color: var(--primary-hover);
-  text-decoration: underline;
-}
-
-/* Enhanced Responsive Design */
-@media (max-width: 768px) {
-  .login-container {
-    padding: var(--spacing-lg);
-  }
-
-  .login-box {
-    padding: var(--spacing-2xl);
-    max-width: 100%;
-  }
-
-  .login-title {
-    font-size: var(--text-xl);
-    margin-bottom: var(--spacing-2xl);
-  }
-
-  .login-form {
-    gap: var(--spacing-md);
-  }
-
-  .input-icon input {
-    padding: var(--spacing-sm) var(--spacing-md);
-    padding-right: var(--spacing-3xl);
-    font-size: var(--text-sm);
-  }
-
-  .input-icon svg {
-    right: var(--spacing-md);
-    width: 16px;
-    height: 16px;
-  }
-
-  .login-btn {
-    padding: var(--spacing-md);
-    font-size: var(--text-sm);
-  }
-}
-
-@media (max-width: 480px) {
-  .login-container {
-    padding: var(--spacing-md);
-  }
-
-  .login-box {
-    padding: var(--spacing-xl);
-  }
-
-  .login-title {
-    font-size: var(--text-lg);
-    flex-direction: column;
-    gap: var(--spacing-sm);
-  }
-
-  .input-icon input {
-    padding: var(--spacing-sm);
-    padding-right: var(--spacing-2xl);
-  }
-
-  .input-icon svg {
-    right: var(--spacing-sm);
-    width: 14px;
-    height: 14px;
-  }
-}
-
-/* Enhanced Loading State */
-.login-btn-loading {
-  position: relative;
-}
-
-.login-btn-loading::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 20px;
-  height: 20px;
-  margin: -10px 0 0 -10px;
-  border: 2px solid transparent;
-  border-top: 2px solid currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Enhanced Focus States */
-.login-btn:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3), var(--shadow-lg);
-}
-
-.register-link:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
-  border-radius: var(--radius-sm);
-}
-
-/* Enhanced Animation */
-.login-box {
-  animation: loginBoxEnter 0.6s ease-out;
-}
-
-@keyframes loginBoxEnter {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Enhanced Accessibility */
-.login-form input:invalid {
-  border-color: var(--error-color);
-  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2);
-}
-
-.login-form input:valid {
-  border-color: var(--success-color);
-}
-
-/* Enhanced Visual Feedback */
-.input-group {
-  position: relative;
-}
-
+/* Input Group States (has-error, has-success) */
 .input-group.has-error input {
-  border-color: var(--error-color);
-  background: rgba(239, 68, 68, 0.05);
+    border-color: var(--error-color);
+    background: rgba(239, 68, 68, 0.1); /* Lighter error background */
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2);
 }
 
 .input-group.has-success input {
-  border-color: var(--success-color);
-  background: rgba(16, 185, 129, 0.05);
+    border-color: var(--success-color);
+    background: rgba(16, 185, 129, 0.1); /* Lighter success background */
+    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2);
 }
 
-/* Enhanced Security Indicators */
+/* Light Theme overrides for error/success states */
+body.light-theme .error-text {
+    background: rgba(255, 230, 230, 0.8);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: var(--error-color);
+}
+body.light-theme .input-group.has-error input {
+    background: rgba(255, 230, 230, 0.7);
+}
+body.light-theme .input-group.has-success input {
+    background: rgba(230, 255, 240, 0.7);
+}
+
+
+/* Password Strength Indicator */
 .password-strength {
-  margin-top: var(--spacing-sm);
-  display: flex;
-  gap: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+    display: flex;
+    gap: var(--spacing-xs);
+    height: 4px; /* Slightly thicker bars */
+    width: 100%;
 }
 
 .strength-bar {
-  height: 3px;
-  flex: 1;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-full);
-  transition: background var(--transition-normal);
+    height: 100%;
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1); /* Default greyed out bar */
+    border-radius: var(--radius-full);
+    transition: background var(--transition-normal);
 }
 
 .strength-bar.weak {
-  background: var(--error-color);
+    background: var(--error-color);
 }
-
 .strength-bar.medium {
-  background: var(--warning-color);
+    background: var(--warning-color);
 }
-
 .strength-bar.strong {
-  background: var(--success-color);
+    background: var(--success-color);
 }
 
-/* Enhanced Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .login-box {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-  
-  .input-icon input {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
+/* Light Theme overrides for password strength bars */
+body.light-theme .strength-bar {
+    background: rgba(0, 0, 0, 0.08); /* Lighter default bar */
 }
 
-/* Performance optimizations */
+/* ===================================== */
+/* 7. Login Button & Loading State       */
+/* ===================================== */
+.login-btn {
+    width: 100%;
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: var(--radius-lg);
+    color: var(--text-white); /* Stays white */
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    font-size: var(--text-base);
+    /* `transition` for non-framer-motion properties, framer handles transform/scale */
+    transition: background var(--transition-normal), box-shadow var(--transition-normal), opacity var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+/* Shine effect on button hover */
+.login-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent); /* Stronger shine */
+    transition: left var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1); /* Smoother cubic-bezier transition */
+    z-index: 1; /* Ensure shine is above button text but below loader */
+}
+
+.login-btn:hover::before {
+    left: 100%;
+}
+
+/* Button hover state (background only, framer handles transforms) */
+.login-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-hover), var(--primary-dark)); /* Deeper hover gradient */
+}
+
+.login-btn:disabled {
+    opacity: 0.5; /* Slightly more opaque when disabled */
+    cursor: not-allowed;
+    transform: none; /* Override potential framer motion transforms */
+    box-shadow: var(--shadow-md); /* Muted shadow when disabled */
+}
+
+/* Loading State for Button */
+.login-btn-loading {
+    color: transparent; /* Hide text */
+    pointer-events: none; /* Prevent clicks during loading */
+}
+
+.login-btn-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px; /* Larger spinner */
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 3px solid rgba(255, 255, 255, 0.3); /* Thicker, semi-transparent border */
+    border-top: 3px solid var(--text-white); /* Solid white top border */
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite; /* Faster spin */
+    z-index: 2; /* Above the shine effect */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Light Theme overrides for loading spinner */
+body.light-theme .login-btn-loading::after {
+    border: 3px solid rgba(0, 0, 0, 0.3); /* Darker semi-transparent border */
+    border-top: 3px solid var(--primary-color); /* Darker solid top border (or a darker text color) */
+}
+
+
+/* ===================================== */
+/* 8. Footer Links (Register & Forgot)   */
+/* ===================================== */
+.login-footer {
+    text-align: center;
+    margin-top: var(--spacing-2xl);
+    font-size: var(--text-sm);
+    color: var(--text-secondary); /* Uses theme variable */
+    transition: color var(--transition-normal);
+}
+
+.login-footer a { /* Target all links in footer */
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: var(--font-medium);
+    transition: color var(--transition-fast), text-decoration var(--transition-fast);
+}
+
+.login-footer a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.forgot-password-link {
+    margin-top: var(--spacing-md); /* Space below register link */
+    display: block; /* Make it a block to control margin */
+}
+
+/* ===================================== */
+/* 9. Theme Toggle Button                */
+/* ===================================== */
+.theme-toggle-button {
+    position: absolute;
+    top: var(--spacing-xl);
+    right: var(--spacing-xl);
+    background: var(--color-surface); /* Uses theme variable */
+    color: var(--text-primary); /* Uses theme variable */
+    border: 1px solid var(--color-border); /* Uses theme variable */
+    border-radius: var(--radius-full);
+    padding: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: var(--text-lg);
+    transition: all var(--transition-normal);
+    z-index: 100; /* Ensure it's on top */
+    box-shadow: var(--shadow-md);
+}
+
+.theme-toggle-button:hover {
+    background: var(--color-hover-bg); /* Uses theme variable */
+    color: var(--primary-color);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.theme-toggle-button:active {
+    transform: translateY(0);
+}
+
+/* ===================================== */
+/* 10. Accessibility (Focus States & Reduced Motion) */
+/* ===================================== */
+
+/* General focus outline replacement for keyboard navigation */
+:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: var(--radius-md); /* Apply to rounded elements */
+}
+
+/* Override/refine for specific elements */
+.login-btn:focus-visible {
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.4), var(--shadow-lg); /* Stronger focus outline */
+    border-radius: var(--radius-lg); /* Match button border-radius */
+    outline: none; /* Remove default browser outline */
+}
+
+.input-icon input:focus-visible {
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3), var(--shadow-lg);
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.login-footer a:focus-visible {
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+    border-radius: var(--radius-sm);
+    outline: none;
+}
+
+/* Performance optimizations (handled by framer-motion for transforms) */
+/* Explicitly mark properties that will change if not already handled by libraries */
 .login-box,
 .login-btn,
-.input-icon input {
-  will-change: transform;
+.input-icon input,
+.theme-toggle-button {
+    will-change: transform, opacity, background-color, border-color, box-shadow, filter, backdrop-filter, color;
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .login-box,
-  .login-btn,
-  .input-icon input {
-    transition: none;
-    animation: none;
-  }
-  
-  .login-container::before {
-    animation: none;
-  }
+    .login-box,
+    .login-btn,
+    .input-icon input,
+    .error-text,
+    .theme-toggle-button {
+        transition: none !important; /* Disable all transitions */
+        animation: none !important; /* Disable all animations */
+    }
+
+    .login-container::before {
+        animation: none !important; /* Disable background animation */
+    }
+
+    .login-btn::before { /* Disable shine effect */
+        transition: none !important;
+    }
+}
+
+
+/* ===================================== */
+/* 11. Responsive Design                 */
+/* ===================================== */
+
+@media (max-width: 768px) {
+    .login-container {
+        padding: var(--spacing-lg);
+    }
+
+    .login-box {
+        padding: var(--spacing-2xl);
+        max-width: 100%; /* Allows it to take full width with padding */
+    }
+
+    .login-title {
+        font-size: var(--text-2xl); /* Scale down title */
+        margin-bottom: var(--spacing-2xl);
+    }
+
+    .login-title svg {
+        size: 24px; /* Adjust icon size */
+    }
+
+    .login-form {
+        gap: var(--spacing-md);
+    }
+
+    .login-form label {
+        font-size: var(--text-xs); /* Smaller labels on mobile */
+    }
+
+    .input-icon input {
+        padding: var(--spacing-sm) var(--spacing-md);
+        padding-right: var(--spacing-3xl);
+        font-size: var(--text-sm);
+    }
+
+    .input-icon svg {
+        right: var(--spacing-md);
+        width: 16px;
+        height: 16px;
+    }
+
+    .login-btn {
+        padding: var(--spacing-md);
+        font-size: var(--text-sm);
+        margin-top: var(--spacing-lg);
+    }
+
+    .error-text {
+        font-size: var(--text-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    .login-footer {
+        margin-top: var(--spacing-xl);
+    }
+
+    .theme-toggle-button {
+        top: var(--spacing-md);
+        right: var(--spacing-md);
+        padding: var(--spacing-xs);
+        font-size: var(--text-base);
+    }
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        padding: var(--spacing-md);
+    }
+
+    .login-box {
+        padding: var(--spacing-xl);
+    }
+
+    .login-title {
+        font-size: var(--text-xl);
+        flex-direction: column; /* Stack title and icon if too long */
+        gap: var(--spacing-sm);
+    }
+
+    .input-icon input {
+        padding: var(--spacing-sm);
+        padding-right: var(--spacing-2xl);
+    }
+
+    .input-icon svg {
+        right: var(--spacing-sm);
+        width: 14px;
+        height: 14px;
+    }
 }
