@@ -1,408 +1,198 @@
-/* Enhanced Post Card Styles */
-#post-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
-  padding: var(--spacing-xl);
-  color: var(--text-primary);
-  transition: all var(--transition-slow);
-  box-shadow: var(--shadow-lg);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  text-decoration: none;
-  display: block;
+/*
+  Postcard.css
+
+  This file defines the styling for the PostCard component, used to display
+  individual post summaries within lists or grids (e.g., on the Explore page).
+
+  Principles applied:
+  - Clean and modern design.
+  - Interactive elements with hover effects.
+  - Flexbox for internal layout of elements within the card.
+  - CSS Variables for theme consistency (colors, borders, shadows).
+  - Semantic class names for readability.
+  - Responsive considerations for smaller screens.
+*/
+
+/* ===================================== */
+/* 1. Post Card Base Styles              */
+/* ===================================== */
+
+.post-card {
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 10px; /* Slightly more rounded corners */
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    flex-direction: column; /* Stack header, title, snippet, footer */
+    justify-content: space-between; /* Push footer to bottom if content is short */
+    min-height: 140px; /* Ensure a consistent minimum height for cards in a grid */
+    box-sizing: border-box; /* Include padding in height calculation */
 }
 
-#post-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--primary-gradient);
-  transform: scaleX(0);
-  transition: transform var(--transition-slow);
-  transform-origin: left;
+.post-card:hover {
+    transform: translateY(-3px); /* Subtle lift effect */
+    box-shadow: 0 5px 15px var(--color-shadow); /* More pronounced shadow on hover */
+    border-color: var(--color-primary); /* Highlight border on hover */
 }
 
-#post-card:hover::before {
-  transform: scaleX(1);
-}
-
-#post-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: var(--shadow-2xl);
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-#post-card:active {
-  transform: translateY(-4px) scale(1.01);
-}
-
-#post-card h3 {
-  font-size: var(--text-lg);
-  margin-bottom: var(--spacing-md);
-  color: var(--text-primary);
-  font-weight: var(--font-semibold);
-  line-height: var(--leading-tight);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  transition: color var(--transition-normal);
-}
-
-#post-card:hover h3 {
-  color: var(--primary-color);
-}
-
-#post-card .meta {
-  font-size: var(--text-sm);
-  margin-bottom: var(--spacing-sm);
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  transition: color var(--transition-normal);
-}
-
-#post-card .meta::before {
-  content: '🏠';
-  font-size: var(--text-xs);
-  padding: var(--spacing-xs);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-sm);
-}
-
-#post-card:hover .meta {
-  color: var(--text-secondary);
-}
-
-#post-card .author {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  margin-top: auto;
-  transition: color var(--transition-normal);
-}
-
-#post-card .author::before {
-  content: '👤';
-  font-size: var(--text-xs);
-  padding: var(--spacing-xs);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-sm);
-}
-
-#post-card:hover .author {
-  color: var(--text-primary);
-}
-
-/* Enhanced Post Card Content */
-.post-card-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  gap: var(--spacing-sm);
-}
+/* ===================================== */
+/* 2. Header Section (Community, Author) */
+/* ===================================== */
 
 .post-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.875rem; /* 14px */
+    color: var(--color-text-secondary);
 }
 
-.post-card-badge {
-  background: var(--primary-gradient);
-  color: var(--text-white);
-  font-size: var(--text-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-full);
-  font-weight: var(--font-medium);
-  white-space: nowrap;
+.post-card-community {
+    font-weight: 600;
+    color: var(--color-primary); /* Emphasize community name */
 }
 
-.post-card-excerpt {
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  line-height: var(--leading-relaxed);
-  margin-bottom: var(--spacing-md);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex-grow: 1;
+.post-card-author {
+    color: var(--color-text-secondary);
 }
+
+/* ===================================== */
+/* 3. Post Title                         */
+/* ===================================== */
+
+.post-card-title {
+    font-size: 1.25rem; /* 20px */
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 10px 0; /* Adjust margins */
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limit title to 2 lines */
+    line-clamp: 2; /* Standard property for cross-browser compatibility */
+    -webkit-box-orient: vertical;
+}
+
+/* ===================================== */
+/* 4. Content Snippet                    */
+/* ===================================== */
+
+.post-card-content-snippet {
+    font-size: 0.9375rem; /* 15px */
+    color: var(--color-text-secondary);
+    margin: 0 0 15px 0;
+    line-height: 1.5;
+    flex-grow: 1; /* Allow snippet to take available space */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Limit snippet to 3 lines */
+    line-clamp: 3; /* Standard property for cross-browser compatibility */
+    -webkit-box-orient: vertical;
+}
+
+/* ===================================== */
+/* 5. Footer Section (Votes, Comments)   */
+/* ===================================== */
 
 .post-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: var(--spacing-md);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Space between vote and comment sections */
+    margin-top: 10px; /* Space from content snippet */
 }
 
-.post-card-stats {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  font-size: var(--text-xs);
-  color: var(--text-muted);
+.post-card-votes,
+.post-card-comments {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.875rem; /* 14px */
+    color: var(--color-text-secondary);
+    font-weight: 500;
 }
 
-.post-stat {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-md);
-  transition: all var(--transition-normal);
+.vote-icon,
+.comment-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--color-text-secondary); /* Default icon color */
 }
 
-.post-stat:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-secondary);
+.vote-score {
+    color: var(--color-text-primary); /* Score can be more prominent */
+    font-weight: 600;
 }
 
-.post-card-date {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
+/* Optional: Color specific vote icons if needed - uncomment to use 
+.upvote-icon {
+    color: #28a745; Green for upvote
 }
 
-.post-card-date::before {
-  content: '🕒';
-  font-size: var(--text-xs);
+.downvote-icon {
+    color: #dc3545; Red for downvote
 }
+*/
 
-/* Enhanced Responsive Design */
+/* ===================================== */
+/* 6. Responsive Adjustments             */
+/* ===================================== */
+
 @media (max-width: 768px) {
-  #post-card {
-    padding: var(--spacing-lg);
-  }
+    .post-card {
+        padding: 12px 15px;
+        min-height: 130px; /* Slightly smaller minimum height on tablets */
+    }
 
-  #post-card h3 {
-    font-size: var(--text-base);
-  }
+    .post-card-title {
+        font-size: 1.15rem; /* Slightly smaller title on tablets */
+    }
 
-  .post-card-footer {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
-  }
+    .post-card-content-snippet {
+        font-size: 0.875rem; /* 14px for snippet on tablets */
+        -webkit-line-clamp: 2; /* Reduce snippet lines on smaller screens */
+        line-clamp: 2; /* Standard property for cross-browser compatibility */
+    }
 
-  .post-card-stats {
-    width: 100%;
-    justify-content: space-between;
-  }
+    .post-card-header,
+    .post-card-footer {
+        font-size: 0.8125rem; /* 13px */
+    }
 }
 
 @media (max-width: 480px) {
-  #post-card {
-    padding: var(--spacing-md);
-  }
+    .post-card {
+        padding: 10px 12px;
+        min-height: 120px; /* Even smaller min-height for small phones */
+    }
 
-  #post-card h3 {
-    font-size: var(--text-sm);
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-  }
+    .post-card-title {
+        font-size: 1.1rem; /* Adjust title for smaller phones */
+    }
 
-  .post-card-excerpt {
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-  }
+    .post-card-content-snippet {
+        font-size: 0.8125rem; /* 13px for snippet on small phones */
+        -webkit-line-clamp: 2; /* Keep 2 lines for snippet */
+        line-clamp: 2; /* Standard property for cross-browser compatibility */
+    }
 
-  .post-card-stats {
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-  }
+    .post-card-header {
+        flex-wrap: wrap; /* Allow header items to wrap if needed */
+        font-size: 0.75rem; /* 12px */
+    }
 
-  .post-stat {
-    font-size: var(--text-xs);
-    padding: var(--spacing-xs);
-  }
-}
+    .post-card-footer {
+        gap: 15px; /* Reduce gap in footer */
+        font-size: 0.8125rem; /* 13px */
+    }
 
-/* Enhanced Loading State */
-.post-card-loading {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
-  padding: var(--spacing-xl);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.post-card-loading .loading-title {
-  height: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-md);
-}
-
-.post-card-loading .loading-meta {
-  height: 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--spacing-sm);
-  width: 60%;
-}
-
-.post-card-loading .loading-content {
-  height: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--spacing-xs);
-}
-
-.post-card-loading .loading-content:last-child {
-  width: 40%;
-}
-
-/* Enhanced Focus States */
-#post-card:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3), var(--shadow-xl);
-}
-
-#post-card:focus-visible {
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3), var(--shadow-2xl);
-}
-
-/* Enhanced Interactive States */
-@media (hover: hover) {
-  #post-card:hover .post-card-badge {
-    background: linear-gradient(135deg, var(--primary-hover), var(--primary-dark));
-    transform: scale(1.05);
-  }
-  
-  #post-card:hover .post-card-excerpt {
-    color: var(--text-primary);
-  }
-}
-
-/* Special Post Types */
-.post-card-featured {
-  border: 2px solid var(--primary-color);
-  background: rgba(99, 102, 241, 0.05);
-}
-
-.post-card-featured::before {
-  background: var(--primary-color);
-  transform: scaleX(1);
-}
-
-.post-card-pinned {
-  border-color: var(--warning-color);
-  background: rgba(245, 158, 11, 0.05);
-}
-
-.post-card-pinned .post-card-badge {
-  background: var(--warning-color);
-}
-
-.post-card-archived {
-  opacity: 0.7;
-  filter: grayscale(0.3);
-}
-
-/* Enhanced Animation */
-.post-card-enter {
-  animation: postCardEnter 0.5s ease-out;
-}
-
-@keyframes postCardEnter {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Performance optimizations */
-#post-card {
-  will-change: transform;
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  #post-card {
-    transition: none;
-  }
-  
-  #post-card:hover {
-    transform: none;
-  }
-  
-  .post-card-enter {
-    animation: none;
-  }
-}
-
-/* Dark mode specific adjustments */
-@media (prefers-color-scheme: dark) {
-  #post-card {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-  
-  #post-card:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.15);
-  }
-}
-
-/* Accessibility improvements */
-.post-card-sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Enhanced typography */
-#post-card h3 {
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Enhanced spacing for better readability */
-.post-card-content > * + * {
-  margin-top: var(--spacing-sm);
-}
-
-/* Enhanced visual hierarchy */
-.post-card-priority-high {
-  border-left: 4px solid var(--error-color);
-}
-
-.post-card-priority-medium {
-  border-left: 4px solid var(--warning-color);
-}
-
-.post-card-priority-low {
-  border-left: 4px solid var(--success-color);
+    .vote-icon,
+    .comment-icon {
+        width: 16px;
+        height: 16px;
+    }
 }
