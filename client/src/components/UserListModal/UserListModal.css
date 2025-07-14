@@ -133,12 +133,13 @@ body.light-theme .modal-overlay {
   max-width: 500px; /* Max width for the modal */
   width: 100%;
   max-height: 80vh; /* Max height to allow scrolling */
-  overflow-y: auto; /* Enable scrolling for content */
+  overflow: hidden; /* Hide default scrollbar */
   display: flex;
   flex-direction: column;
   color: var(--text-primary);
   position: relative;
   transition: background var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal), color var(--transition-normal);
+  will-change: transform, opacity, background, border-color, box-shadow; /* Performance hint */
 }
 
 body.light-theme .modal-content {
@@ -196,8 +197,36 @@ body.light-theme .modal-close-btn:hover {
 .modal-body {
   flex-grow: 1; /* Allows it to take available space */
   overflow-y: auto; /* Enable scrolling if list is long */
-  padding-right: var(--spacing-sm); /* Account for scrollbar space */
+  padding-right: var(--spacing-sm); /* Account for scrollbar space if default */
+  /* Custom Scrollbar */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--primary-color) var(--color-border); /* Firefox */
 }
+
+/* Webkit (Chrome, Safari) scrollbar styles */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-surface); /* Inner border to make thumb thinner */
+}
+
+body.light-theme .modal-body::-webkit-scrollbar-thumb {
+  border-color: var(--color-surface);
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+}
+
 
 .modal-list {
   list-style: none;
@@ -215,6 +244,8 @@ body.light-theme .modal-close-btn:hover {
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+  will-change: transform, background, border-color, box-shadow; /* Performance hint */
 }
 
 body.light-theme .modal-list-item {
@@ -224,13 +255,14 @@ body.light-theme .modal-list-item {
 
 .modal-list-item:hover {
   background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-3px) scale(1.01); /* Subtle lift and scale */
+  box-shadow: var(--shadow-md), 0 0 10px rgba(99, 102, 241, 0.1); /* Added subtle glow */
+  border-color: var(--primary-color); /* Highlight border on hover */
 }
 
 body.light-theme .modal-list-item:hover {
   background: rgba(240, 244, 248, 0.8);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08), 0 0 8px rgba(99, 102, 241, 0.05);
 }
 
 .modal-list-avatar {
@@ -241,6 +273,7 @@ body.light-theme .modal-list-item:hover {
   margin-right: var(--spacing-md);
   border: 2px solid var(--primary-color);
   flex-shrink: 0; /* Prevent shrinking */
+  transition: border-color var(--transition-fast);
 }
 
 .modal-list-link {
@@ -269,14 +302,18 @@ body.light-theme .modal-list-item:hover {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-white);
+  box-shadow: var(--shadow-sm); /* Added subtle shadow */
+  transition: all var(--transition-fast);
 }
 
 .badge.you {
   background: var(--primary-color);
+  box-shadow: 0 2px 5px rgba(99, 102, 241, 0.3);
 }
 
 .badge.creator {
   background: var(--secondary-color);
+  box-shadow: 0 2px 5px rgba(6, 182, 212, 0.3);
 }
 
 /* ===================================== */
@@ -294,6 +331,7 @@ body.light-theme .modal-list-item:hover {
   text-align: center;
   position: relative;
   overflow: hidden;
+  will-change: transform, background, color, border-color, box-shadow, opacity; /* Performance hint */
 }
 
 .follow-unfollow-btn.follow {
@@ -306,8 +344,14 @@ body.light-theme .modal-list-item:hover {
 .follow-unfollow-btn.follow:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--primary-hover), var(--primary-dark));
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3), 0 0 10px rgba(99, 102, 241, 0.4); /* Added glow */
 }
+
+.follow-unfollow-btn.follow:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm); /* Subtle press effect */
+}
+
 
 .follow-unfollow-btn.unfollow {
   background: transparent;
@@ -327,6 +371,11 @@ body.light-theme .follow-unfollow-btn.unfollow {
   border-color: var(--error-color);
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(239, 68, 68, 0.2);
+}
+
+.follow-unfollow-btn.unfollow:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm); /* Subtle press effect */
 }
 
 .follow-unfollow-btn:disabled {
@@ -378,6 +427,17 @@ body.light-theme .follow-unfollow-btn:disabled::after {
   border-radius: var(--radius-lg);
   margin-top: var(--spacing-lg);
   background: rgba(255, 255, 255, 0.02);
+  display: flex; /* For icon alignment */
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.modal-empty-message::before {
+  content: '😔'; /* Sad face icon */
+  font-size: var(--text-2xl);
+  display: block;
+  margin-bottom: var(--spacing-xs);
 }
 
 body.light-theme .modal-empty-message {
@@ -462,4 +522,28 @@ body.light-theme .modal-empty-message {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
   border-radius: var(--radius-md);
+}
+
+/* ===================================== */
+/* 10. Performance & Reduced Motion      */
+/* ===================================== */
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-content,
+  .modal-close-btn,
+  .modal-list-item,
+  .modal-list-avatar,
+  .modal-list-link,
+  .badge,
+  .follow-unfollow-btn {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .follow-unfollow-btn:disabled::after { /* Ensure spinner animation is also off */
+    animation: none !important;
+  }
 }
