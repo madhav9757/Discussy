@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 
 import './Header.css';
+import { useSelector } from 'react-redux';
 
 const NotificationDropdownContent = ({ onClose }) => (
     <>
@@ -88,12 +89,7 @@ const Header = ({ searchQuery, onSearchChange }) => {
     const mobileMenuToggleButtonRef = useRef(null);
     const searchInputRef = useRef(null);
 
-    const user = {
-        username: 'john_doe',
-        avatar: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=john_doe',
-        email: 'john.doe@example.com',
-        role: 'user', // Added role for potential future use (e.g., admin panel link)
-    };
+    const user = useSelector(state => state.auth.userInfo);
     // const user = null; // Uncomment to test logged out state
 
     // Simulate unread notifications count
@@ -410,7 +406,7 @@ const Header = ({ searchQuery, onSearchChange }) => {
                                 aria-expanded={isUserDropdownOpen}
                                 aria-controls="user-dropdown-menu"
                             >
-                                <img src={user.avatar} alt={`${user.username}'s avatar`} className="header-avatar" />
+                                <img src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.username}`} alt={`${user.username}'s avatar`} className="header-avatar" />
                                 <span className="header-username">{user.username}</span>
                                 <ChevronDown
                                     size={16}
@@ -431,7 +427,7 @@ const Header = ({ searchQuery, onSearchChange }) => {
                                         transition={{ duration: 0.2 }}
                                     >
                                         <div className="user-dropdown-header">
-                                            <img src={user.avatar} alt={user.username} className="header-avatar" />
+                                            <img src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.username}`} alt={user.username} className="header-avatar" />
                                             <div>
                                                 <p className="user-dropdown-name">{user.username}</p>
                                                 <p className="user-dropdown-email">{user.email}</p>

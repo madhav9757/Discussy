@@ -155,18 +155,6 @@
     transition: all 0.3s ease;
 }
 
-.highlighted-comment::before {
-    content: "Your comment";
-    position: absolute;
-    top: -10px;
-    left: 10px;
-    font-size: 0.75rem;
-    background: #4ad991;
-    color: #111;
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
-}
-
 .user-badge {
     margin-left: 0.5rem;
     background-color: #4ad99130;

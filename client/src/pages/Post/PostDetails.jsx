@@ -153,8 +153,27 @@ const PostDetailsPage = () => {
 
       {/* Parallax Header */}
       <div className="parallax-header">
-        {/* The main title of the post will be rendered here for the hero section */}
-        <h1>{post.title}</h1>
+        <div className="parallax-content">
+          <h1>{post.title}</h1>
+          <div className="parallax-metadata">
+            <span className="parallax-meta-item parallax-category">
+              🎮 {post.category || 'Discussion'}
+            </span>
+            <span className="parallax-meta-item">
+              🌐 <Link className="parallax-meta-link" to={`/community/${post.community._id}`}>
+                r/{post.community.name}
+              </Link>
+            </span>
+            <span className="parallax-meta-item">
+              👤 <Link className="parallax-meta-link" to={`/user/${post.author._id}`}>
+                {post.author.username}
+              </Link>
+            </span>
+            <span className="parallax-meta-item">
+              ⏰ {formatDateTime(post.createdAt)}
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="post-details-container"> {/* This is the main content area now */}
@@ -236,21 +255,25 @@ const PostDetailsPage = () => {
               <button
                 className={`vote-button upvote-button ${currentUserVote === 'upvote' ? 'active' : ''}`}
                 onClick={handleUpvote}
+                data-tooltip="Upvote"
+                aria-label="Upvote this post"
               >
-                👍 {upvoteCount}
+                👍 <span className="vote-count">{upvoteCount}</span>
               </button>
               <button
                 className={`vote-button downvote-button ${currentUserVote === 'downvote' ? 'active' : ''}`}
                 onClick={handleDownvote}
+                data-tooltip="Downvote"
+                aria-label="Downvote this post"
               >
-                👎 {downvoteCount}
+                👎 <span className="vote-count">{downvoteCount}</span>
               </button>
             </div>
 
             <div className="sidebar-module author-card-module">
               <h4>About the Author</h4>
               <img
-                src={post.author.avatar || `https://api.dicebear.com/8.x/initials/svg?seed=${post.author.username}&chars=2`}
+                src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${post.author.username}`}
                 alt={post.author.username}
                 className="author-avatar"
               />
@@ -258,6 +281,14 @@ const PostDetailsPage = () => {
                 {post.author.username}
               </Link>
               {post.author.bio && <p className="author-bio">{post.author.bio}</p>}
+              <div className="author-stats">
+                <div className="author-stat-item">
+                  Member since {new Date(post.author.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                </div>
+                <div className="author-stat-item">
+                  {post.author.postsCount || 0} posts · {post.author.commentsCount || 0} comments
+                </div>
+              </div>
               <Link to={`/user/${post.author._id}`} className="view-profile-button">
                 <User size={16} /> View Profile
               </Link>

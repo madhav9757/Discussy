@@ -1,18 +1,3 @@
-/*
-  Home.css
-
-  This file defines the styling for the Home component, creating an engaging
-  landing page with a modern aesthetic, responsive layout, and animations.
-
-  Principles applied:
-  - Flexbox and CSS Grid for flexible and responsive layouts.
-  - CSS Variables for consistent theming (light/dark mode).
-  - Subtle shadows, gradients, and border-radius for depth and modern feel.
-  - Keyframe animations for background decorative elements.
-  - Media queries for full responsiveness across device sizes.
-  - Integration with Framer Motion animations (CSS properties like transform, opacity).
-*/
-
 /* ===================================== */
 /* 1. Base Container & Layout            */
 /* ===================================== */

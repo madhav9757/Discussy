@@ -1,17 +1,4 @@
-/*
-  Explore.css
-
-  This file defines the styling for the Explore page, which displays trending posts
-  and popular communities.
-
-  Principles applied:
-  - Responsive design using media queries for a good experience across devices.
-  - Grid layout for flexible and organized card displays.
-  - CSS Variables inherited from global styles (e.g., from Header.css for colors)
-    for theme consistency.
-  - Clear and semantic class names.
-  - Subtle visual cues like shadows and hover effects for interactivity.
-*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
 /* ===================================== */
 /* 1. Explore Page Container             */
