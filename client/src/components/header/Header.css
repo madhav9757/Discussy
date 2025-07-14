@@ -19,55 +19,86 @@
 
 /* Root variables for theme management */
 :root {
-    --header-height: 60px; /* Standard header height */
-    --padding-inline: 20px; /* Horizontal padding for header container */
+    --header-height: 60px;
+    /* Standard header height */
+    --padding-inline: 20px;
+    /* Horizontal padding for header container */
 
     /* Light Theme Colors */
-    --color-primary: #3b82f6; /* Blue-500 */
-    --color-primary-dark: #2563eb; /* Blue-600 */
-    --color-text-primary: #1f2937; /* Gray-900 */
-    --color-text-secondary: #4b5563; /* Gray-700 */
+    --color-primary: #3b82f6;
+    /* Blue-500 */
+    --color-primary-dark: #2563eb;
+    /* Blue-600 */
+    --color-text-primary: #1f2937;
+    /* Gray-900 */
+    --color-text-secondary: #4b5563;
+    /* Gray-700 */
     --color-background: #ffffff;
-    --color-surface: #f9fafb; /* Gray-50 */
-    --color-border: #e5e7eb; /* Gray-200 */
-    --color-shadow: rgba(0, 0, 0, 0.05); /* Subtle shadow */
-    --color-hover-bg: #f3f4f6; /* Gray-100 */
-    --color-active-bg: #e5e7eb; /* Gray-200 */
-    --color-notification-badge: #ef4444; /* Red-500 */
-    --color-unread-dot: #3b82f6; /* Primary blue for unread dot */
-    --color-danger: #ef4444; /* Red-500 */
-    --color-danger-hover: #dc2626; /* Red-600 */
+    --color-surface: #f9fafb;
+    /* Gray-50 */
+    --color-border: #e5e7eb;
+    /* Gray-200 */
+    --color-shadow: rgba(0, 0, 0, 0.05);
+    /* Subtle shadow */
+    --color-hover-bg: #f3f4f6;
+    /* Gray-100 */
+    --color-active-bg: #e5e7eb;
+    /* Gray-200 */
+    --color-notification-badge: #ef4444;
+    /* Red-500 */
+    --color-unread-dot: #3b82f6;
+    /* Primary blue for unread dot */
+    --color-danger: #ef4444;
+    /* Red-500 */
+    --color-danger-hover: #dc2626;
+    /* Red-600 */
 }
 
 /* Dark Theme Colors (applied when data-theme="dark") */
 [data-theme="dark"] {
-    --color-primary: #60a5fa; /* Blue-400 */
-    --color-primary-dark: #3b82f6; /* Blue-500 */
-    --color-text-primary: #e5e7eb; /* Gray-200 */
-    --color-text-secondary: #9ca3af; /* Gray-400 */
-    --color-background: #111827; /* Gray-900 */
-    --color-surface: #1f2937; /* Gray-800 */
-    --color-border: #374151; /* Gray-700 */
-    --color-shadow: rgba(0, 0, 0, 0.3); /* More prominent shadow in dark mode */
-    --color-hover-bg: #374151; /* Gray-700 */
-    --color-active-bg: #4b5563; /* Gray-600 */
-    --color-notification-badge: #dc2626; /* Red-600 */
-    --color-unread-dot: #60a5fa; /* Primary blue for unread dot */
-    --color-danger: #ef4444; /* Red-500 */
-    --color-danger-hover: #dc2626; /* Red-600 */
+    --color-primary: #60a5fa;
+    /* Blue-400 */
+    --color-primary-dark: #3b82f6;
+    /* Blue-500 */
+    --color-text-primary: #e5e7eb;
+    /* Gray-200 */
+    --color-text-secondary: #9ca3af;
+    /* Gray-400 */
+    --color-background: #111827;
+    /* Gray-900 */
+    --color-surface: #1f2937;
+    /* Gray-800 */
+    --color-border: #374151;
+    /* Gray-700 */
+    --color-shadow: rgba(0, 0, 0, 0.3);
+    /* More prominent shadow in dark mode */
+    --color-hover-bg: #374151;
+    /* Gray-700 */
+    --color-active-bg: #4b5563;
+    /* Gray-600 */
+    --color-notification-badge: #dc2626;
+    /* Red-600 */
+    --color-unread-dot: #60a5fa;
+    /* Primary blue for unread dot */
+    --color-danger: #ef4444;
+    /* Red-500 */
+    --color-danger-hover: #dc2626;
+    /* Red-600 */
 }
 
 /* Base styles for HTML elements for consistency */
 body {
     margin: 0;
-    font-family: 'Inter', sans-serif; /* Recommended modern sans-serif font */
+    font-family: 'Inter', sans-serif;
+    /* Recommended modern sans-serif font */
     background-color: var(--color-background);
     color: var(--color-text-primary);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 a {
-    color: inherit; /* Inherit color from parent by default */
+    color: inherit;
+    /* Inherit color from parent by default */
     text-decoration: none;
 }
 
@@ -99,13 +130,17 @@ ul {
     border-bottom: 1px solid var(--color-border);
     z-index: 1000;
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: none; /* No shadow by default */
+    box-shadow: none;
+    /* No shadow by default */
 }
 
 .header-main.scrolled {
-    box-shadow: 0 2px 10px var(--color-shadow);
-    /* backdrop-filter: blur(8px); */ /* Optional: Add a blur effect when scrolled */
-    /* background-color: color-mix(in srgb, var(--color-background) 90%, transparent); */ /* Optional: Semi-transparent background */
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.75);
+}
+
+[data-theme="dark"] .header-main.scrolled {
+    background-color: rgba(17, 24, 39, 0.75);
 }
 
 /* When search is active on mobile, hide overflow to prevent scroll issues */
@@ -119,9 +154,12 @@ ul {
     justify-content: space-between;
     height: var(--header-height);
     padding: 0 var(--padding-inline);
-    max-width: 1400px; /* Max width for content */
-    margin: 0 auto; /* Center the header content */
-    position: relative; /* For search overlay positioning */
+    max-width: 1400px;
+    /* Max width for content */
+    margin: 0 auto;
+    /* Center the header content */
+    position: relative;
+    /* For search overlay positioning */
 }
 
 /* ===================================== */
@@ -133,10 +171,13 @@ ul {
     align-items: center;
     gap: 8px;
     font-weight: 700;
-    font-size: 1.25rem; /* 20px */
+    font-size: 1.25rem;
+    /* 20px */
     color: var(--color-primary);
-    flex-shrink: 0; /* Prevent logo from shrinking */
-    padding: 8px 0; /* Add some padding for touch target on mobile */
+    flex-shrink: 0;
+    /* Prevent logo from shrinking */
+    padding: 8px 0;
+    /* Add some padding for touch target on mobile */
 }
 
 .header-logo-icon {
@@ -156,8 +197,10 @@ ul {
 .header-nav {
     display: flex;
     align-items: center;
-    gap: 24px; /* Space between nav links */
-    margin-left: 32px; /* Space from logo */
+    gap: 24px;
+    /* Space between nav links */
+    margin-left: 32px;
+    /* Space from logo */
 }
 
 .header-nav-link {
@@ -171,8 +214,21 @@ ul {
     transition: color 0.2s ease;
 }
 
-.header-nav-link:hover {
-    color: var(--color-text-primary);
+.header-nav-link::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, var(--color-primary), #3b82f6);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.header-nav-link:hover::after {
+    transform: scaleX(1);
 }
 
 .header-nav-link.active {
@@ -183,12 +239,14 @@ ul {
 /* Active indicator for navigation links */
 .nav-indicator {
     position: absolute;
-    bottom: -1px; /* Position it on the bottom border */
+    bottom: -1px;
+    /* Position it on the bottom border */
     left: 0;
     right: 0;
     height: 2px;
     background-color: var(--color-primary);
-    border-radius: 9999px; /* Pill shape */
+    border-radius: 9999px;
+    /* Pill shape */
 }
 
 
@@ -197,10 +255,13 @@ ul {
 /* ===================================== */
 
 .header-search {
-    flex-grow: 1; /* Allows search to take available space */
-    max-width: 500px; /* Max width for desktop search */
+    flex-grow: 1;
+    /* Allows search to take available space */
+    max-width: 500px;
+    /* Max width for desktop search */
     margin: 0 20px;
-    position: relative; /* For dropdown positioning */
+    position: relative;
+    /* For dropdown positioning */
 }
 
 .header-search-input-wrapper {
@@ -216,7 +277,8 @@ ul {
 
 .header-search-input-wrapper:focus-within {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent); /* Focus ring */
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent);
+    /* Focus ring */
 }
 
 .header-search-icon {
@@ -229,10 +291,13 @@ ul {
     flex-grow: 1;
     border: none;
     background: transparent;
-    font-size: 0.9375rem; /* 15px */
+    font-size: 0.9375rem;
+    /* 15px */
     color: var(--color-text-primary);
-    padding: 0; /* Remove default input padding */
-    outline: none; /* Remove default focus outline */
+    padding: 0;
+    /* Remove default input padding */
+    outline: none;
+    /* Remove default focus outline */
 }
 
 .header-search input::placeholder {
@@ -240,7 +305,8 @@ ul {
 }
 
 .header-search-shortcut {
-    font-size: 0.75rem; /* 12px */
+    font-size: 0.75rem;
+    /* 12px */
     background-color: var(--color-hover-bg);
     border: 1px solid var(--color-border);
     border-radius: 4px;
@@ -277,26 +343,24 @@ ul {
     display: flex;
     align-items: center;
     gap: 16px;
-    flex-shrink: 0; /* Prevent actions from shrinking */
-    margin-left: auto; /* Push actions to the right */
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .action-button-wrapper {
-    position: relative; /* For dropdown positioning */
-    display: flex; /* To contain button and badge */
+    position: relative;
+    display: flex;
 }
 
 .action-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
     border-radius: 8px;
     background-color: transparent;
     color: var(--color-text-secondary);
     transition: background-color 0.2s ease, color 0.2s ease;
-    position: relative; /* For badge */
+    position: relative;
 }
 
 .action-button:hover {
@@ -314,16 +378,16 @@ ul {
     height: 20px;
 }
 
-/* Notification Badge */
 .notification-badge {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: 2px;
+    right: 9px;
     background-color: var(--color-notification-badge);
     color: white;
     border-radius: 50%;
     padding: 2px 6px;
-    font-size: 0.6875rem; /* 11px */
+    font-size: 0.6875rem;
+    /* 11px */
     font-weight: 600;
     min-width: 20px;
     height: 20px;
@@ -331,10 +395,9 @@ ul {
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    border: 2px solid var(--color-background); /* Border to stand out */
+    border: 2px solid var(--color-background);
 }
 
-/* New Post Button */
 .new-post-button {
     display: flex;
     align-items: center;
@@ -363,11 +426,15 @@ ul {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 10px; /* Slightly more padding for the user button */
-    height: 40px; /* Match height of other action buttons */
-    width: auto; /* Allow width to adapt to username */
+    padding: 6px 10px;
+    /* Slightly more padding for the user button */
+    height: 40px;
+    /* Match height of other action buttons */
+    width: auto;
+    /* Allow width to adapt to username */
     border-radius: 8px;
-    background-color: var(--color-surface); /* Distinct background */
+    background-color: var(--color-surface);
+    /* Distinct background */
     color: var(--color-text-primary);
     transition: background-color 0.2s ease;
 }
@@ -389,7 +456,8 @@ ul {
 
 .header-username {
     font-weight: 500;
-    font-size: 0.9375rem; /* 15px */
+    font-size: 0.9375rem;
+    /* 15px */
 }
 
 .header-chevron {
@@ -442,7 +510,8 @@ ul {
 
 /* Theme Toggle (Desktop specific) */
 .theme-toggle-desktop {
-    display: flex; /* Hide by default on mobile */
+    display: flex;
+    /* Hide by default on mobile */
 }
 
 /* ===================================== */
@@ -451,28 +520,36 @@ ul {
 
 .header-dropdown {
     position: absolute;
-    top: calc(var(--header-height) - 10px); /* Position slightly above bottom of header for better UX */
-    right: 0; /* Default position for right-aligned dropdowns */
+    top: calc(var(--header-height) - 10px);
+    /* Position slightly above bottom of header for better UX */
+    right: 0;
+    /* Default position for right-aligned dropdowns */
     background-color: var(--color-background);
     border: 1px solid var(--color-border);
     border-radius: 8px;
     box-shadow: 0 4px 15px var(--color-shadow);
     padding: 10px 0;
     min-width: 240px;
-    max-height: calc(100vh - var(--header-height) - 20px); /* Max height to prevent overflow */
-    overflow-y: auto; /* Enable scrolling for long lists */
+    max-height: calc(100vh - var(--header-height) - 20px);
+    /* Max height to prevent overflow */
+    overflow-y: auto;
+    /* Enable scrolling for long lists */
     transform-origin: top right;
-    z-index: 1050; /* Above header */
+    z-index: 1050;
+    /* Above header */
 }
 
 /* Specific adjustments for search dropdown */
 .header-dropdown.search-dropdown {
-    left: 0; /* Align with search input */
+    left: 0;
+    /* Align with search input */
     right: auto;
     width: 100%;
-    top: calc(100% + 5px); /* Position below the search input */
+    top: calc(100% + 5px);
+    /* Position below the search input */
     transform-origin: top center;
-    padding: 0; /* Remove internal padding, sections handle it */
+    padding: 0;
+    /* Remove internal padding, sections handle it */
 }
 
 
@@ -486,7 +563,8 @@ ul {
 }
 
 .dropdown-section h4 {
-    font-size: 0.8125rem; /* 13px */
+    font-size: 0.8125rem;
+    /* 13px */
     color: var(--color-text-secondary);
     margin: 0 0 8px 0;
     text-transform: uppercase;
@@ -500,9 +578,11 @@ ul {
     padding: 8px 12px;
     border-radius: 6px;
     color: var(--color-text-primary);
-    font-size: 0.9375rem; /* 15px */
+    font-size: 0.9375rem;
+    /* 15px */
     transition: background-color 0.2s ease;
-    white-space: nowrap; /* Prevent text wrapping */
+    white-space: nowrap;
+    /* Prevent text wrapping */
 }
 
 .dropdown-item:hover {
@@ -553,7 +633,8 @@ ul {
 }
 
 .user-dropdown-email {
-    font-size: 0.8125rem; /* 13px */
+    font-size: 0.8125rem;
+    /* 13px */
     color: var(--color-text-secondary);
     margin: 2px 0 0 0;
 }
@@ -561,11 +642,14 @@ ul {
 /* Notification Dropdown Specifics */
 .notifications-dropdown {
     min-width: 300px;
-    max-width: 380px; /* Allow wider for notification content */
+    max-width: 380px;
+    /* Allow wider for notification content */
     right: 0;
-    left: auto; /* Ensure it stays right-aligned */
+    left: auto;
+    /* Ensure it stays right-aligned */
     transform-origin: top right;
-    padding: 0; /* Remove default padding for internal sections */
+    padding: 0;
+    /* Remove default padding for internal sections */
 }
 
 .notifications-dropdown-header {
@@ -578,12 +662,14 @@ ul {
 
 .notifications-dropdown-header h3 {
     margin: 0;
-    font-size: 1.125rem; /* 18px */
+    font-size: 1.125rem;
+    /* 18px */
     color: var(--color-text-primary);
 }
 
 .notifications-dropdown-mark-all {
-    font-size: 0.875rem; /* 14px */
+    font-size: 0.875rem;
+    /* 14px */
     color: var(--color-primary);
     font-weight: 500;
     padding: 4px 8px;
@@ -596,14 +682,16 @@ ul {
 }
 
 .notifications-dropdown-list {
-    max-height: 300px; /* Max height for scrollable list */
+    max-height: 300px;
+    /* Max height for scrollable list */
     overflow-y: auto;
     padding: 0;
 }
 
 .notification-item {
     display: flex;
-    align-items: flex-start; /* Align avatar and text */
+    align-items: flex-start;
+    /* Align avatar and text */
     gap: 12px;
     padding: 12px 16px;
     border-bottom: 1px solid var(--color-border);
@@ -620,7 +708,8 @@ ul {
 }
 
 .notification-item--unread {
-    background-color: color-mix(in srgb, var(--color-primary) 5%, transparent); /* Light background for unread */
+    background-color: color-mix(in srgb, var(--color-primary) 5%, transparent);
+    /* Light background for unread */
     font-weight: 500;
 }
 
@@ -649,9 +738,24 @@ ul {
     border: 2px solid var(--color-background);
 }
 
-.notification-item-type--comment { background-color: #3b82f6; color: white; } /* Blue */
-.notification-item-type--like { background-color: #ef4444; color: white; } /* Red */
-.notification-item-type--system { background-color: #f59e0b; color: white; } /* Amber */
+.notification-item-type--comment {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* Blue */
+.notification-item-type--like {
+    background-color: #ef4444;
+    color: white;
+}
+
+/* Red */
+.notification-item-type--system {
+    background-color: #f59e0b;
+    color: white;
+}
+
+/* Amber */
 
 .notification-item-type .notification-type-icon {
     width: 12px;
@@ -664,13 +768,15 @@ ul {
 
 .notification-item-message {
     margin: 0;
-    font-size: 0.9375rem; /* 15px */
+    font-size: 0.9375rem;
+    /* 15px */
     color: var(--color-text-primary);
     line-height: 1.4;
 }
 
 .notification-item-time {
-    font-size: 0.75rem; /* 12px */
+    font-size: 0.75rem;
+    /* 12px */
     color: var(--color-text-secondary);
     margin-top: 4px;
     display: block;
@@ -694,7 +800,8 @@ ul {
 }
 
 .notifications-dropdown-view-all {
-    font-size: 0.875rem; /* 14px */
+    font-size: 0.875rem;
+    /* 14px */
     color: var(--color-primary);
     font-weight: 500;
     display: inline-block;
@@ -710,19 +817,23 @@ ul {
 
 /* Search Suggestions specific styles */
 .search-dropdown .dropdown-section {
-    padding: 0; /* Override default section padding */
+    padding: 0;
+    /* Override default section padding */
     border-bottom: none;
 }
 
 .search-dropdown .dropdown-section h4 {
     padding: 10px 16px 8px;
-    margin-bottom: 0; /* Remove margin below h4 */
-    background-color: var(--color-surface); /* Slightly different background for header */
+    margin-bottom: 0;
+    /* Remove margin below h4 */
+    background-color: var(--color-surface);
+    /* Slightly different background for header */
     border-bottom: 1px solid var(--color-border);
 }
 
 .search-dropdown .dropdown-section ul {
-    padding: 8px 0; /* Padding for the list itself */
+    padding: 8px 0;
+    /* Padding for the list itself */
 }
 
 .search-dropdown .dropdown-section li {
@@ -730,7 +841,8 @@ ul {
     align-items: center;
     gap: 10px;
     padding: 8px 16px;
-    font-size: 0.9375rem; /* 15px */
+    font-size: 0.9375rem;
+    /* 15px */
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
@@ -757,7 +869,8 @@ ul {
 /* ===================================== */
 
 .header-mobile-toggles {
-    display: none; /* Hidden by default on desktop */
+    display: none;
+    /* Hidden by default on desktop */
     align-items: center;
     gap: 10px;
 }
@@ -773,9 +886,11 @@ ul {
     border: none;
     padding: 0;
     cursor: pointer;
-    z-index: 1100; /* Ensure it's above other mobile elements */
+    z-index: 1100;
+    /* Ensure it's above other mobile elements */
     flex-shrink: 0;
-    position: relative; /* For animation origin */
+    position: relative;
+    /* For animation origin */
 }
 
 .mobile-menu-button-line {
@@ -802,20 +917,20 @@ ul {
 /* Mobile Menu Sidebar */
 .mobile-menu-sidebar {
     position: fixed;
-    top: 0;
+    top: auto;
     right: 0;
-    width: 100%; /* Full width on small phones */
-    max-width: 320px; /* Max width for sidebar on larger mobiles/tablets */
-    height: 100vh; /* Full viewport height */
+    width: 100%;
+    max-width: 320px;
+    height: auto;
     background-color: var(--color-background);
     border-left: 1px solid var(--color-border);
     box-shadow: -4px 0 15px var(--color-shadow);
-    z-index: 999; /* Below toggles, above main content */
+    z-index: 999;
     display: flex;
     flex-direction: column;
     padding: 20px;
     box-sizing: border-box;
-    overflow-y: auto; /* Enable scrolling for content */
+    overflow-y: auto;
 }
 
 .mobile-menu-header {
@@ -849,7 +964,6 @@ ul {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    flex-grow: 1; /* Allows navigation to take up space */
 }
 
 .mobile-nav-link {
@@ -858,7 +972,8 @@ ul {
     gap: 12px;
     padding: 12px 16px;
     border-radius: 8px;
-    font-size: 1.125rem; /* 18px */
+    font-size: 1.125rem;
+    /* 18px */
     font-weight: 500;
     color: var(--color-text-primary);
     transition: background-color 0.2s ease;
@@ -876,11 +991,13 @@ ul {
 .mobile-nav-link .header-icon {
     width: 22px;
     height: 22px;
-    color: var(--color-text-secondary); /* Default icon color */
+    color: var(--color-text-secondary);
+    /* Default icon color */
 }
 
 .mobile-nav-link.active .header-icon {
-    color: var(--color-primary); /* Active icon color */
+    color: var(--color-primary);
+    /* Active icon color */
 }
 
 
@@ -895,20 +1012,20 @@ ul {
 
 .theme-toggle-mobile-wrapper {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
     padding: 8px 0;
 }
 
 .theme-toggle-label {
-    font-size: 1.125rem; /* 18px */
+    font-size: 1.125rem;
     font-weight: 500;
     color: var(--color-text-primary);
 }
 
 .theme-toggle-mobile {
-    width: 44px; /* Larger touch target */
-    height: 44px;
+    width: auto;
+    height: auto;
     border-radius: 8px;
     color: var(--color-text-secondary);
 }
@@ -973,7 +1090,8 @@ ul {
     color: var(--color-danger);
     background-color: var(--color-surface);
     transition: background-color 0.2s ease;
-    justify-content: flex-start; /* Align text to start */
+    justify-content: flex-start;
+    /* Align text to start */
 }
 
 .mobile-logout-button .header-icon {
@@ -997,16 +1115,19 @@ ul {
 /* Small screens (e.g., up to 768px, typical tablet portrait/mobile landscape) */
 @media (max-width: 768px) {
     .header-logo-text {
-        display: none; /* Hide logo text on small screens */
+        display: none;
+        /* Hide logo text on small screens */
     }
 
     .header-nav,
     .header-actions {
-        display: none; /* Hide desktop nav and actions */
+        display: none;
+        /* Hide desktop nav and actions */
     }
 
     .header-mobile-toggles {
-        display: flex; /* Show mobile toggles */
+        display: flex;
+        /* Show mobile toggles */
     }
 
     .header-search {
@@ -1014,51 +1135,65 @@ ul {
         top: 0;
         left: 0;
         width: 100%;
-        height: var(--header-height); /* Keep search input visible in header normally */
+        height: var(--header-height);
+        /* Keep search input visible in header normally */
         margin: 0;
         padding: 0 var(--padding-inline);
         background-color: var(--color-background);
         box-sizing: border-box;
         transition: transform 0.3s ease, opacity 0.3s ease;
-        z-index: 900; /* Below toggles, above main header content */
-        display: flex; /* Ensure flex for input wrapper */
+        z-index: 900;
+        /* Below toggles, above main header content */
+        display: flex;
+        /* Ensure flex for input wrapper */
         align-items: center;
     }
 
     .header-search-input-wrapper {
-        flex-grow: 1; /* Allow input wrapper to take full width */
+        flex-grow: 1;
+        /* Allow input wrapper to take full width */
     }
 
     .header-search-shortcut {
-        display: none; /* Hide shortcut on mobile */
+        display: none;
+        /* Hide shortcut on mobile */
     }
 
     /* Full-screen search overlay for mobile */
     .header-main.search-active .header-search {
-        position: fixed; /* Make it fixed to overlay */
+        position: fixed;
+        /* Make it fixed to overlay */
         top: 0;
         left: 0;
         width: 100%;
-        height: 100vh; /* Full screen height */
+        height: 100vh;
+        /* Full screen height */
         background-color: var(--color-background);
         display: flex;
-        flex-direction: column; /* Stack input and suggestions */
+        flex-direction: column;
+        /* Stack input and suggestions */
         align-items: flex-start;
-        padding: 20px; /* More padding for full screen */
+        padding: 20px;
+        /* More padding for full screen */
         box-sizing: border-box;
-        transform: translateY(0%); /* Ensure it's visible */
+        transform: translateY(0%);
+        /* Ensure it's visible */
         opacity: 1;
-        z-index: 1001; /* Above mobile menu */
+        z-index: 1001;
+        /* Above mobile menu */
     }
 
     .header-main.search-active .header-search .header-search-input-wrapper {
         width: 100%;
-        margin-bottom: 15px; /* Space between input and suggestions */
-        padding: 12px 16px; /* Larger padding for search input */
+        margin-bottom: 15px;
+        /* Space between input and suggestions */
+        padding: 12px 16px;
+        /* Larger padding for search input */
     }
 
     .header-main.search-active .header-search input[type="text"] {
-        font-size: 1.125rem; /* Larger font for mobile search */
+        font-size: 1.125rem;
+        /* Larger font for mobile search */
     }
 
     /* Position the mobile search icon properly when expanded */
@@ -1083,49 +1218,61 @@ ul {
 
     /* Search dropdown within the full-screen search overlay */
     .header-main.search-active .header-dropdown.search-dropdown {
-        position: static; /* Let it flow naturally within the flex container */
+        position: static;
+        /* Let it flow naturally within the flex container */
         width: 100%;
         max-width: none;
         box-shadow: none;
         border: none;
         border-radius: 0;
-        background: transparent; /* Blend with parent */
+        background: transparent;
+        /* Blend with parent */
         overflow: visible;
-        flex-grow: 1; /* Take remaining height */
+        flex-grow: 1;
+        /* Take remaining height */
     }
 
     .header-main.search-active .header-dropdown.search-dropdown .dropdown-section h4 {
-        background-color: transparent; /* No distinct background for heading */
+        background-color: transparent;
+        /* No distinct background for heading */
         border-bottom: none;
-        padding: 10px 0 8px; /* Adjust padding */
+        padding: 10px 0 8px;
+        /* Adjust padding */
     }
 
     .header-main.search-active .header-dropdown.search-dropdown .dropdown-section ul {
-        padding: 0; /* Remove list padding */
+        padding: 0;
+        /* Remove list padding */
     }
 
     .header-main.search-active .header-dropdown.search-dropdown .dropdown-section li {
-        padding: 12px 0; /* Adjust list item padding */
+        padding: 12px 0;
+        /* Adjust list item padding */
         font-size: 1rem;
     }
 
     /* Overlay effect for mobile menu */
-    .mobile-menu-sidebar.framer-visible ~ .header-main:not(.search-active) .header-container::before {
+    .mobile-menu-sidebar.framer-visible~.header-main:not(.search-active) .header-container::before {
         content: '';
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: rgba(0, 0, 0, 0.5); /* Dimming overlay */
-        z-index: 990; /* Below the sidebar but above other content */
-        pointer-events: none; /* Allow clicks to pass through */
+        background-color: rgba(0, 0, 0, 0.5);
+        /* Dimming overlay */
+        z-index: 990;
+        /* Below the sidebar but above other content */
+        pointer-events: none;
+        /* Allow clicks to pass through */
     }
 
     /* Mobile specific dropdowns for notifications */
     .notifications-dropdown.mobile-notifications-dropdown {
-        top: var(--header-height); /* Position right below header */
-        width: calc(100% - var(--padding-inline) * 2); /* Full width minus padding */
+        top: var(--header-height);
+        /* Position right below header */
+        width: calc(100% - var(--padding-inline) * 2);
+        /* Full width minus padding */
         left: var(--padding-inline);
         right: var(--padding-inline);
         max-width: none;
@@ -1141,18 +1288,21 @@ ul {
 /* Larger mobile devices / small tablets (e.g., 480px to 768px) */
 @media (min-width: 481px) and (max-width: 768px) {
     .header-logo-section {
-        margin-right: 10px; /* Add space between logo and search toggle */
+        margin-right: 10px;
+        /* Add space between logo and search toggle */
     }
 }
 
 /* Larger screens (e.g., 769px and up) */
 @media (min-width: 769px) {
     .header-mobile-toggles {
-        display: none; /* Hide mobile toggles on desktop */
+        display: none;
+        /* Hide mobile toggles on desktop */
     }
 
     .mobile-menu-sidebar {
-        display: none; /* Hide mobile sidebar */
+        display: none;
+        /* Hide mobile sidebar */
     }
 
     .header-search.header-search--expanded {
@@ -1179,9 +1329,8 @@ ul {
 
 /* Accessibility: Focus states */
 *:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-    border-radius: 4px; /* Adjust as needed for element shape */
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
 }
 
 /* Remove outline for elements that handle focus styling internally (like active states) */
@@ -1192,7 +1341,8 @@ ul {
 .auth-register-button:focus-visible,
 .mobile-auth-register-button:focus-visible,
 .mobile-logout-button:focus-visible {
-    outline: none; /* Handled by specific styles */
+    outline: none;
+    /* Handled by specific styles */
 }
 
 /* Ensure icons have a baseline alignment */

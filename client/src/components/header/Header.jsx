@@ -11,19 +11,15 @@ import {
     ChevronDown,
 } from 'lucide-react';
 
-// Import the CSS file (ensure this file will contain the new CSS principles)
 import './Header.css';
 
-// --- Sub-component for Notification Dropdown Content ---
 const NotificationDropdownContent = ({ onClose }) => (
     <>
         <div className="notifications-dropdown-header">
             <h3>Notifications</h3>
-            {/* Conditional "Mark all read" button if there are unread notifications */}
             <button className="notifications-dropdown-mark-all">Mark all read</button>
         </div>
         <div className="notifications-dropdown-list">
-            {/* Simulated Notifications - In a real app, this would be mapped from an array of notification objects */}
             <div className="notification-item notification-item--unread">
                 <div className="notification-item-avatar">
                     <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=reply_user" alt="User avatar" />
@@ -69,7 +65,6 @@ const NotificationDropdownContent = ({ onClose }) => (
         </div>
     </>
 );
-// --- End Sub-component ---
 
 
 const Header = ({ searchQuery, onSearchChange }) => {
@@ -87,15 +82,12 @@ const Header = ({ searchQuery, onSearchChange }) => {
         return saved ? JSON.parse(saved) : window.matchMedia('(prefers-color-scheme: dark)').matches;
     });
 
-    // Refs for dropdowns and mobile menu to handle outside clicks
     const userDropdownRef = useRef(null);
     const notificationDropdownRef = useRef(null);
     const mobileMenuRef = useRef(null);
     const mobileMenuToggleButtonRef = useRef(null);
     const searchInputRef = useRef(null);
 
-    // Simulated user - toggle null/object to test logged in/out states
-    // In a real app, this would come from an authentication context/Redux store
     const user = {
         username: 'john_doe',
         avatar: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=john_doe',
@@ -546,18 +538,6 @@ const Header = ({ searchQuery, onSearchChange }) => {
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     >
-                        <div className="mobile-menu-header">
-                            <span className="header-logo-text">Menu</span>
-                            <motion.button
-                                className="action-button close-mobile-menu-button"
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                aria-label="Close mobile menu"
-                            >
-                                <X size={24} />
-                            </motion.button>
-                        </div>
-
                         <motion.nav
                             className="mobile-nav-list"
                             variants={containerVariants}
@@ -598,7 +578,7 @@ const Header = ({ searchQuery, onSearchChange }) => {
                                     onClick={() => setIsDarkMode(!isDarkMode)}
                                     aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                                 >
-                                    {isDarkMode ? <Sun size={20} className="header-icon" /> : <Moon size={20} className="header-icon" />}
+                                    {isDarkMode ? <Sun size={40} className="header-icon" /> : <Moon size={40} className="header-icon" />}
                                 </motion.button>
                             </motion.div>
 
