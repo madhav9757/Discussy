@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import './LoginPage.css';
 import { motion } from 'framer-motion';
-import { LogIn, Lock, Sun, Moon } from 'lucide-react'; // Import Sun and Moon icons
+import { LogIn, Lock, Sun, Moon } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser } from '../authSlice'; // Assuming this path is correct
+import { loginUser } from '../authSlice';
 import { toast } from 'react-toastify';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link for navigation
-// import { unwrapResult } from '@reduxjs/toolkit'; // unwrapResult is not needed here as unwrap() is used directly
-
+import { useNavigate, Link } from 'react-router-dom';
+import { useTheme } from '../../../context/ThemeContext'; // <--- Add this line: Adjust the path as needed
 
 const LoginPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { isLoading } = useSelector((state) => state.auth); // Error state handled in catch block
+    const { isLoading } = useSelector((state) => state.auth);
 
     const { theme, toggleTheme } = useTheme(); // Use the theme hook
 
@@ -21,8 +20,8 @@ const LoginPage = () => {
         password: '',
     });
     const [errors, setErrors] = useState({});
-    const [showPassword, setShowPassword] = useState(false); // For password visibility toggle
-    const [passwordStrength, setPasswordStrength] = useState(0); // 0-3 for strength indicator
+    const [showPassword, setShowPassword] = useState(false);
+    const [passwordStrength, setPasswordStrength] = useState(0);
 
     const validateEmailOrUsername = (value) => {
         if (!value) return 'Username or email is required.';
@@ -38,18 +37,17 @@ const LoginPage = () => {
     const checkPasswordStrength = (pwd) => {
         let strength = 0;
         if (pwd.length >= 6) strength++;
-        if (/[A-Z]/.test(pwd)) strength++; // Uppercase
-        if (/[a-z]/.test(pwd)) strength++; // Lowercase
-        if (/[0-9]/.test(pwd)) strength++; // Number
-        if (/[^A-Za-z0-9]/.test(pwd)) strength++; // Special character
-        return Math.min(strength, 3); // Cap at 3 for visual bars
+        if (/[A-Z]/.test(pwd)) strength++;
+        if (/[a-z]/.test(pwd)) strength++;
+        if (/[0-9]/.test(pwd)) strength++;
+        if (/[^A-Za-z0-9]/.test(pwd)) strength++;
+        return Math.min(strength, 3);
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
 
-        // Real-time validation feedback
         if (name === 'usernameOrEmail') {
             setErrors((prev) => ({ ...prev, usernameOrEmail: validateEmailOrUsername(value) }));
         } else if (name === 'password') {
@@ -75,12 +73,10 @@ const LoginPage = () => {
         }
 
         try {
-            // The loginUser async thunk will handle API calls and state updates
             const res = await dispatch(loginUser(formData)).unwrap();
             toast.success('🎉 Login successful!');
             navigate('/');
         } catch (err) {
-            // Error from thunk is already 'unwrapped' and is the error object or message
             const errorMessage = err?.data?.message || err?.message || '❌ Login failed';
             toast.error(errorMessage);
         }
@@ -90,7 +86,6 @@ const LoginPage = () => {
 
     return (
         <div className="login-container">
-            {/* Theme Toggle Button */}
             <button
                 className="theme-toggle-button"
                 onClick={toggleTheme}
@@ -124,7 +119,7 @@ const LoginPage = () => {
                                 autoComplete="username"
                                 required
                             />
-                            <LogIn size={18} /> {/* Using LogIn icon for username/email field */}
+                            <LogIn size={18} />
                         </div>
                         {errors.usernameOrEmail && <p className="error-text">{errors.usernameOrEmail}</p>}
                     </div>
@@ -142,16 +137,13 @@ const LoginPage = () => {
                                 autoComplete="current-password"
                                 required
                             />
-                            {/* Toggle password visibility icon */}
                             {showPassword ? (
                                 <Lock size={18} onClick={() => setShowPassword(false)} style={{ cursor: 'pointer' }} />
                             ) : (
                                 <Lock size={18} onClick={() => setShowPassword(true)} style={{ cursor: 'pointer' }} />
-                                // You might want FaEye and FaEyeSlash from react-icons/fa if you prefer that visual
                             )}
                         </div>
                         {errors.password && <p className="error-text">{errors.password}</p>}
-                        {/* Password Strength Indicator */}
                         {formData.password.length > 0 && !errors.password && (
                             <div className="password-strength">
                                 <div className={`strength-bar ${passwordStrength >= 1 ? 'weak' : ''}`}></div>
@@ -176,7 +168,7 @@ const LoginPage = () => {
                     Don’t have an account?{' '}
                     <Link to="/register" className="register-link">Register</Link>
                 </p>
-                <p className="login-footer forgot-password-link"> {/* Added class for specific styling */}
+                <p className="login-footer forgot-password-link">
                     <Link to="/forgot-password" className="register-link">Forgot Password?</Link>
                 </p>
             </motion.div>
