@@ -128,7 +128,7 @@ body.light-theme .modal-overlay {
   background: rgba(45, 55, 72, 0.85); /* Semi-transparent surface for glassmorphism */
   border: 1px solid rgba(255, 255, 255, 0.15); /* Light border for dark theme glass */
   border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-glass);
+  box-shadow: var(--shadow-glass), inset 0 0 15px rgba(255, 255, 255, 0.05); /* Added subtle inner shadow */
   padding: var(--spacing-3xl);
   max-width: 500px; /* Max width for the modal */
   width: 100%;
@@ -145,7 +145,7 @@ body.light-theme .modal-overlay {
 body.light-theme .modal-content {
   background: rgba(255, 255, 255, 0.9); /* More opaque white for light theme glass */
   border: 1px solid rgba(0, 0, 0, 0.1); /* Darker border for light theme */
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08); /* Lighter shadow */
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08), inset 0 0 10px rgba(0, 0, 0, 0.02); /* Lighter shadow + inner shadow */
 }
 
 /* ===================================== */
@@ -198,6 +198,8 @@ body.light-theme .modal-close-btn:hover {
   flex-grow: 1; /* Allows it to take available space */
   overflow-y: auto; /* Enable scrolling if list is long */
   padding-right: var(--spacing-sm); /* Account for scrollbar space if default */
+  position: relative; /* For scroll indicator shadows */
+
   /* Custom Scrollbar */
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: var(--primary-color) var(--color-border); /* Firefox */
@@ -227,6 +229,42 @@ body.light-theme .modal-body::-webkit-scrollbar-thumb {
   background: var(--primary-hover);
 }
 
+/* Scroll Indicator Shadows (requires JS to toggle classes like .scrolled-top, .scrolled-bottom) */
+.modal-body::before,
+.modal-body::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 20px; /* Height of the shadow */
+  pointer-events: none;
+  z-index: 5; /* Above content, below scrollbar */
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.modal-body::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), transparent);
+}
+
+.modal-body::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+}
+
+/* Example classes to be toggled by JS based on scroll position */
+.modal-body.scrolled-top::before {
+  opacity: 1;
+}
+.modal-body.scrolled-bottom::after {
+  opacity: 1;
+}
+.modal-body.scrolled-both::before,
+.modal-body.scrolled-both::after {
+  opacity: 1;
+}
+
 
 .modal-list {
   list-style: none;
@@ -239,10 +277,12 @@ body.light-theme .modal-body::-webkit-scrollbar-thumb {
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-md) var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
+  /* Removed margin-bottom to use border for separation */
   background: rgba(255, 255, 255, 0.05); /* Subtle background for each item */
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Stronger bottom border for separation */
+  margin-bottom: var(--spacing-sm); /* Re-added margin for spacing between items */
   transition: all var(--transition-normal);
   box-shadow: var(--shadow-sm);
   will-change: transform, background, border-color, box-shadow; /* Performance hint */
@@ -251,6 +291,7 @@ body.light-theme .modal-body::-webkit-scrollbar-thumb {
 body.light-theme .modal-list-item {
   background: rgba(240, 244, 248, 0.6);
   border: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15); /* Darker bottom border for separation */
 }
 
 .modal-list-item:hover {
@@ -273,7 +314,13 @@ body.light-theme .modal-list-item:hover {
   margin-right: var(--spacing-md);
   border: 2px solid var(--primary-color);
   flex-shrink: 0; /* Prevent shrinking */
-  transition: border-color var(--transition-fast);
+  transition: all var(--transition-fast);
+}
+
+.modal-list-item:hover .modal-list-avatar {
+  transform: scale(1.05); /* Scale avatar on item hover */
+  border-color: var(--primary-hover); /* Change border color on hover */
+  box-shadow: 0 0 8px var(--primary-color); /* Glow on avatar */
 }
 
 .modal-list-link {
@@ -308,7 +355,12 @@ body.light-theme .modal-list-item:hover {
 
 .badge.you {
   background: var(--primary-color);
-  box-shadow: 0 2px 5px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 5px rgba(99, 102, 241, 0.3), 0 0 8px rgba(99, 102, 241, 0.5); /* Stronger glow */
+}
+
+.badge.you:hover {
+  transform: scale(1.05); /* Subtle scale on hover */
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4), 0 0 12px rgba(99, 102, 241, 0.6);
 }
 
 .badge.creator {
@@ -332,6 +384,28 @@ body.light-theme .modal-list-item:hover {
   position: relative;
   overflow: hidden;
   will-change: transform, background, color, border-color, box-shadow, opacity; /* Performance hint */
+}
+
+/* Ripple effect (requires JS to add .ripple-span) */
+.follow-unfollow-btn .ripple-span {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3); /* White ripple */
+  animation: ripple-animation 0.6s linear forwards;
+  pointer-events: none;
+  transform: scale(0);
+  opacity: 1;
+}
+
+@keyframes ripple-animation {
+  from {
+    transform: scale(0);
+    opacity: 1;
+  }
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }
 
 .follow-unfollow-btn.follow {
