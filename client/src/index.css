@@ -1,9 +1,13 @@
+/* This CSS should be in a file like index.css or a dedicated theme.css */
+
 /* Default (Light) Theme */
 :root {
-  --background-color: #ffffff;
+  --background-color: #ffffff; /* General background color for elements if not gradient */
   --text-color: #333333;
   --primary-color: #007bff;
-  /* Add more variables for other elements like borders, shadows, etc. */
+  --app-background-gradient: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 80%, #dbeafe 100%);
+  --button-text-color: #ffffff; /* Example: Text color for primary buttons */
+  /* Add more variables for other elements like borders, shadows, cards, etc. */
 }
 
 /* Dark Theme */
@@ -11,13 +15,18 @@ body.dark {
   --background-color: #1a1a1a;
   --text-color: #e0e0e0;
   --primary-color: #00bcd4; /* Example: A different primary color for dark mode */
+  --app-background-gradient: linear-gradient(120deg, #1a1a1a 0%, #333333 80%, #111111 100%); /* Dark gradient example */
+  --button-text-color: #e0e0e0; /* Adjust for dark button text if needed */
 }
 
 /* Apply variables to general elements */
 body {
-  background-color: var(--background-color);
-  color: var(--text-color);
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+  /*
+   * IMPORTANT: Removed 'background-color: var(--background-color);' from here.
+   * The main app background is now handled by '.app-wrapper' using '--app-background-gradient'.
+   */
+  color: var(--text-color); /* Apply text color to body */
+  transition: color 0.3s ease; /* Smooth transition for text color */
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -26,7 +35,7 @@ h1, h2, h3, h4, h5, h6 {
 
 button {
   background-color: var(--primary-color);
-  color: var(--text-color); /* Or a specific button text color */
+  color: var(--button-text-color); /* Use specific button text color variable */
   border: none;
   padding: 10px 20px;
   border-radius: 5px;

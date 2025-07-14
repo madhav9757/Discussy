@@ -1,0 +1,111 @@
+/* src/components/SearchBar/SearchBar.css */
+
+:root {
+    --search-bg: #f8f8f8;
+    --search-border: #cccccc;
+    --search-placeholder: #999999;
+    --search-suggestions-bg: #ffffff;
+    --search-suggestions-border: #e0e0e0;
+    --search-suggestions-hover: #f0f0f0;
+    --brand-color: #007bff; /* Ensure this is defined or passed */
+}
+
+[data-theme='dark'] {
+    --search-bg: #3c4046;
+    --search-border: #555555;
+    --search-placeholder: #aaaaaa;
+    --search-suggestions-bg: #3a3f47;
+    --search-suggestions-border: #555555;
+    --search-suggestions-hover: #4e535a;
+    --brand-color: #61dafb;
+}
+
+.search-bar-container { /* Renamed from .search-container */
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%; /* Important for proper sizing within its parent */
+}
+
+.search-input {
+    padding: 0.6rem 0.8rem 0.6rem 2.5rem; /* Left padding for icon */
+    border: 1px solid var(--search-border);
+    border-radius: 20px;
+    font-size: 0.95rem;
+    background-color: var(--search-bg);
+    color: var(--navbar-text); /* Assumes navbar-text is accessible or define a search-text var */
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%; /* Fill its parent container */
+}
+
+.search-input::placeholder {
+    color: var(--search-placeholder);
+}
+
+.search-input:focus {
+    border-color: var(--brand-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.search-icon-button { /* New button for the search icon */
+    position: absolute;
+    left: 10px;
+    background: none;
+    border: none;
+    color: var(--search-placeholder);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-icon-button:hover {
+    color: var(--brand-color); /* Slightly more interactive hover */
+}
+
+
+.search-suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%; /* Match input width */
+    background-color: var(--search-suggestions-bg);
+    border: 1px solid var(--search-suggestions-border);
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.suggestion-item {
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    color: var(--navbar-text); /* Assumes navbar-text is accessible */
+}
+
+.suggestion-item:hover {
+    background-color: var(--search-suggestions-hover);
+}
+
+/* Optional: Scrollbar for suggestions */
+.search-suggestions-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.search-suggestions-dropdown::-webkit-scrollbar-track {
+    background: var(--search-bg);
+    border-radius: 10px;
+}
+
+.search-suggestions-dropdown::-webkit-scrollbar-thumb {
+    background: var(--search-border);
+    border-radius: 10px;
+}
+
+.search-suggestions-dropdown::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-color);
+}
