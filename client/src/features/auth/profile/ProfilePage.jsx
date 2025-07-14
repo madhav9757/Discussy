@@ -8,7 +8,8 @@ import {
   useUnfollowUserMutation,
 } from '../../../app/api/userApi.js';
 import UserListModal from '../../../components/UserListModal/UserListModal.jsx';
-import './ProfilePage.css';
+import './ProfilePage.css'; // Import the CSS file
+import { User, Users, UserPlus, Calendar, Mail, Globe, Lock, Edit, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react'; // Import Lucide icons
 
 const formatDateTime = (isoString) => {
   if (!isoString) return 'N/A';
@@ -28,17 +29,20 @@ const ProfilePage = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const isOwnProfile = !id || id === userInfo?._id;
 
+  // Fetch own profile data if it's the user's profile
   const {
     data: profileData,
     isLoading: isLoadingProfile,
     isError: isErrorProfile,
+    refetch: refetchOwnProfile, // Added refetch for own profile
   } = useGetProfileQuery(undefined, { skip: !isOwnProfile });
-  console.log(profileData);
 
+  // Fetch other user's data if it's not the user's own profile
   const {
     data: otherUserData,
     isLoading: isLoadingOther,
     isError: isErrorOther,
+    refetch: refetchOtherProfile, // Added refetch for other profile
   } = useGetUserByIdQuery(id, { skip: isOwnProfile });
 
   const data = isOwnProfile ? profileData : otherUserData;
@@ -53,6 +57,18 @@ const ProfilePage = () => {
   const [modalUsers, setModalUsers] = useState([]);
   const [activeTab, setActiveTab] = useState('created');
 
+  // Refetch data after follow/unfollow to update counts and button state
+  React.useEffect(() => {
+    if (!isLoadingFollow && !isLoadingUnfollow) {
+      if (isOwnProfile) {
+        refetchOwnProfile();
+      } else {
+        refetchOtherProfile();
+      }
+    }
+  }, [isLoadingFollow, isLoadingUnfollow, isOwnProfile, refetchOwnProfile, refetchOtherProfile]);
+
+
   if (isLoading) return <div className="profile-loading">Loading profile...</div>;
   if (isError || !data?._id) {
     return <div className="profile-error">Error loading profile or no user data found.</div>;
@@ -61,7 +77,7 @@ const ProfilePage = () => {
   const {
     _id,
     username,
-    email,
+    email, // Email is typically not displayed publicly on a profile page
     image,
     bio,
     isPrivate,
@@ -93,32 +109,38 @@ const ProfilePage = () => {
     setModalUsers([]);
   };
 
+  // Check if the currently logged-in user is following this profile
   const isFollowing = followers.some((f) => f._id === userInfo?._id);
 
   return (
     <div className="github-profile-page-wrapper">
       <div className="profile-sidebar">
-        <img
-          src={image || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${username}`}
-          alt="User Avatar"
-          className="sidebar-profile-image"
-        />
+        {/* Profile Image with Animated Gradient Border */}
+        <div className="sidebar-profile-image">
+          <img
+            src={image || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${username}`}
+            alt="User Avatar"
+          />
+        </div>
         <h2 className="sidebar-username">{username}</h2>
         <span className={`profile-badge ${isPrivate ? 'private' : 'public'}`}>
-          {isPrivate ? '🔒 Private' : '🌐 Public'}
+          {isPrivate ? <Lock size={14} /> : <Globe size={14} />} {isPrivate ? 'Private' : 'Public'}
         </span>
 
         {bio && <p className="profile-bio">{bio}</p>}
 
+        {/* Conditional Edit/Follow/Unfollow Button */}
         {isOwnProfile ? (
           <Link to="/profile/edit" className="sidebar-edit-link">
-            <button className="sidebar-edit-btn">Edit Profile</button>
+            <button className="sidebar-edit-btn">
+              <Edit size={16} /> Edit Profile
+            </button>
           </Link>
         ) : (
           <button
-            className="sidebar-edit-btn"
+            className="sidebar-edit-btn" // Reusing button style
             onClick={() => (isFollowing ? unfollowUser(_id) : followUser(_id))}
-            disabled={isLoadingFollow || isLoadingUnfollow}
+            disabled={isLoadingFollow || isLoadingUnfollow || !userInfo} // Disable if not logged in
           >
             {isLoadingFollow || isLoadingUnfollow
               ? '...'
@@ -130,17 +152,17 @@ const ProfilePage = () => {
 
         <div className="sidebar-stats">
           <Link to="#" className="stat-link" onClick={(e) => { e.preventDefault(); openModal('Followers', followers); }}>
-            <span className="stat-icon">👥</span>
+            <Users size={18} className="stat-icon" />
             <span className="stat-text">{totalFollowers} followers</span>
           </Link>
 
           <Link to="#" className="stat-link" onClick={(e) => { e.preventDefault(); openModal('Following', following); }}>
-            <span className="stat-icon">🚶‍♂️</span>
+            <UserPlus size={18} className="stat-icon" /> {/* Changed icon for following */}
             <span className="stat-text">{totalFollowing} following</span>
           </Link>
 
           <span className="stat-item">
-            <span className="stat-icon">📅</span>
+            <Calendar size={18} className="stat-icon" />
             <span className="stat-text">Joined on {registrationDate}</span>
           </span>
         </div>
@@ -149,48 +171,58 @@ const ProfilePage = () => {
       <div className="profile-main-content">
         <div className="profile-tabs-header">
           <button className={activeTab === 'created' ? 'active-tab' : ''} onClick={() => setActiveTab('created')}>
-            Created Communities
+            Created Communities ({createdCommunities.length})
           </button>
           <button className={activeTab === 'joined' ? 'active-tab' : ''} onClick={() => setActiveTab('joined')}>
-            Joined Communities
+            Joined Communities ({joinedCommunities.length})
           </button>
           <button className={activeTab === 'posts' ? 'active-tab' : ''} onClick={() => setActiveTab('posts')}>
-            My Posts
+            My Posts ({posts.length})
           </button>
         </div>
 
         <div className="tab-content">
-          {activeTab === 'created' && (
-            createdCommunities.length > 0 ? (
-              <ul className="content-list">
-                {createdCommunities.map((c) => (
-                  <li key={c._id}><Link to={`/community/${c._id}`}>r/{c.name}</Link></li>
-                ))}
-              </ul>
-            ) : <p>No communities created yet.</p>
-          )}
+          {isLoading ? ( // Show skeleton loader if data is still loading
+            <>
+              <div className="skeleton-item" style={{ height: '40px', width: '80%' }}></div>
+              <div className="skeleton-item" style={{ height: '40px', width: '90%' }}></div>
+              <div className="skeleton-item" style={{ height: '40px', width: '70%' }}></div>
+            </>
+          ) : (
+            <>
+              {activeTab === 'created' && (
+                createdCommunities.length > 0 ? (
+                  <ul className="content-list">
+                    {createdCommunities.map((c) => (
+                      <li key={c._id}><Link to={`/community/${c._id}`}>r/{c.name}</Link></li>
+                    ))}
+                  </ul>
+                ) : <p>No communities created yet.</p>
+              )}
 
-          {activeTab === 'joined' && (
-            joinedCommunities.length > 0 ? (
-              <ul className="content-list">
-                {joinedCommunities.map((c) => (
-                  <li key={c._id}><Link to={`/community/${c._id}`}>r/{c.name}</Link></li>
-                ))}
-              </ul>
-            ) : <p>Not joined any communities yet.</p>
-          )}
+              {activeTab === 'joined' && (
+                joinedCommunities.length > 0 ? (
+                  <ul className="content-list">
+                    {joinedCommunities.map((c) => (
+                      <li key={c._id}><Link to={`/community/${c._id}`}>r/{c.name}</Link></li>
+                    ))}
+                  </ul>
+                ) : <p>Not joined any communities yet.</p>
+              )}
 
-          {activeTab === 'posts' && (
-            posts.length > 0 ? (
-              <ul className="content-list">
-                {posts.map((post) => (
-                  <li key={post._id}>
-                    <Link to={`/posts/${post._id}`}>{post.title}</Link>
-                    <span className="post-date"> - {formatDateTime(post.createdAt)}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : <p>No posts created yet.</p>
+              {activeTab === 'posts' && (
+                posts.length > 0 ? (
+                  <ul className="content-list">
+                    {posts.map((post) => (
+                      <li key={post._id}>
+                        <Link to={`/posts/${post._id}`}>{post.title}</Link>
+                        <span className="post-date"> - {formatDateTime(post.createdAt)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p>No posts created yet.</p>
+              )}
+            </>
           )}
         </div>
       </div>
