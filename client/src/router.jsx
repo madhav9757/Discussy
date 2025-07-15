@@ -45,6 +45,7 @@ const AppRouter = () => {
       <Route element={<ProtectedRoute />}>
         <Route path="/profile" element={<ProfilePage />} /> {/* User's own profile */}
         <Route path="/profile/edit" element={<UpdateProfile />} />
+        <Route path="/new-post" element={<CreatePost />} />
         <Route path="/community/:id/create-post" element={<CreatePost />} />
         <Route path="/edit-post/:id" element={<EditPostPage />} />
       </Route>

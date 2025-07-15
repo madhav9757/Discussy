@@ -137,6 +137,24 @@
   text-decoration: underline;
 }
 
+/* General post header styles */
+#general-post-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #333;
+}
+
+#general-post-header h2 {
+  color: #f5f5f5;
+  margin-bottom: 0.5rem;
+}
+
+#general-post-header p {
+  color: #bbb;
+  font-size: 0.95rem;
+}
+
 /* Responsive */
 @media (max-width: 500px) {
   #post-form-box {
