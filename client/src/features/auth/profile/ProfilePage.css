@@ -693,7 +693,6 @@ body.light-theme .content-list li {
     background: var(--color-surface);
     padding-top: var(--spacing-sm);
     padding-bottom: var(--spacing-sm);
-    z-index: 10;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
   }
