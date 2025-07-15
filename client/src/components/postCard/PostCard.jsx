@@ -1,10 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, ArrowUp, ArrowDown } from 'lucide-react'; // Importing icons
+import { useGetCommentsByPostIdQuery } from '../../app/api/commentsApi';
 import './Postcard.css';
 
 const PostCard = ({ post }) => {
   const navigate = useNavigate();
+  
+  // Fetch actual comments for this post
+  const { data: comments = [] } = useGetCommentsByPostIdQuery(post._id);
 
   const handleClick = () => {
     navigate(`/posts/${post._id}`);
@@ -19,7 +23,7 @@ const PostCard = ({ post }) => {
 
   const upvotes = post.upvotes?.length || 0;
   const downvotes = post.downvotes?.length || 0;
-  const commentCount = post.comments?.length || 0;
+  const commentCount = comments.length; // Use actual fetched comments count
   const score = upvotes - downvotes;
 
   return (
