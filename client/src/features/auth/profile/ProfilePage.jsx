@@ -109,7 +109,6 @@ const ProfilePage = () => {
     setModalUsers([]);
   };
 
-  // Check if the currently logged-in user is following this profile
   const isFollowing = followers.some((f) => f._id === userInfo?._id);
 
   return (

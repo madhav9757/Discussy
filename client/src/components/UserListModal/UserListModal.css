@@ -7,11 +7,15 @@
 :root {
   /* Colors - Default (Dark Theme) */
   --dark-bg-primary: #1a202c; /* Deep dark background */
-  --color-primary: #6366f1; /* Indigo 500 */
+
+  /* --- ALIGNMENT HERE --- */
+  --color-primary: #5d5dff; /* **Updated to match ProfilePage.css accent color** */
   --primary-color: var(--color-primary);
-  --primary-hover: #4f46e5; /* Indigo 600 */
-  --primary-dark: #4338ca; /* Indigo 700 */
-  --primary-gradient: linear-gradient(135deg, var(--color-primary), #8b5cf6); /* Indigo to Violet */
+  --primary-hover: #7b7bff; /* **Updated to match ProfilePage.css hover color** */
+  --primary-dark: #4338ca; /* Keeping a darker shade for gradients/deeper uses */
+  --primary-gradient: linear-gradient(135deg, var(--color-primary), #8a2be2); /* **Adjusted gradient end for purple hue** */
+  /* --- END ALIGNMENT --- */
+
 
   --color-secondary: #06b6d4; /* Cyan 500 */
   --secondary-color: var(--color-secondary);
@@ -19,14 +23,14 @@
   --secondary-dark: #0e7490; /* Cyan 700 */
   --secondary-gradient: linear-gradient(135deg, var(--color-secondary), #22d3ee); /* Cyan to Light Cyan */
 
-  --text-primary: #e2e8f0; /* Light text on dark background */
-  --text-secondary: #a0aec0; /* Slightly muted text */
+  --text-primary: #e0e0e0; /* Light text on dark background, consistent with profile page */
+  --text-secondary: #8b949e; /* Slightly muted text, consistent with profile page */
   --text-muted: #718096; /* Placeholder/disabled text */
   --text-white: #ffffff; /* For buttons etc. */
 
-  --color-surface: #2d3748; /* For UI elements like cards */
-  --color-hover-bg: rgba(255, 255, 255, 0.15); /* Hover background for elements */
-  --color-border: rgba(255, 255, 255, 0.1); /* Default border */
+  --color-surface: #1e1e3b; /* For UI elements like cards, consistent with profile page */
+  --color-hover-bg: rgba(255, 255, 255, 0.1); /* Slightly adjusted for consistent dark theme feel */
+  --color-border: #363654; /* Default border, consistent with profile page */
 
   --error-color: #ef4444; /* Red 500 */
   --warning-color: #f59e0b; /* Amber 500 */
@@ -73,11 +77,11 @@
   --transition-slow: 0.5s ease-in-out;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
-  --shadow-glass: 0 25px 50px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1); /* Slightly more prominent for dark */
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.08); /* Adjusted */
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1); /* Adjusted */
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.1); /* Adjusted */
+  --shadow-glass: 0 25px 50px rgba(0, 0, 0, 0.4); /* Stronger for dark glass */
 }
 
 /* ===================================== */
@@ -106,46 +110,46 @@ body.light-theme {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6); /* Dark semi-transparent overlay */
+  background: rgba(0, 0, 0, 0.65); /* Slightly darker overlay for stronger dark feel */
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000; /* Ensure it's on top of everything */
-  padding: var(--spacing-lg); /* Padding for smaller screens */
-  backdrop-filter: blur(5px); /* Subtle blur for the background behind modal */
-  -webkit-backdrop-filter: blur(5px);
+  z-index: 9999;
+  padding: var(--spacing-lg);
+  backdrop-filter: blur(8px); /* Slightly stronger blur for more depth */
+  -webkit-backdrop-filter: blur(8px);
   transition: background var(--transition-normal), backdrop-filter var(--transition-normal);
 }
 
 body.light-theme .modal-overlay {
-  background: rgba(0, 0, 0, 0.4); /* Lighter overlay in light theme */
+  background: rgba(0, 0, 0, 0.4);
 }
 
 /* ===================================== */
 /* 3. Modal Content (The Box Itself)     */
 /* ===================================== */
 .modal-content {
-  background: rgba(45, 55, 72, 0.85); /* Semi-transparent surface for glassmorphism */
-  border: 1px solid rgba(255, 255, 255, 0.15); /* Light border for dark theme glass */
+  background: rgba(30, 30, 59, 0.9); /* Opaque version of --card-background */
+  border: 1px solid var(--color-border); /* Consistent border color */
   border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-glass), inset 0 0 15px rgba(255, 255, 255, 0.05); /* Added subtle inner shadow */
+  box-shadow: var(--shadow-glass), inset 0 0 18px rgba(255, 255, 255, 0.03); /* Subtle inner shadow adjusted */
   padding: var(--spacing-3xl);
-  max-width: 500px; /* Max width for the modal */
+  max-width: 500px;
   width: 100%;
-  max-height: 80vh; /* Max height to allow scrolling */
-  overflow: hidden; /* Hide default scrollbar */
+  max-height: 80vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   color: var(--text-primary);
   position: relative;
   transition: background var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal), color var(--transition-normal);
-  will-change: transform, opacity, background, border-color, box-shadow; /* Performance hint */
+  will-change: transform, opacity, background, border-color, box-shadow;
 }
 
 body.light-theme .modal-content {
-  background: rgba(255, 255, 255, 0.9); /* More opaque white for light theme glass */
-  border: 1px solid rgba(0, 0, 0, 0.1); /* Darker border for light theme */
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08), inset 0 0 10px rgba(0, 0, 0, 0.02); /* Lighter shadow + inner shadow */
+  background: rgba(255, 255, 255, 0.95); /* More opaque white for light theme */
+  border: 1px solid rgba(0, 0, 0, 0.12); /* Darker border for light theme */
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1), inset 0 0 10px rgba(0, 0, 0, 0.02);
 }
 
 /* ===================================== */
@@ -177,7 +181,7 @@ body.light-theme .modal-content {
   padding: var(--spacing-xs);
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
-  line-height: 1; /* Adjust line height for 'x' */
+  line-height: 1;
 }
 
 .modal-close-btn:hover {
@@ -195,14 +199,14 @@ body.light-theme .modal-close-btn:hover {
 /* 5. Modal Body (User List)             */
 /* ===================================== */
 .modal-body {
-  flex-grow: 1; /* Allows it to take available space */
-  overflow-y: auto; /* Enable scrolling if list is long */
-  padding-right: var(--spacing-sm); /* Account for scrollbar space if default */
-  position: relative; /* For scroll indicator shadows */
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-right: var(--spacing-sm);
+  position: relative;
 
   /* Custom Scrollbar */
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: var(--primary-color) var(--color-border); /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) var(--color-border);
 }
 
 /* Webkit (Chrome, Safari) scrollbar styles */
@@ -218,7 +222,7 @@ body.light-theme .modal-close-btn:hover {
 .modal-body::-webkit-scrollbar-thumb {
   background: var(--primary-color);
   border-radius: var(--radius-full);
-  border: 2px solid var(--color-surface); /* Inner border to make thumb thinner */
+  border: 2px solid var(--card-background); /* Inner border to match card */
 }
 
 body.light-theme .modal-body::-webkit-scrollbar-thumb {
@@ -236,21 +240,21 @@ body.light-theme .modal-body::-webkit-scrollbar-thumb {
   position: absolute;
   left: 0;
   right: 0;
-  height: 20px; /* Height of the shadow */
+  height: 20px;
   pointer-events: none;
-  z-index: 5; /* Above content, below scrollbar */
+  z-index: 5;
   opacity: 0;
   transition: opacity var(--transition-normal);
 }
 
 .modal-body::before {
   top: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), transparent);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent); /* Darker shadow */
 }
 
 .modal-body::after {
   bottom: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent); /* Darker shadow */
 }
 
 /* Example classes to be toggled by JS based on scroll position */
@@ -277,28 +281,27 @@ body.light-theme .modal-body::-webkit-scrollbar-thumb {
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-md) var(--spacing-sm);
-  /* Removed margin-bottom to use border for separation */
-  background: rgba(255, 255, 255, 0.05); /* Subtle background for each item */
+  background: rgba(255, 255, 255, 0.03); /* Very subtle background for each item */
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Stronger bottom border for separation */
-  margin-bottom: var(--spacing-sm); /* Re-added margin for spacing between items */
+  border: 1px solid rgba(255, 255, 255, 0.05); /* Lighter border than before for subtlety */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Slightly stronger bottom border */
+  margin-bottom: var(--spacing-sm);
   transition: all var(--transition-normal);
   box-shadow: var(--shadow-sm);
-  will-change: transform, background, border-color, box-shadow; /* Performance hint */
+  will-change: transform, background, border-color, box-shadow;
 }
 
 body.light-theme .modal-list-item {
   background: rgba(240, 244, 248, 0.6);
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.15); /* Darker bottom border for separation */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
 }
 
 .modal-list-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-3px) scale(1.01); /* Subtle lift and scale */
-  box-shadow: var(--shadow-md), 0 0 10px rgba(99, 102, 241, 0.1); /* Added subtle glow */
-  border-color: var(--primary-color); /* Highlight border on hover */
+  background: rgba(255, 255, 255, 0.07); /* More prominent hover background */
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: var(--shadow-md), 0 0 10px rgba(93, 93, 255, 0.15); /* Adjusted glow for new primary color */
+  border-color: var(--primary-color);
 }
 
 body.light-theme .modal-list-item:hover {
@@ -313,14 +316,14 @@ body.light-theme .modal-list-item:hover {
   object-fit: cover;
   margin-right: var(--spacing-md);
   border: 2px solid var(--primary-color);
-  flex-shrink: 0; /* Prevent shrinking */
+  flex-shrink: 0;
   transition: all var(--transition-fast);
 }
 
 .modal-list-item:hover .modal-list-avatar {
-  transform: scale(1.05); /* Scale avatar on item hover */
-  border-color: var(--primary-hover); /* Change border color on hover */
-  box-shadow: 0 0 8px var(--primary-color); /* Glow on avatar */
+  transform: scale(1.05);
+  border-color: var(--primary-hover);
+  box-shadow: 0 0 8px var(--primary-color);
 }
 
 .modal-list-link {
@@ -349,18 +352,18 @@ body.light-theme .modal-list-item:hover {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-white);
-  box-shadow: var(--shadow-sm); /* Added subtle shadow */
+  box-shadow: var(--shadow-sm);
   transition: all var(--transition-fast);
 }
 
 .badge.you {
   background: var(--primary-color);
-  box-shadow: 0 2px 5px rgba(99, 102, 241, 0.3), 0 0 8px rgba(99, 102, 241, 0.5); /* Stronger glow */
+  box-shadow: 0 2px 5px rgba(93, 93, 255, 0.3), 0 0 8px rgba(93, 93, 255, 0.5); /* Adjusted glow */
 }
 
 .badge.you:hover {
-  transform: scale(1.05); /* Subtle scale on hover */
-  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4), 0 0 12px rgba(99, 102, 241, 0.6);
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(93, 93, 255, 0.4), 0 0 12px rgba(93, 93, 255, 0.6);
 }
 
 .badge.creator {
@@ -378,19 +381,19 @@ body.light-theme .modal-list-item:hover {
   cursor: pointer;
   font-size: var(--text-sm);
   transition: all var(--transition-normal);
-  flex-shrink: 0; /* Prevent shrinking */
-  min-width: 90px; /* Ensure consistent width */
+  flex-shrink: 0;
+  min-width: 90px;
   text-align: center;
   position: relative;
   overflow: hidden;
-  will-change: transform, background, color, border-color, box-shadow, opacity; /* Performance hint */
+  will-change: transform, background, color, border-color, box-shadow, opacity;
 }
 
 /* Ripple effect (requires JS to add .ripple-span) */
 .follow-unfollow-btn .ripple-span {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3); /* White ripple */
+  background: rgba(255, 255, 255, 0.3);
   animation: ripple-animation 0.6s linear forwards;
   pointer-events: none;
   transform: scale(0);
@@ -412,18 +415,18 @@ body.light-theme .modal-list-item:hover {
   background: var(--primary-gradient);
   color: var(--text-white);
   border: none;
-  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 10px rgba(93, 93, 255, 0.2); /* Adjusted for new primary */
 }
 
 .follow-unfollow-btn.follow:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--primary-hover), var(--primary-dark));
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3), 0 0 10px rgba(99, 102, 241, 0.4); /* Added glow */
+  box-shadow: 0 6px 15px rgba(93, 93, 255, 0.3), 0 0 10px rgba(93, 93, 255, 0.4); /* Adjusted glow */
 }
 
 .follow-unfollow-btn.follow:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: var(--shadow-sm); /* Subtle press effect */
+  box-shadow: var(--shadow-sm);
 }
 
 
@@ -449,7 +452,7 @@ body.light-theme .follow-unfollow-btn.unfollow {
 
 .follow-unfollow-btn.unfollow:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: var(--shadow-sm); /* Subtle press effect */
+  box-shadow: var(--shadow-sm);
 }
 
 .follow-unfollow-btn:disabled {
@@ -460,8 +463,8 @@ body.light-theme .follow-unfollow-btn.unfollow {
 }
 
 /* Loading state for buttons */
-.follow-unfollow-btn:disabled { /* Reuse disabled style for loading */
-  color: transparent; /* Hide text */
+.follow-unfollow-btn:disabled {
+  color: transparent;
 }
 
 .follow-unfollow-btn:disabled::after {
@@ -501,14 +504,14 @@ body.light-theme .follow-unfollow-btn:disabled::after {
   border-radius: var(--radius-lg);
   margin-top: var(--spacing-lg);
   background: rgba(255, 255, 255, 0.02);
-  display: flex; /* For icon alignment */
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-sm);
 }
 
 .modal-empty-message::before {
-  content: '😔'; /* Sad face icon */
+  content: '😔';
   font-size: var(--text-2xl);
   display: block;
   margin-bottom: var(--spacing-xs);
@@ -524,7 +527,7 @@ body.light-theme .modal-empty-message {
 @media (max-width: 768px) {
   .modal-content {
     padding: var(--spacing-2xl);
-    max-width: 90%; /* Wider on smaller tablets */
+    max-width: 90%;
   }
 
   .modal-title {
@@ -550,7 +553,7 @@ body.light-theme .modal-empty-message {
 @media (max-width: 480px) {
   .modal-content {
     padding: var(--spacing-xl);
-    max-width: 95%; /* Even wider on mobile */
+    max-width: 95%;
   }
 
   .modal-header {
@@ -562,28 +565,28 @@ body.light-theme .modal-empty-message {
   }
 
   .modal-list-item {
-    flex-direction: column; /* Stack avatar/link and button vertically */
+    flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-sm);
     padding: var(--spacing-md);
   }
 
   .modal-list-avatar {
-    margin-right: 0; /* Remove right margin when stacked */
+    margin-right: 0;
   }
 
   .modal-list-link {
-    width: 100%; /* Take full width when stacked */
+    width: 100%;
     justify-content: flex-start;
   }
 
   .follow-unfollow-btn {
-    width: 100%; /* Full width button when stacked */
+    width: 100%;
     margin-top: var(--spacing-sm);
   }
 
   .badge {
-    margin-left: 0; /* Align badges correctly when stacked */
+    margin-left: 0;
   }
 }
 
@@ -607,7 +610,6 @@ body.light-theme .modal-empty-message {
   .modal-close-btn,
   .modal-list-item,
   .modal-list-avatar,
-  .modal-list-link,
   .badge,
   .follow-unfollow-btn {
     transition: none !important;
@@ -617,7 +619,11 @@ body.light-theme .modal-empty-message {
     backdrop-filter: none !important;
   }
 
-  .follow-unfollow-btn:disabled::after { /* Ensure spinner animation is also off */
+  .modal-list-link { /* Explicitly add this to ensure no transition */
+    transition: none !important;
+  }
+
+  .follow-unfollow-btn:disabled::after {
     animation: none !important;
   }
 }
