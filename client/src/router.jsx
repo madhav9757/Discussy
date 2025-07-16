@@ -13,6 +13,7 @@ import AboutPage from './pages/About/AboutPage.jsx';
 import CreatePost from './features/posts/createPost/CreatePost.jsx';
 import EditPostPage from './features/posts/updatePost/UpdatePost.jsx';
 import UpdateProfile from './features/auth/profile/updateProfile/UpdateProfile.jsx';
+import NotificationsPage from './pages/notifications/NotificationsPage.jsx';
 
 // Import the new ProtectedRoute component
 import ProtectedRoute from './components/ProtectedRoute'; // Adjust path as needed
@@ -48,6 +49,7 @@ const AppRouter = () => {
         <Route path="/new-post" element={<CreatePost />} />
         <Route path="/community/:id/create-post" element={<CreatePost />} />
         <Route path="/edit-post/:id" element={<EditPostPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
       </Route>
 
       {/* Catch-all route for 404 Not Found */}

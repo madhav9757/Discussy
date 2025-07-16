@@ -9,14 +9,22 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['comment', 'like', 'system'],
+      enum: ['comment', 'like', 'follow', 'post', 'system'],
       required: true,
     },
     message: {
       type: String,
       required: true,
     },
-    link: String,
+    link: {
+      type: String,
+      default: '',
+    },
+    relatedUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
     isRead: {
       type: Boolean,
       default: false,
@@ -24,5 +32,9 @@ const notificationSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Index for better query performance
+notificationSchema.index({ user: 1, createdAt: -1 });
+notificationSchema.index({ user: 1, isRead: 1 });
 
 export default mongoose.model('Notification', notificationSchema);

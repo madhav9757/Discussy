@@ -4,6 +4,7 @@ import Community from '../models/Community.js';
 import Post from '../models/Post.js';
 import bcrypt from 'bcryptjs';
 import { generateToken, cookieOptions } from '../utils/token.js';
+import { createNotification } from './notificationController.js';
 
 
 // @desc    Register a new user
@@ -27,6 +28,14 @@ export const register = asyncHandler(async (req, res) => {
   const user = await User.create({ username, email, passwordHash });
 
   const token = generateToken({ id: user._id, username: user.username });
+
+  // Create welcome notification
+  await createNotification({
+    userId: user._id,
+    type: 'system',
+    message: 'Welcome to Discussly! Start by exploring communities and creating your first post.',
+    link: '/explore'
+  });
 
   res
     .cookie('token', token, cookieOptions)
@@ -139,6 +148,15 @@ export const followUser = asyncHandler(async (req, res) => {
 
   await userToFollow.save();
   await currentUser.save();
+
+  // Create notification for the followed user
+  await createNotification({
+    userId: targetUserId,
+    type: 'follow',
+    message: `${currentUser.username} started following you`,
+    link: `/user/${currentUserId}`,
+    relatedUser: currentUserId
+  });
 
   res.status(200).json({ message: "Followed successfully" });
 });

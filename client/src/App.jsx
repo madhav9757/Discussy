@@ -56,37 +56,40 @@ function App() {
     skip: !userInfo?._id,
   });
 
-  // ❌ No setNotifications needed — RTK handles caching
-
   // ✅ WebSocket setup for real-time notification
   useEffect(() => {
     if (userInfo?._id) {
+      // Join the user to their notification room
       socket.emit('join', userInfo._id);
+      
+      // Listen for new notifications
+      socket.on('notification', (newNotif) => {
+        toast.success(newNotif.message); // Optional toast
+
+        // 👇 Update RTK Query cache directly (no slice)
+        dispatch(
+          notificationsApi.util.updateQueryData('getNotifications', undefined, (draft) => {
+            draft.unshift(newNotif);
+          })
+        );
+      });
+
+      // Listen for notifications marked as read
+      socket.on('notificationsMarkedRead', () => {
+        dispatch(
+          notificationsApi.util.updateQueryData('getNotifications', undefined, (draft) => {
+            draft.forEach((notif) => (notif.isRead = true));
+          })
+        );
+      });
+
+      // Cleanup on unmount or user change
+      return () => {
+        socket.off('notification');
+        socket.off('notificationsMarkedRead');
+        socket.emit('leave', userInfo._id);
+      };
     }
-
-    socket.on('notification', (newNotif) => {
-      toast.success(newNotif.message); // Optional toast
-
-      // 👇 Update RTK Query cache directly (no slice)
-      dispatch(
-        notificationsApi.util.updateQueryData('getNotifications', undefined, (draft) => {
-          draft.unshift(newNotif);
-        })
-      );
-    });
-
-    socket.on('notificationsMarkedRead', () => {
-      dispatch(
-        notificationsApi.util.updateQueryData('getNotifications', undefined, (draft) => {
-          draft.forEach((notif) => (notif.isRead = true));
-        })
-      );
-    });
-
-    return () => {
-      socket.off('notification');
-      socket.off('notificationsMarkedRead');
-    };
   }, [userInfo?._id, dispatch]);
 
   return (

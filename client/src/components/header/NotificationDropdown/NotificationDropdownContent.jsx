@@ -2,25 +2,62 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, Heart, Info } from 'lucide-react';
+import { MessageCircle, Heart, Info, UserPlus, FileText } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   useMarkAllNotificationsAsReadMutation,
-} from '../../features/notifications/notificationsApi';
-import { markAllAsReadSuccess } from '../../features/notifications/notificationsSlice';
+} from '../../../app/api/notificationsApi.js';
+import { notificationsApi } from '../../../app/api/notificationsApi.js';
 import './NotificationDropdown.css';
 
 const NotificationDropdownContent = ({ onClose }) => {
   const dispatch = useDispatch();
-  const notifications = useSelector((state) => state.notifications.items);
+  const notifications = useSelector((state) => {
+    // Get notifications from RTK Query cache
+    const notificationsData = notificationsApi.endpoints.getNotifications.select()(state);
+    return notificationsData?.data || [];
+  });
+  
   const [markAllRead, { isLoading }] = useMarkAllNotificationsAsReadMutation();
 
   const handleMarkAllRead = async () => {
     try {
       await markAllRead().unwrap(); // RTK Query mutation
-      dispatch(markAllAsReadSuccess()); // Optimistic update
+      // The cache will be updated automatically via the socket event
     } catch (err) {
       console.error('Failed to mark notifications as read', err);
+    }
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'comment':
+        return <MessageCircle size={12} />;
+      case 'like':
+        return <Heart size={12} />;
+      case 'follow':
+        return <UserPlus size={12} />;
+      case 'post':
+        return <FileText size={12} />;
+      case 'system':
+      default:
+        return <Info size={12} />;
+    }
+  };
+
+  const getNotificationTypeClass = (type) => {
+    switch (type) {
+      case 'comment':
+        return 'notification-item-type--comment';
+      case 'like':
+        return 'notification-item-type--like';
+      case 'follow':
+        return 'notification-item-type--follow';
+      case 'post':
+        return 'notification-item-type--post';
+      case 'system':
+      default:
+        return 'notification-item-type--system';
     }
   };
 
@@ -50,13 +87,14 @@ const NotificationDropdownContent = ({ onClose }) => {
             >
               <div className="notification-item-avatar">
                 <img
-                  src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${notif.type}`}
+                  src={notif.relatedUser 
+                    ? `https://api.dicebear.com/7.x/pixel-art/svg?seed=${notif.relatedUser}` 
+                    : `https://api.dicebear.com/7.x/pixel-art/svg?seed=${notif.type}`
+                  }
                   alt="User avatar"
                 />
-                <div className={`notification-item-type notification-item-type--${notif.type}`}>
-                  {notif.type === 'comment' && <MessageCircle size={12} />}
-                  {notif.type === 'like' && <Heart size={12} />}
-                  {notif.type === 'system' && <Info size={12} />}
+                <div className={`notification-item-type ${getNotificationTypeClass(notif.type)}`}>
+                  {getNotificationIcon(notif.type)}
                 </div>
               </div>
               <div className="notification-item-content">

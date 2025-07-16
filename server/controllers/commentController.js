@@ -1,6 +1,7 @@
 import Comment from '../models/Comment.js';
 import Post from '../models/Post.js';
 import User from '../models/User.js';
+import { createNotification } from './notificationController.js';
 
 /**
  * @desc Get all comments for a specific post
@@ -55,19 +56,20 @@ export const createComment = async (req, res) => {
 
     try {
         // Validate if the post exists
-        const postExists = await Post.findById(postId);
-        if (!postExists) {
+        const post = await Post.findById(postId).populate('author', 'username');
+        if (!post) {
             return res.status(404).json({ message: 'Post not found.' });
         }
 
         // If parentId is provided, validate if the parent comment exists
+        let parentComment = null;
         if (parentId) {
-            const parentCommentExists = await Comment.findById(parentId);
-            if (!parentCommentExists) {
+            parentComment = await Comment.findById(parentId).populate('createdBy', 'username');
+            if (!parentComment) {
                 return res.status(404).json({ message: 'Parent comment not found.' });
             }
             // Optional: Ensure parent comment belongs to the same post
-            if (parentCommentExists.postId.toString() !== postId) {
+            if (parentComment.postId.toString() !== postId) {
                 return res.status(400).json({ message: 'Parent comment does not belong to this post.' });
             }
         }
@@ -92,6 +94,28 @@ export const createComment = async (req, res) => {
                     path: 'createdBy',
                     select: 'username'
                 }
+            });
+        }
+
+        // Create notification for post author (if not commenting on own post)
+        if (post.author._id.toString() !== createdBy.toString()) {
+            await createNotification({
+                userId: post.author._id,
+                type: 'comment',
+                message: `${req.user.username} commented on your post: "${post.title}"`,
+                link: `/posts/${postId}`,
+                relatedUser: createdBy
+            });
+        }
+
+        // Create notification for parent comment author (if replying and not replying to self)
+        if (parentComment && parentComment.createdBy._id.toString() !== createdBy.toString()) {
+            await createNotification({
+                userId: parentComment.createdBy._id,
+                type: 'comment',
+                message: `${req.user.username} replied to your comment`,
+                link: `/posts/${postId}`,
+                relatedUser: createdBy
             });
         }
 
@@ -201,7 +225,7 @@ export const toggleCommentVote = async (req, res) => {
     }
 
     try {
-        const comment = await Comment.findById(commentId);
+        const comment = await Comment.findById(commentId).populate('createdBy', 'username');
         if (!comment) {
             return res.status(404).json({ message: 'Comment not found.' });
         }
@@ -219,6 +243,17 @@ export const toggleCommentVote = async (req, res) => {
                 // If previously downvoted, remove downvote
                 if (hasDownvoted) {
                     comment.downvotes.pull(userId);
+                }
+                
+                // Create notification for comment author (if not voting on own comment)
+                if (comment.createdBy._id.toString() !== userId.toString()) {
+                    await createNotification({
+                        userId: comment.createdBy._id,
+                        type: 'like',
+                        message: `${req.user.username} liked your comment`,
+                        link: `/posts/${comment.postId}`,
+                        relatedUser: userId
+                    });
                 }
             }
         } else { // type === 'downvote'
@@ -239,11 +274,10 @@ export const toggleCommentVote = async (req, res) => {
 
         return res.status(200).json({
             message: "Vote updated successfully.",
-            upvotes: updateComment.upvotes,
-            downvotes: updateComment.downvotes,
-            commentId: updateComment._id,
+            upvotes: comment.upvotes,
+            downvotes: comment.downvotes,
+            commentId: comment._id,
         });
-
 
     } catch (error) {
         console.error('Error toggling comment vote:', error);

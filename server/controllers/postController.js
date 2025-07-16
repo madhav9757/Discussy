@@ -1,6 +1,7 @@
 import Post from '../models/Post.js';
 import Community from '../models/Community.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import { createNotification } from './notificationController.js';
 
 // @desc Get all posts
 // @route GET /api/posts
@@ -33,6 +34,26 @@ export const createPost = asyncHandler(async (req, res) => {
   const populatedPost = await Post.findById(post._id)
     .populate({ path: 'community', select: 'name _id createdBy' })
     .populate({ path: 'author', select: 'username _id' });
+
+  // Get community details for notification
+  const communityDetails = await Community.findById(community).populate('members', 'username _id');
+  
+  // Notify community members (except the author)
+  if (communityDetails && communityDetails.members) {
+    const notificationPromises = communityDetails.members
+      .filter(member => member._id.toString() !== req.user._id.toString())
+      .map(member => 
+        createNotification({
+          userId: member._id,
+          type: 'post',
+          message: `${req.user.username} posted in r/${communityDetails.name}: "${title}"`,
+          link: `/posts/${post._id}`,
+          relatedUser: req.user._id
+        })
+      );
+    
+    await Promise.all(notificationPromises);
+  }
 
   res.status(201).json(populatedPost);
 });
@@ -121,7 +142,7 @@ export const toggleVote = asyncHandler(async (req, res) => {
     throw new Error('Invalid vote type');
   }
 
-  const post = await Post.findById(id);
+  const post = await Post.findById(id).populate('author', 'username');
 
   if (!post) {
     res.status(404);
@@ -138,6 +159,17 @@ export const toggleVote = asyncHandler(async (req, res) => {
   // Add vote only if not already selected
   if (type === 'upvote' && !hasUpvoted) {
     post.upvotes.push(userId);
+    
+    // Create notification for post author (if not voting on own post)
+    if (post.author._id.toString() !== userId.toString()) {
+      await createNotification({
+        userId: post.author._id,
+        type: 'like',
+        message: `${req.user.username} liked your post: "${post.title}"`,
+        link: `/posts/${id}`,
+        relatedUser: userId
+      });
+    }
   } else if (type === 'downvote' && !hasDownvoted) {
     post.downvotes.push(userId);
   }
@@ -146,7 +178,7 @@ export const toggleVote = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     message: 'Vote updated successfully',
-    upvotes: post.upvotes,
-    downvotes: post.downvotes,
+    upvotes: post.upvotes.length,
+    downvotes: post.downvotes.length,
   });
 });

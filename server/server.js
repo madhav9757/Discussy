@@ -24,7 +24,7 @@ const server = http.createServer(app); // Create an HTTP server from the Express
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL, // Allow connections from your frontend URL
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Allow connections from your frontend URL
     methods: ["GET", "POST"], // Allowed HTTP methods for CORS
     credentials: true // Allow sending cookies/auth headers
   }
@@ -35,15 +35,25 @@ const connectedUsers = new Map();
 io.on('connection', (socket) => {
   console.log(`Socket connected: ${socket.id}`);
 
-  socket.on('register', (userId) => {
+  // Handle user joining with their ID
+  socket.on('join', (userId) => {
     if (userId) {
-      connectedUsers.set(userId, socket.id);
-      console.log(`User ${userId} registered with socket ID: ${socket.id}`);
+      connectedUsers.set(userId.toString(), socket.id);
+      console.log(`User ${userId} joined with socket ID: ${socket.id}`);
+    }
+  });
+
+  // Handle user leaving
+  socket.on('leave', (userId) => {
+    if (userId) {
+      connectedUsers.delete(userId.toString());
+      console.log(`User ${userId} left`);
     }
   });
 
   socket.on('disconnect', () => {
     console.log(`Socket disconnected: ${socket.id}`);
+    // Remove user from connected users map
     for (let [userId, socketId] of connectedUsers.entries()) {
       if (socketId === socket.id) {
         connectedUsers.delete(userId);
@@ -72,7 +82,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   })
 );
