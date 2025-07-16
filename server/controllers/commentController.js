@@ -47,7 +47,6 @@ export const createComment = async (req, res) => {
     const { content, parentId } = req.body;
 
     // Assuming req.user is populated by an authentication middleware
-    // For example, if using JWT and passport.js: req.user._id
     const createdBy = req.user._id; // The ID of the authenticated user
 
     if (!content || !content.trim()) {
@@ -56,7 +55,7 @@ export const createComment = async (req, res) => {
 
     try {
         // Validate if the post exists
-        const post = await Post.findById(postId).populate('author', 'username');
+        const post = await Post.findById(postId).populate('author', 'username _id');
         if (!post) {
             return res.status(404).json({ message: 'Post not found.' });
         }
@@ -64,7 +63,7 @@ export const createComment = async (req, res) => {
         // If parentId is provided, validate if the parent comment exists
         let parentComment = null;
         if (parentId) {
-            parentComment = await Comment.findById(parentId).populate('createdBy', 'username');
+            parentComment = await Comment.findById(parentId).populate('createdBy', 'username _id');
             if (!parentComment) {
                 return res.status(404).json({ message: 'Parent comment not found.' });
             }
@@ -119,6 +118,7 @@ export const createComment = async (req, res) => {
             });
         }
 
+        console.log(`💬 Comment created by ${req.user.username} on post ${postId}`);
         res.status(201).json(newComment);
     } catch (error) {
         console.error('Error creating comment:', error);
@@ -168,6 +168,7 @@ export const updateComment = async (req, res) => {
             });
         }
 
+        console.log(`✏️ Comment ${commentId} updated by ${req.user.username}`);
         res.status(200).json(comment);
     } catch (error) {
         console.error('Error updating comment:', error);
@@ -183,7 +184,6 @@ export const updateComment = async (req, res) => {
 export const deleteComment = async (req, res) => {
     const { commentId } = req.params;
     const userId = req.user._id; // Authenticated user's ID
-    // const isAdmin = req.user.role === 'admin'; // If you have user roles
 
     try {
         const comment = await Comment.findById(commentId);
@@ -192,23 +192,20 @@ export const deleteComment = async (req, res) => {
             return res.status(404).json({ message: 'Comment not found.' });
         }
 
-        // Check if the authenticated user is the creator OR an admin
-        if (comment.createdBy.toString() !== userId.toString() /* && !isAdmin */) {
+        // Check if the authenticated user is the creator
+        if (comment.createdBy.toString() !== userId.toString()) {
             return res.status(403).json({ message: 'Not authorized to delete this comment.' });
         }
 
-        // Optional: Delete nested replies if you want cascade deletion
-        // await Comment.deleteMany({ parentId: commentId });
+        await comment.deleteOne();
 
-        await comment.deleteOne(); // Use deleteOne() or findByIdAndDelete()
-
+        console.log(`🗑️ Comment ${commentId} deleted by ${req.user.username}`);
         res.status(200).json({ message: 'Comment deleted successfully.' });
     } catch (error) {
         console.error('Error deleting comment:', error);
         res.status(500).json({ message: 'Server error deleting comment.' });
     }
 };
-
 
 /**
  * @desc Toggle upvote/downvote on a comment
@@ -225,7 +222,7 @@ export const toggleCommentVote = async (req, res) => {
     }
 
     try {
-        const comment = await Comment.findById(commentId).populate('createdBy', 'username');
+        const comment = await Comment.findById(commentId).populate('createdBy', 'username _id');
         if (!comment) {
             return res.status(404).json({ message: 'Comment not found.' });
         }
@@ -272,6 +269,7 @@ export const toggleCommentVote = async (req, res) => {
 
         await comment.save();
 
+        console.log(`👍 Comment ${commentId} ${type} by ${req.user.username}`);
         return res.status(200).json({
             message: "Vote updated successfully.",
             upvotes: comment.upvotes,

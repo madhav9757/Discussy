@@ -53,6 +53,7 @@ export const createPost = asyncHandler(async (req, res) => {
       );
     
     await Promise.all(notificationPromises);
+    console.log(`📝 Post created by ${req.user.username} in r/${communityDetails.name}, notified ${notificationPromises.length} members`);
   }
 
   res.status(201).json(populatedPost);
@@ -103,6 +104,7 @@ export const updatePost = asyncHandler(async (req, res) => {
     .populate({ path: 'community', select: 'name _id createdBy' })
     .populate({ path: 'author', select: 'username _id' });
 
+  console.log(`✏️ Post ${id} updated by ${req.user.username}`);
   res.json(populatedPost);
 });
 
@@ -127,6 +129,7 @@ export const deletePost = asyncHandler(async (req, res) => {
   }
 
   await post.deleteOne();
+  console.log(`🗑️ Post ${id} deleted by ${req.user.username}`);
   res.status(200).json({ message: 'Post deleted successfully' });
 });
 
@@ -142,7 +145,7 @@ export const toggleVote = asyncHandler(async (req, res) => {
     throw new Error('Invalid vote type');
   }
 
-  const post = await Post.findById(id).populate('author', 'username');
+  const post = await Post.findById(id).populate('author', 'username _id');
 
   if (!post) {
     res.status(404);
@@ -176,6 +179,7 @@ export const toggleVote = asyncHandler(async (req, res) => {
 
   await post.save();
 
+  console.log(`👍 Post ${id} ${type} by ${req.user.username}`);
   res.status(200).json({
     message: 'Vote updated successfully',
     upvotes: post.upvotes.length,

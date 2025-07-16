@@ -37,6 +37,7 @@ export const register = asyncHandler(async (req, res) => {
     link: '/explore'
   });
 
+  console.log(`👤 New user registered: ${username}`);
   res
     .cookie('token', token, cookieOptions)
     .status(201)
@@ -60,7 +61,7 @@ export const login = asyncHandler(async (req, res) => {
     throw new Error('All fields are required');
   }
 
-  console.log('🧪 req.body =', req.body);
+  console.log('🔐 Login attempt for:', usernameOrEmail);
 
   const user = await User.findOne({
     $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
@@ -73,6 +74,7 @@ export const login = asyncHandler(async (req, res) => {
 
   const token = generateToken({ id: user._id, username: user.username });
 
+  console.log(`✅ User logged in: ${user.username}`);
   res
     .cookie('token', token, cookieOptions)
     .status(200)
@@ -110,7 +112,7 @@ export const getProfile = asyncHandler(async (req, res) => {
   res.status(200).json({
     ...user.toObject(),
     createdCommunities,
-    posts, // ← added this
+    posts,
   });
 })
 
@@ -118,6 +120,7 @@ export const getProfile = asyncHandler(async (req, res) => {
 // @route   POST /api/users/logout
 export const logout = (req, res) => {
   res.clearCookie('token', cookieOptions);
+  console.log('👋 User logged out');
   res.status(200).json({ message: 'Logged out successfully' });
 };
 
@@ -158,6 +161,7 @@ export const followUser = asyncHandler(async (req, res) => {
     relatedUser: currentUserId
   });
 
+  console.log(`👥 ${currentUser.username} followed ${userToFollow.username}`);
   res.status(200).json({ message: "Followed successfully" });
 });
 
@@ -184,17 +188,15 @@ export const unfollowUser = asyncHandler(async (req, res) => {
   await userToUnfollow.save();
   await currentUser.save();
 
+  console.log(`👥 ${currentUser.username} unfollowed ${userToUnfollow.username}`);
   res.status(200).json({ message: "Unfollowed successfully" });
 });
 
 // @desc    Update user profile
 // @route   PUT /api/users/profile
 // @access  Private
-// @desc    Update user profile
-// @route   PUT /api/users/profile
-// @access  Private
 export const updateProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user.id); // req.user.id comes from the protect middleware
+  const user = await User.findById(req.user.id);
 
   if (!user) {
     res.status(404);
@@ -236,6 +238,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   await user.save();
 
+  console.log(`✏️ Profile updated for ${user.username}`);
   res.status(200).json({
     _id: user._id,
     username: user.username,

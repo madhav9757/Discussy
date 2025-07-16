@@ -3,17 +3,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, Heart, Info, UserPlus, FileText } from 'lucide-react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   useMarkAllNotificationsAsReadMutation,
+  notificationsApi,
 } from '../../../app/api/notificationsApi.js';
-import { notificationsApi } from '../../../app/api/notificationsApi.js';
 import './NotificationDropdown.css';
 
 const NotificationDropdownContent = ({ onClose }) => {
-  const dispatch = useDispatch();
+  // Get notifications from RTK Query cache
   const notifications = useSelector((state) => {
-    // Get notifications from RTK Query cache
     const notificationsData = notificationsApi.endpoints.getNotifications.select()(state);
     return notificationsData?.data || [];
   });
@@ -22,10 +21,10 @@ const NotificationDropdownContent = ({ onClose }) => {
 
   const handleMarkAllRead = async () => {
     try {
-      await markAllRead().unwrap(); // RTK Query mutation
-      // The cache will be updated automatically via the socket event
+      await markAllRead().unwrap();
+      console.log('✅ All notifications marked as read');
     } catch (err) {
-      console.error('Failed to mark notifications as read', err);
+      console.error('❌ Failed to mark notifications as read', err);
     }
   };
 
@@ -61,24 +60,26 @@ const NotificationDropdownContent = ({ onClose }) => {
     }
   };
 
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
   return (
     <>
       <div className="notifications-dropdown-header">
         <h3>Notifications</h3>
-        {notifications.some(n => !n.isRead) && (
+        {unreadCount > 0 && (
           <button
             className="notifications-dropdown-mark-all"
             onClick={handleMarkAllRead}
             disabled={isLoading}
           >
-            {isLoading ? 'Marking...' : 'Mark all read'}
+            {isLoading ? 'Marking...' : `Mark all read (${unreadCount})`}
           </button>
         )}
       </div>
 
       <div className="notifications-dropdown-list">
         {notifications.length > 0 ? (
-          notifications.map((notif) => (
+          notifications.slice(0, 10).map((notif) => (
             <Link
               to={notif.link || '#'}
               key={notif._id}
@@ -87,8 +88,8 @@ const NotificationDropdownContent = ({ onClose }) => {
             >
               <div className="notification-item-avatar">
                 <img
-                  src={notif.relatedUser 
-                    ? `https://api.dicebear.com/7.x/pixel-art/svg?seed=${notif.relatedUser}` 
+                  src={notif.relatedUser?.username 
+                    ? `https://api.dicebear.com/7.x/pixel-art/svg?seed=${notif.relatedUser.username}` 
                     : `https://api.dicebear.com/7.x/pixel-art/svg?seed=${notif.type}`
                   }
                   alt="User avatar"
@@ -107,7 +108,13 @@ const NotificationDropdownContent = ({ onClose }) => {
             </Link>
           ))
         ) : (
-          <div className="modal-empty-message">No notifications</div>
+          <div className="modal-empty-message">
+            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔔</div>
+            <p>No notifications yet</p>
+            <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>
+              When you get notifications, they'll show up here
+            </p>
+          </div>
         )}
       </div>
 
@@ -125,10 +132,13 @@ function formatTimeAgo(timestamp) {
   const now = new Date();
   const date = new Date(timestamp);
   const seconds = Math.floor((now - date) / 1000);
+  
   if (seconds < 60) return 'Just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)} hrs ago`;
-  return `${Math.floor(seconds / 86400)} days ago`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+  
+  return date.toLocaleDateString();
 }
 
 export default NotificationDropdownContent;

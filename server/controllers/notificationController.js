@@ -9,8 +9,11 @@ import { io, connectedUsers } from '../server.js';
 export const getNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find({ user: req.user._id })
+      .populate('relatedUser', 'username _id')
       .sort({ createdAt: -1 })
-      .limit(100); // Limit to latest 100
+      .limit(50); // Limit to latest 50 notifications
+    
+    console.log(`📨 Fetching notifications for user ${req.user._id}:`, notifications.length);
     res.json(notifications);
   } catch (error) {
     console.error('Error fetching notifications:', error);
@@ -25,10 +28,12 @@ export const getNotifications = async (req, res) => {
  */
 export const markAllRead = async (req, res) => {
   try {
-    await Notification.updateMany(
+    const result = await Notification.updateMany(
       { user: req.user._id, isRead: false },
       { $set: { isRead: true } }
     );
+    
+    console.log(`✅ Marked ${result.modifiedCount} notifications as read for user ${req.user._id}`);
     
     // Emit socket event to update UI in real-time
     const userSocketId = connectedUsers.get(req.user._id.toString());
@@ -36,7 +41,7 @@ export const markAllRead = async (req, res) => {
       io.to(userSocketId).emit('notificationsMarkedRead');
     }
     
-    res.sendStatus(204);
+    res.json({ message: 'All notifications marked as read', modifiedCount: result.modifiedCount });
   } catch (error) {
     console.error('Error marking notifications as read:', error);
     res.status(500).json({ message: 'Failed to mark notifications as read' });
@@ -62,6 +67,14 @@ export const markNotificationAsRead = async (req, res) => {
       return res.status(404).json({ message: 'Notification not found' });
     }
     
+    console.log(`✅ Marked notification ${id} as read for user ${req.user._id}`);
+    
+    // Emit socket event for single notification read
+    const userSocketId = connectedUsers.get(req.user._id.toString());
+    if (userSocketId) {
+      io.to(userSocketId).emit('notificationRead', id);
+    }
+    
     res.json(notification);
   } catch (error) {
     console.error('Error marking notification as read:', error);
@@ -76,6 +89,12 @@ export const markNotificationAsRead = async (req, res) => {
  */
 export const createNotification = async ({ userId, type, message, link = '', relatedUser = null }) => {
   try {
+    // Don't create notification if user is trying to notify themselves
+    if (relatedUser && userId.toString() === relatedUser.toString()) {
+      console.log('🚫 Skipping self-notification');
+      return null;
+    }
+
     const newNotification = await Notification.create({
       user: userId,
       type,
@@ -84,10 +103,22 @@ export const createNotification = async ({ userId, type, message, link = '', rel
       relatedUser,
     });
 
+    // Populate the relatedUser field for the response
+    await newNotification.populate('relatedUser', 'username _id');
+
+    console.log(`📨 Created notification for user ${userId}:`, {
+      type,
+      message,
+      relatedUser: relatedUser?.toString()
+    });
+
     // Emit real-time notification via Socket.IO
     const userSocketId = connectedUsers.get(userId.toString());
     if (userSocketId) {
+      console.log(`🔌 Sending real-time notification to socket ${userSocketId}`);
       io.to(userSocketId).emit('notification', newNotification);
+    } else {
+      console.log(`🔌 User ${userId} not connected to socket`);
     }
 
     return newNotification;
@@ -115,6 +146,7 @@ export const deleteNotification = async (req, res) => {
       return res.status(404).json({ message: 'Notification not found' });
     }
     
+    console.log(`🗑️ Deleted notification ${id} for user ${req.user._id}`);
     res.json({ message: 'Notification deleted successfully' });
   } catch (error) {
     console.error('Error deleting notification:', error);
