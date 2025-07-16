@@ -4,3 +4,5 @@ export const COMMENT_API_URL = `${API_BASE_URL}/comments`;
 export const POST_API_URL = `${API_BASE_URL}/posts`;
 export const COMMUNITY_API_URL = `${API_BASE_URL}/communities`;
 export const USER_API_URL = `${API_BASE_URL}/users`
+export const NOTIFICATION_API_URL = `${API_BASE_URL}/notifications`;
+
