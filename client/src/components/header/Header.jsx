@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import SearchBar from '../SearchBar/SearchBar';
 import {
-    MessageCircle, Plus, Bell, UserCircle, Star, Heart,
-    LogIn, LogOut, Home, Compass, Info, Sun, Moon, Settings,
+    MessageCircle, Search, Plus, Bell, UserCircle, Star, Heart, // Added Search icon back as it's needed for the toggle button
+    LogIn, LogOut, Home, Compass, Info, Sun, Moon, Settings, X, // X is from SearchBar, not needed in Header unless used elsewhere
     LayoutDashboard, FileText, Bookmark, Shield, BarChart3,
     Flag, TrendingUp, Link as LinkIcon, User, Tag, Edit, Clock, Filter,
     ChevronDown,
@@ -32,7 +32,6 @@ const Header = ({ searchQuery, onSearchChange }) => {
     const userDropdownRef = useRef(null);
     const mobileMenuRef = useRef(null);
     const mobileMenuToggleButtonRef = useRef(null);
-    // REMOVED: const searchInputRef = useRef(null); // No longer needed here
 
     const user = useSelector(state => state.auth.userInfo);
 
@@ -50,7 +49,7 @@ const Header = ({ searchQuery, onSearchChange }) => {
     useEffect(() => {
         setIsMobileMenuOpen(false);
         setIsUserDropdownOpen(false);
-        setIsSearchExpanded(false);
+        setIsSearchExpanded(false); // Collapse search on route change
     }, [location.pathname]);
 
     useEffect(() => {
@@ -67,9 +66,6 @@ const Header = ({ searchQuery, onSearchChange }) => {
                 setIsMobileMenuOpen(false);
             }
             // Logic for clicking outside searchbar is now handled within SearchBar component
-            // REMOVED: if (isSearchExpanded && searchInputRef.current && !searchInputRef.current.closest('.header-search').contains(event.target)) {
-            // REMOVED:     setIsSearchExpanded(false);
-            // REMOVED: }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
@@ -80,13 +76,6 @@ const Header = ({ searchQuery, onSearchChange }) => {
         document.body.style.overflow = (isMobileMenuOpen || (isSearchExpanded && window.innerWidth < 768)) ? 'hidden' : '';
         return () => (document.body.style.overflow = '');
     }, [isMobileMenuOpen, isSearchExpanded]);
-
-    // REMOVED: useEffect for searchInputRef focus is now in SearchBar component
-    // REMOVED: useEffect(() => {
-    // REMOVED:     if (isSearchExpanded && searchInputRef.current) {
-    // REMOVED:         searchInputRef.current.focus();
-    // REMOVED:     }
-    // REMOVED: }, [isSearchExpanded]);
 
     const isActive = (path) => location.pathname === path;
 
@@ -117,7 +106,7 @@ const Header = ({ searchQuery, onSearchChange }) => {
         const icons = {
             Home, Compass, Info, LayoutDashboard, FileText, Bookmark,
             Shield, BarChart3, Flag, TrendingUp, Link: LinkIcon, User, Tag, Edit,
-            Star, Heart, MessageCircle, Clock, Settings, LogIn, LogOut, Plus, Bell, UserCircle, Sun, Moon
+            Star, Heart, MessageCircle, Clock, Settings, LogIn, LogOut, Plus, Bell, UserCircle, Sun, Moon, Search
         };
         return icons[iconName] || Home;
     };
@@ -179,13 +168,16 @@ const Header = ({ searchQuery, onSearchChange }) => {
                     })}
                 </nav>
 
-                {/* Smart Search - Desktop & Mobile (integrated for a consistent look) */}
-                <SearchBar
-                    searchQuery={searchQuery}
-                    onSearchChange={onSearchChange}
-                    isSearchExpanded={isSearchExpanded}
-                    setIsSearchExpanded={setIsSearchExpanded}
-                />
+                {/* Search Bar (Desktop - always present on desktop, expanded for mobile) */}
+                {/* This is the standard position for the search bar, visible on desktop */}
+                <div className="header-desktop-search">
+                    <SearchBar
+                        searchQuery={searchQuery}
+                        onSearchChange={onSearchChange}
+                        isSearchExpanded={isSearchExpanded} // desktop search is controlled by css for width
+                        setIsSearchExpanded={setIsSearchExpanded}
+                    />
+                </div>
 
                 {/* Desktop Actions */}
                 <div className="header-actions">
@@ -292,20 +284,13 @@ const Header = ({ searchQuery, onSearchChange }) => {
 
                 {/* Mobile Toggles (Search, Notifications, Menu) */}
                 <div className="header-mobile-toggles">
-                    {/* Mobile Search Button (toggles the full-width search overlay) */}
-                    <motion.button
-                        className="action-button mobile-search-button"
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-                        aria-label="Toggle search"
-                    >
-                        <SearchBar
-                            searchQuery={searchQuery}
-                            onSearchChange={onSearchChange}
-                            isSearchExpanded={isSearchExpanded}
-                            setIsSearchExpanded={setIsSearchExpanded}
-                        />
-                    </motion.button>
+                    
+                    <SearchBar
+                        searchQuery={searchQuery}
+                        onSearchChange={onSearchChange}
+                        isSearchExpanded={isSearchExpanded} 
+                        setIsSearchExpanded={setIsSearchExpanded}
+                    />
 
                     {/* Mobile Notification Bell (handled by NotificationDropdown component) */}
                     <div className="mobile-notification-toggle">
@@ -329,6 +314,17 @@ const Header = ({ searchQuery, onSearchChange }) => {
                     </button>
                 </div>
             </div>
+
+            {/* Mobile Expanded Search Bar - RENDERED OUTSIDE OF THE BUTTONS */}
+            {/* This div will conditionally display the SearchBar full-width on mobile */}
+            {isSearchExpanded && window.innerWidth < 768 && (
+                <SearchBar
+                    searchQuery={searchQuery}
+                    onSearchChange={onSearchChange}
+                    isSearchExpanded={isSearchExpanded}
+                    setIsSearchExpanded={setIsSearchExpanded}
+                />
+            )}
 
             {/* Mobile Menu Sidebar */}
             <AnimatePresence>
@@ -370,7 +366,6 @@ const Header = ({ searchQuery, onSearchChange }) => {
                                     </Link>
                                 </motion.div>
                             )}
-
                         </motion.nav>
 
                         <div className="mobile-menu-footer">

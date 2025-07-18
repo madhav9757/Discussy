@@ -161,6 +161,8 @@
     }
 
     .header-search-input-wrapper {
+        position: fixed;
+        top: 6px;
         width: calc(100% - var(--padding-inline) * 2); /* Account for padding */
         margin: 0 var(--padding-inline);
         background-color: var(--color-surface);
