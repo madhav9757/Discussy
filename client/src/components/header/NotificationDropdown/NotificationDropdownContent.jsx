@@ -1,23 +1,18 @@
-// src/components/NotificationDropdown/NotificationDropdownContent.jsx
-
+// src/components/notifications/NotificationDropdownContent.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, Heart, Info, UserPlus, FileText } from 'lucide-react';
-import { useSelector } from 'react-redux';
 import {
+  useGetNotificationsQuery,
   useMarkAllNotificationsAsReadMutation,
-  notificationsApi,
+  useMarkNotificationAsReadMutation // Import this hook
 } from '../../../app/api/notificationsApi.js';
 import './NotificationDropdown.css';
 
 const NotificationDropdownContent = ({ onClose }) => {
-  // Get notifications from RTK Query cache
-  const notifications = useSelector((state) => {
-    const notificationsData = notificationsApi.endpoints.getNotifications.select()(state);
-    return notificationsData?.data || [];
-  });
-  
-  const [markAllRead, { isLoading }] = useMarkAllNotificationsAsReadMutation();
+  const { data: notifications = [], isLoading, error } = useGetNotificationsQuery();
+  const [markAllRead, { isLoading: isMarkingAllRead }] = useMarkAllNotificationsAsReadMutation();
+  const [markAsRead] = useMarkNotificationAsReadMutation(); // Initialize the mutation hook
 
   const handleMarkAllRead = async () => {
     try {
@@ -25,6 +20,16 @@ const NotificationDropdownContent = ({ onClose }) => {
       console.log('✅ All notifications marked as read');
     } catch (err) {
       console.error('❌ Failed to mark notifications as read', err);
+    }
+  };
+
+  // New function to mark an individual notification as read
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await markAsRead(notificationId).unwrap(); // Use .unwrap() to catch errors
+      console.log(`✅ Notification ${notificationId} marked as read`);
+    } catch (err) {
+      console.error(`❌ Failed to mark notification ${notificationId} as read`, err);
     }
   };
 
@@ -62,6 +67,30 @@ const NotificationDropdownContent = ({ onClose }) => {
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
+  const sortedNotifications = [...notifications].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const unreadNotifications = sortedNotifications.filter(n => !n.isRead);
+  const readNotifications = sortedNotifications.filter(n => n.isRead);
+
+  const DISPLAY_LIMIT = 15; // Set a reasonable display limit for the dropdown. You can adjust this.
+
+  let notificationsToDisplay = [];
+
+  // Add all unread notifications first
+  notificationsToDisplay = [...unreadNotifications];
+
+  // Fill remaining slots with recent read notifications if available
+  const remainingSlots = DISPLAY_LIMIT - notificationsToDisplay.length;
+  if (remainingSlots > 0) {
+    notificationsToDisplay = [
+      ...notificationsToDisplay,
+      ...readNotifications.slice(0, remainingSlots)
+    ];
+  }
+  // Ensure the final list doesn't exceed the display limit
+  notificationsToDisplay = notificationsToDisplay.slice(0, DISPLAY_LIMIT);
+
+
   return (
     <>
       <div className="notifications-dropdown-header">
@@ -70,26 +99,33 @@ const NotificationDropdownContent = ({ onClose }) => {
           <button
             className="notifications-dropdown-mark-all"
             onClick={handleMarkAllRead}
-            disabled={isLoading}
+            disabled={isMarkingAllRead}
           >
-            {isLoading ? 'Marking...' : `Mark all read (${unreadCount})`}
+            {isMarkingAllRead ? 'Marking...' : `Mark all read (${unreadCount})`}
           </button>
         )}
       </div>
 
       <div className="notifications-dropdown-list">
-        {notifications.length > 0 ? (
-          notifications.slice(0, 10).map((notif) => (
+        {notificationsToDisplay.length > 0 ? (
+          notificationsToDisplay.map((notif) => (
             <Link
               to={notif.link || '#'}
               key={notif._id}
               className={`notification-item ${!notif.isRead ? 'notification-item--unread' : ''}`}
-              onClick={onClose}
+              onClick={(e) => {
+                // Prevent event bubbling if the link itself is clicked directly
+                // and ensure the dropdown closes *after* the navigation happens or is initiated.
+                if (!notif.isRead) {
+                  handleMarkAsRead(notif._id);
+                }
+                onClose(); // Close the dropdown after interaction
+              }}
             >
               <div className="notification-item-avatar">
                 <img
-                  src={notif.relatedUser?.username 
-                    ? `https://api.dicebear.com/7.x/pixel-art/svg?seed=${notif.relatedUser.username}` 
+                  src={notif.relatedUser?.username
+                    ? `https://api.dicebear.com/7.x/pixel-art/svg?seed=${notif.relatedUser.username}`
                     : `https://api.dicebear.com/7.x/pixel-art/svg?seed=${notif.type}`
                   }
                   alt="User avatar"
@@ -132,12 +168,12 @@ function formatTimeAgo(timestamp) {
   const now = new Date();
   const date = new Date(timestamp);
   const seconds = Math.floor((now - date) / 1000);
-  
+
   if (seconds < 60) return 'Just now';
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
   if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-  
+
   return date.toLocaleDateString();
 }
 

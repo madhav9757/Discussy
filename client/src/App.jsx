@@ -13,7 +13,7 @@ import socket from './socket';
 
 import {
   useGetNotificationsQuery,
-  notificationsApi,
+  notificationsApi,  
 } from './app/api/notificationsApi.js';
 
 function App() {
@@ -55,7 +55,8 @@ function App() {
     refetch: refetchNotifications
   } = useGetNotificationsQuery(undefined, {
     skip: !userInfo?._id,
-    pollingInterval: 30000, // Poll every 30 seconds as backup
+    pollingInterval: 30000, // Poll every 30 seconds
+    refetchOnMountOrArgChange: true, // Refetch on component mount and arg changes
   });
 
   // ✅ WebSocket setup for real-time notifications
@@ -70,16 +71,13 @@ function App() {
       const handleNewNotification = (newNotif) => {
         console.log('📨 New notification received:', newNotif);
         
-        // Show toast notification
         toast.success(newNotif.message, {
           duration: 4000,
           position: 'top-right',
         });
 
-        // Update RTK Query cache by adding new notification to the beginning
         dispatch(
           notificationsApi.util.updateQueryData('getNotifications', undefined, (draft) => {
-            // Check if notification already exists to prevent duplicates
             const exists = draft.find(n => n._id === newNotif._id);
             if (!exists) {
               draft.unshift(newNotif);
@@ -88,7 +86,6 @@ function App() {
         );
       };
 
-      // Listen for notifications marked as read
       const handleNotificationsMarkedRead = () => {
         console.log('✅ All notifications marked as read');
         dispatch(
@@ -98,7 +95,6 @@ function App() {
         );
       };
 
-      // Listen for single notification marked as read
       const handleNotificationRead = (notificationId) => {
         console.log('✅ Notification marked as read:', notificationId);
         dispatch(
@@ -115,7 +111,6 @@ function App() {
       socket.on('notificationsMarkedRead', handleNotificationsMarkedRead);
       socket.on('notificationRead', handleNotificationRead);
 
-      // Cleanup on unmount or user change
       return () => {
         console.log('🔌 Disconnecting user from socket:', userInfo._id);
         socket.off('notification', handleNewNotification);
@@ -126,7 +121,6 @@ function App() {
     }
   }, [userInfo?._id, dispatch]);
 
-  // ✅ Handle socket connection status
   useEffect(() => {
     const handleConnect = () => {
       console.log('🔌 Socket connected');

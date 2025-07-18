@@ -34,7 +34,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 button {
-  background-color: var(--primary-color);
   color: var(--button-text-color); /* Use specific button text color variable */
   border: none;
   padding: 10px 20px;

@@ -48,7 +48,8 @@
 /* Dropdown Menu Container */
 .notifications-dropdown-menu {
     position: absolute;
-    top: calc(100% + 10px); /* Position below the button with a gap */
+    /* OLD: top: calc(100% + 10px); */
+    top: calc(100% + 20px); /* Increased gap from 10px to 20px */
     right: 0; /* Align to the right of the button */
     width: 350px; /* Fixed width for the dropdown */
     max-height: 450px; /* Max height for scrollability */

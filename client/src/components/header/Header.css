@@ -1,96 +1,43 @@
-/*
-  Header.css
-
-  This file defines the styling for the Header component, implementing a modern, clean,
-  and responsive design based on the provided principles.
-
-  Principles applied:
-  - Flexbox for layout control.
-  - CSS Variables for theme management (light/dark mode).
-  - Minimalistic design with subtle shadows and transitions.
-  - Responsive design using media queries for mobile-first approach.
-  - Semantic class names for clarity.
-  - Emphasis on accessibility with focus states and aria attributes (handled in JSX).
-*/
-
-/* ===================================== */
-/* 1. Base Styles & Global Variables     */
-/* ===================================== */
-
-/* Root variables for theme management */
 :root {
     --header-height: 60px;
-    /* Standard header height */
     --padding-inline: 20px;
-    /* Horizontal padding for header container */
 
-    /* Light Theme Colors */
     --color-primary: #3b82f6;
-    /* Blue-500 */
     --color-primary-dark: #2563eb;
-    /* Blue-600 */
     --color-text-primary: #1f2937;
-    /* Gray-900 */
     --color-text-secondary: #4b5563;
-    /* Gray-700 */
     --color-background: #ffffff;
     --color-surface: #f9fafb;
-    /* Gray-50 */
     --color-border: #e5e7eb;
-    /* Gray-200 */
     --color-shadow: rgba(0, 0, 0, 0.05);
-    /* Subtle shadow */
     --color-hover-bg: #f3f4f6;
-    /* Gray-100 */
     --color-active-bg: #e5e7eb;
-    /* Gray-200 */
     --color-notification-badge: #ef4444;
-    /* Red-500 */
     --color-unread-dot: #3b82f6;
-    /* Primary blue for unread dot */
     --color-danger: #ef4444;
-    /* Red-500 */
     --color-danger-hover: #dc2626;
-    /* Red-600 */
 }
 
-/* Dark Theme Colors (applied when data-theme="dark") */
 [data-theme="dark"] {
     --color-primary: #60a5fa;
-    /* Blue-400 */
     --color-primary-dark: #3b82f6;
-    /* Blue-500 */
     --color-text-primary: #e5e7eb;
-    /* Gray-200 */
     --color-text-secondary: #9ca3af;
-    /* Gray-400 */
     --color-background: #111827;
-    /* Gray-900 */
     --color-surface: #1f2937;
-    /* Gray-800 */
     --color-border: #374151;
-    /* Gray-700 */
     --color-shadow: rgba(0, 0, 0, 0.3);
-    /* More prominent shadow in dark mode */
     --color-hover-bg: #374151;
-    /* Gray-700 */
     --color-active-bg: #4b5563;
-    /* Gray-600 */
     --color-notification-badge: #dc2626;
-    /* Red-600 */
     --color-unread-dot: #60a5fa;
-    /* Primary blue for unread dot */
     --color-danger: #ef4444;
-    /* Red-500 */
     --color-danger-hover: #dc2626;
-    /* Red-600 */
 }
 
-/* Base styles for HTML elements for consistency */
 body {
     margin: 0;
     font-family: 'Inter', sans-serif;
-    /* Recommended modern sans-serif font */
     background-color: var(--color-background);
     color: var(--color-text-primary);
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -98,7 +45,6 @@ body {
 
 a {
     color: inherit;
-    /* Inherit color from parent by default */
     text-decoration: none;
 }
 
@@ -117,10 +63,6 @@ ul {
     margin: 0;
 }
 
-/* ===================================== */
-/* 2. Header Main Container            */
-/* ===================================== */
-
 .header-main {
     position: fixed;
     top: 0;
@@ -131,7 +73,6 @@ ul {
     z-index: 1000;
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     box-shadow: none;
-    /* No shadow by default */
 }
 
 .header-main.scrolled {
@@ -143,7 +84,6 @@ ul {
     background-color: rgba(17, 24, 39, 0.75);
 }
 
-/* When search is active on mobile, hide overflow to prevent scroll issues */
 .header-main.search-active {
     overflow: hidden;
 }
@@ -155,16 +95,9 @@ ul {
     height: var(--header-height);
     padding: 0 var(--padding-inline);
     max-width: 1400px;
-    /* Max width for content */
     margin: 0 auto;
-    /* Center the header content */
     position: relative;
-    /* For search overlay positioning */
 }
-
-/* ===================================== */
-/* 3. Logo Section                     */
-/* ===================================== */
 
 .header-logo-section {
     display: flex;
@@ -172,12 +105,9 @@ ul {
     gap: 8px;
     font-weight: 700;
     font-size: 1.25rem;
-    /* 20px */
     color: var(--color-primary);
     flex-shrink: 0;
-    /* Prevent logo from shrinking */
     padding: 8px 0;
-    /* Add some padding for touch target on mobile */
 }
 
 .header-logo-icon {
@@ -185,22 +115,15 @@ ul {
     height: 24px;
 }
 
-/* Hide logo text on small screens */
 .header-logo-text {
     display: block;
 }
-
-/* ===================================== */
-/* 4. Desktop Navigation               */
-/* ===================================== */
 
 .header-nav {
     display: flex;
     align-items: center;
     gap: 24px;
-    /* Space between nav links */
     margin-left: 32px;
-    /* Space from logo */
 }
 
 .header-nav-link {
@@ -236,32 +159,21 @@ ul {
     font-weight: 600;
 }
 
-/* Active indicator for navigation links */
 .nav-indicator {
     position: absolute;
     bottom: -1px;
-    /* Position it on the bottom border */
     left: 0;
     right: 0;
     height: 2px;
     background-color: var(--color-primary);
     border-radius: 9999px;
-    /* Pill shape */
 }
-
-
-/* ===================================== */
-/* 5. Smart Search Bar                 */
-/* ===================================== */
 
 .header-search {
     flex-grow: 1;
-    /* Allows search to take available space */
     max-width: 500px;
-    /* Max width for desktop search */
     margin: 0 20px;
     position: relative;
-    /* For dropdown positioning */
 }
 
 .header-search-input-wrapper {
@@ -278,7 +190,6 @@ ul {
 .header-search-input-wrapper:focus-within {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent);
-    /* Focus ring */
 }
 
 .header-search-icon {
@@ -292,12 +203,9 @@ ul {
     border: none;
     background: transparent;
     font-size: 0.9375rem;
-    /* 15px */
     color: var(--color-text-primary);
     padding: 0;
-    /* Remove default input padding */
     outline: none;
-    /* Remove default focus outline */
 }
 
 .header-search input::placeholder {
@@ -306,7 +214,6 @@ ul {
 
 .header-search-shortcut {
     font-size: 0.75rem;
-    /* 12px */
     background-color: var(--color-hover-bg);
     border: 1px solid var(--color-border);
     border-radius: 4px;
@@ -333,11 +240,6 @@ ul {
 .search-clear-button:hover {
     background-color: var(--color-border);
 }
-
-
-/* ===================================== */
-/* 6. Desktop Actions (Right Side)     */
-/* ===================================== */
 
 .header-actions {
     display: flex;
@@ -387,7 +289,6 @@ ul {
     border-radius: 50%;
     padding: 2px 6px;
     font-size: 0.6875rem;
-    /* 11px */
     font-weight: 600;
     min-width: 20px;
     height: 20px;
@@ -421,20 +322,15 @@ ul {
     height: 20px;
 }
 
-/* User Profile Toggle */
 .user-toggle {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 6px 10px;
-    /* Slightly more padding for the user button */
     height: 40px;
-    /* Match height of other action buttons */
     width: auto;
-    /* Allow width to adapt to username */
     border-radius: 8px;
     background-color: var(--color-surface);
-    /* Distinct background */
     color: var(--color-text-primary);
     transition: background-color 0.2s ease;
 }
@@ -457,7 +353,6 @@ ul {
 .header-username {
     font-weight: 500;
     font-size: 0.9375rem;
-    /* 15px */
 }
 
 .header-chevron {
@@ -469,7 +364,6 @@ ul {
     transform: rotate(180deg);
 }
 
-/* Auth buttons (Login/Sign Up) */
 .header-auth-buttons {
     display: flex;
     align-items: center;
@@ -508,22 +402,14 @@ ul {
     background-color: var(--color-primary-dark);
 }
 
-/* Theme Toggle (Desktop specific) */
 .theme-toggle-desktop {
     display: flex;
-    /* Hide by default on mobile */
 }
-
-/* ===================================== */
-/* 7. Dropdown Menus (User, Notifications, Search Suggestions) */
-/* ===================================== */
 
 .header-dropdown {
     position: absolute;
     top: calc(var(--header-height) - 10px);
-    /* Position slightly above bottom of header for better UX */
     right: 0;
-    /* Default position for right-aligned dropdowns */
     background-color: var(--color-background);
     border: 1px solid var(--color-border);
     border-radius: 8px;
@@ -531,27 +417,19 @@ ul {
     padding: 10px 0;
     min-width: 240px;
     max-height: calc(100vh - var(--header-height) - 20px);
-    /* Max height to prevent overflow */
     overflow-y: auto;
-    /* Enable scrolling for long lists */
     transform-origin: top right;
     z-index: 1050;
-    /* Above header */
 }
 
-/* Specific adjustments for search dropdown */
 .header-dropdown.search-dropdown {
     left: 0;
-    /* Align with search input */
     right: auto;
     width: 100%;
     top: calc(100% + 5px);
-    /* Position below the search input */
     transform-origin: top center;
     padding: 0;
-    /* Remove internal padding, sections handle it */
 }
-
 
 .dropdown-section {
     padding: 8px 16px;
@@ -564,7 +442,6 @@ ul {
 
 .dropdown-section h4 {
     font-size: 0.8125rem;
-    /* 13px */
     color: var(--color-text-secondary);
     margin: 0 0 8px 0;
     text-transform: uppercase;
@@ -579,10 +456,8 @@ ul {
     border-radius: 6px;
     color: var(--color-text-primary);
     font-size: 0.9375rem;
-    /* 15px */
     transition: background-color 0.2s ease;
     white-space: nowrap;
-    /* Prevent text wrapping */
 }
 
 .dropdown-item:hover {
@@ -612,7 +487,6 @@ ul {
     color: white;
 }
 
-/* User Dropdown Specifics */
 .user-dropdown-header {
     display: flex;
     align-items: center;
@@ -634,22 +508,17 @@ ul {
 
 .user-dropdown-email {
     font-size: 0.8125rem;
-    /* 13px */
     color: var(--color-text-secondary);
     margin: 2px 0 0 0;
 }
 
-/* Notification Dropdown Specifics */
 .notifications-dropdown {
     min-width: 300px;
     max-width: 380px;
-    /* Allow wider for notification content */
     right: 0;
     left: auto;
-    /* Ensure it stays right-aligned */
     transform-origin: top right;
     padding: 0;
-    /* Remove default padding for internal sections */
 }
 
 .notifications-dropdown-header {
@@ -663,13 +532,11 @@ ul {
 .notifications-dropdown-header h3 {
     margin: 0;
     font-size: 1.125rem;
-    /* 18px */
     color: var(--color-text-primary);
 }
 
 .notifications-dropdown-mark-all {
     font-size: 0.875rem;
-    /* 14px */
     color: var(--color-primary);
     font-weight: 500;
     padding: 4px 8px;
@@ -683,7 +550,6 @@ ul {
 
 .notifications-dropdown-list {
     max-height: 300px;
-    /* Max height for scrollable list */
     overflow-y: auto;
     padding: 0;
 }
@@ -691,7 +557,6 @@ ul {
 .notification-item {
     display: flex;
     align-items: flex-start;
-    /* Align avatar and text */
     gap: 12px;
     padding: 12px 16px;
     border-bottom: 1px solid var(--color-border);
@@ -709,7 +574,6 @@ ul {
 
 .notification-item--unread {
     background-color: color-mix(in srgb, var(--color-primary) 5%, transparent);
-    /* Light background for unread */
     font-weight: 500;
 }
 
@@ -743,19 +607,15 @@ ul {
     color: white;
 }
 
-/* Blue */
 .notification-item-type--like {
     background-color: #ef4444;
     color: white;
 }
 
-/* Red */
 .notification-item-type--system {
     background-color: #f59e0b;
     color: white;
 }
-
-/* Amber */
 
 .notification-item-type .notification-type-icon {
     width: 12px;
@@ -769,14 +629,12 @@ ul {
 .notification-item-message {
     margin: 0;
     font-size: 0.9375rem;
-    /* 15px */
     color: var(--color-text-primary);
     line-height: 1.4;
 }
 
 .notification-item-time {
     font-size: 0.75rem;
-    /* 12px */
     color: var(--color-text-secondary);
     margin-top: 4px;
     display: block;
@@ -801,7 +659,6 @@ ul {
 
 .notifications-dropdown-view-all {
     font-size: 0.875rem;
-    /* 14px */
     color: var(--color-primary);
     font-weight: 500;
     display: inline-block;
@@ -814,26 +671,20 @@ ul {
     background-color: var(--color-hover-bg);
 }
 
-
-/* Search Suggestions specific styles */
 .search-dropdown .dropdown-section {
     padding: 0;
-    /* Override default section padding */
     border-bottom: none;
 }
 
 .search-dropdown .dropdown-section h4 {
     padding: 10px 16px 8px;
     margin-bottom: 0;
-    /* Remove margin below h4 */
     background-color: var(--color-surface);
-    /* Slightly different background for header */
     border-bottom: 1px solid var(--color-border);
 }
 
 .search-dropdown .dropdown-section ul {
     padding: 8px 0;
-    /* Padding for the list itself */
 }
 
 .search-dropdown .dropdown-section li {
@@ -842,7 +693,6 @@ ul {
     gap: 10px;
     padding: 8px 16px;
     font-size: 0.9375rem;
-    /* 15px */
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
@@ -863,19 +713,13 @@ ul {
     color: var(--color-text-secondary);
 }
 
-
-/* ===================================== */
-/* 8. Mobile Toggles & Menu            */
-/* ===================================== */
-
 .header-mobile-toggles {
     display: none;
-    /* Hidden by default on desktop */
     align-items: center;
-    gap: 10px;
+    gap: 5px;
+    padding-right: 10px;
 }
 
-/* Hamburger Menu Button */
 .mobile-menu-button {
     display: flex;
     flex-direction: column;
@@ -887,10 +731,17 @@ ul {
     padding: 0;
     cursor: pointer;
     z-index: 1100;
-    /* Ensure it's above other mobile elements */
     flex-shrink: 0;
     position: relative;
-    /* For animation origin */
+}
+
+.mobile-notification-toggle {
+    background: none ;
+    position: relative;
+    z-index: 1100;
+    height: auto;
+    width: auto;
+    flex-shrink: 0;
 }
 
 .mobile-menu-button-line {
@@ -914,7 +765,6 @@ ul {
     transform: translateY(-8px) rotate(-45deg);
 }
 
-/* Mobile Menu Sidebar */
 .mobile-menu-sidebar {
     position: fixed;
     top: auto;
@@ -959,7 +809,6 @@ ul {
     background-color: var(--color-hover-bg);
 }
 
-
 .mobile-nav-list {
     display: flex;
     flex-direction: column;
@@ -973,7 +822,6 @@ ul {
     padding: 12px 16px;
     border-radius: 8px;
     font-size: 1.125rem;
-    /* 18px */
     font-weight: 500;
     color: var(--color-text-primary);
     transition: background-color 0.2s ease;
@@ -992,14 +840,11 @@ ul {
     width: 22px;
     height: 22px;
     color: var(--color-text-secondary);
-    /* Default icon color */
 }
 
 .mobile-nav-link.active .header-icon {
     color: var(--color-primary);
-    /* Active icon color */
 }
-
 
 .mobile-menu-footer {
     padding-top: 20px;
@@ -1091,7 +936,6 @@ ul {
     background-color: var(--color-surface);
     transition: background-color 0.2s ease;
     justify-content: flex-start;
-    /* Align text to start */
 }
 
 .mobile-logout-button .header-icon {
@@ -1107,27 +951,18 @@ ul {
     color: white;
 }
 
-
-/* ===================================== */
-/* 9. Responsive Adjustments           */
-/* ===================================== */
-
-/* Small screens (e.g., up to 768px, typical tablet portrait/mobile landscape) */
 @media (max-width: 768px) {
     .header-logo-text {
         display: none;
-        /* Hide logo text on small screens */
     }
 
     .header-nav,
     .header-actions {
         display: none;
-        /* Hide desktop nav and actions */
     }
 
     .header-mobile-toggles {
         display: flex;
-        /* Show mobile toggles */
     }
 
     .header-search {
@@ -1136,122 +971,94 @@ ul {
         left: 0;
         width: 100%;
         height: var(--header-height);
-        /* Keep search input visible in header normally */
         margin: 0;
         padding: 0 var(--padding-inline);
         background-color: var(--color-background);
         box-sizing: border-box;
         transition: transform 0.3s ease, opacity 0.3s ease;
         z-index: 900;
-        /* Below toggles, above main header content */
         display: flex;
-        /* Ensure flex for input wrapper */
         align-items: center;
     }
 
     .header-search-input-wrapper {
         flex-grow: 1;
-        /* Allow input wrapper to take full width */
     }
 
     .header-search-shortcut {
         display: none;
-        /* Hide shortcut on mobile */
     }
 
-    /* Full-screen search overlay for mobile */
     .header-main.search-active .header-search {
         position: fixed;
-        /* Make it fixed to overlay */
         top: 0;
         left: 0;
         width: 100%;
         height: 100vh;
-        /* Full screen height */
         background-color: var(--color-background);
         display: flex;
         flex-direction: column;
-        /* Stack input and suggestions */
         align-items: flex-start;
         padding: 20px;
-        /* More padding for full screen */
         box-sizing: border-box;
         transform: translateY(0%);
-        /* Ensure it's visible */
         opacity: 1;
         z-index: 1001;
-        /* Above mobile menu */
     }
 
     .header-main.search-active .header-search .header-search-input-wrapper {
         width: 100%;
         margin-bottom: 15px;
-        /* Space between input and suggestions */
         padding: 12px 16px;
-        /* Larger padding for search input */
     }
 
     .header-main.search-active .header-search input[type="text"] {
         font-size: 1.125rem;
-        /* Larger font for mobile search */
     }
 
-    /* Position the mobile search icon properly when expanded */
     .header-main.search-active .header-search-icon {
         margin-right: 12px;
         width: 24px;
         height: 24px;
     }
 
-    /* Adjust search clear button size for mobile */
     .header-main.search-active .search-clear-button {
         width: 32px;
         height: 32px;
     }
 
-
-    /* Hide non-search elements when search is active */
     .header-main.search-active .header-logo-section,
     .header-main.search-active .header-mobile-toggles {
         display: none;
     }
 
-    /* Search dropdown within the full-screen search overlay */
     .header-main.search-active .header-dropdown.search-dropdown {
         position: static;
-        /* Let it flow naturally within the flex container */
         width: 100%;
         max-width: none;
         box-shadow: none;
         border: none;
         border-radius: 0;
         background: transparent;
-        /* Blend with parent */
         overflow: visible;
         flex-grow: 1;
-        /* Take remaining height */
     }
 
     .header-main.search-active .header-dropdown.search-dropdown .dropdown-section h4 {
         background-color: transparent;
-        /* No distinct background for heading */
         border-bottom: none;
         padding: 10px 0 8px;
-        /* Adjust padding */
     }
 
     .header-main.search-active .header-dropdown.search-dropdown .dropdown-section ul {
         padding: 0;
-        /* Remove list padding */
     }
 
     .header-main.search-active .header-dropdown.search-dropdown .dropdown-section li {
         padding: 12px 0;
-        /* Adjust list item padding */
         font-size: 1rem;
     }
 
-    /* Overlay effect for mobile menu */
     .mobile-menu-sidebar.framer-visible~.header-main:not(.search-active) .header-container::before {
         content: '';
         position: fixed;
@@ -1260,53 +1067,40 @@ ul {
         right: 0;
         bottom: 0;
         background-color: rgba(0, 0, 0, 0.5);
-        /* Dimming overlay */
         z-index: 990;
-        /* Below the sidebar but above other content */
         pointer-events: none;
-        /* Allow clicks to pass through */
     }
 
-    /* Mobile specific dropdowns for notifications */
     .notifications-dropdown.mobile-notifications-dropdown {
         top: var(--header-height);
-        /* Position right below header */
         width: calc(100% - var(--padding-inline) * 2);
-        /* Full width minus padding */
         left: var(--padding-inline);
         right: var(--padding-inline);
         max-width: none;
         transform-origin: top center;
     }
 
-    /* Hide desktop theme toggle on mobile */
     .theme-toggle-desktop {
         display: none;
     }
 }
 
-/* Larger mobile devices / small tablets (e.g., 480px to 768px) */
 @media (min-width: 481px) and (max-width: 768px) {
     .header-logo-section {
         margin-right: 10px;
-        /* Add space between logo and search toggle */
     }
 }
 
-/* Larger screens (e.g., 769px and up) */
 @media (min-width: 769px) {
     .header-mobile-toggles {
         display: none;
-        /* Hide mobile toggles on desktop */
     }
 
     .mobile-menu-sidebar {
         display: none;
-        /* Hide mobile sidebar */
     }
 
     .header-search.header-search--expanded {
-        /* Reset any mobile-specific expansion styles */
         position: static;
         height: auto;
         padding: 0;
@@ -1320,20 +1114,17 @@ ul {
     }
 }
 
-/* Adjust padding for very small screens */
 @media (max-width: 400px) {
     :root {
         --padding-inline: 15px;
     }
 }
 
-/* Accessibility: Focus states */
 *:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 3px;
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
 }
 
-/* Remove outline for elements that handle focus styling internally (like active states) */
 .action-button.active:focus-visible,
 .header-search-input-wrapper:focus-within,
 .mobile-nav-link.active:focus-visible,
@@ -1342,10 +1133,8 @@ ul {
 .mobile-auth-register-button:focus-visible,
 .mobile-logout-button:focus-visible {
     outline: none;
-    /* Handled by specific styles */
 }
 
-/* Ensure icons have a baseline alignment */
 .header-icon {
     vertical-align: middle;
 }

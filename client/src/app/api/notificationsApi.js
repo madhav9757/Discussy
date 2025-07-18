@@ -38,5 +38,4 @@ export const {
   useMarkNotificationAsReadMutation,
 } = extendedNotificationsApi;
 
-// ✅ Export full API for cache access
 export const notificationsApi = extendedNotificationsApi;

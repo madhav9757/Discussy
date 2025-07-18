@@ -1,19 +1,31 @@
-// src/components/NotificationDropdown/NotificationDropdown.jsx
-
 import React, { useState, useRef, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import NotificationDropdownContent from './NotificationDropdownContent';
+import { useGetNotificationsQuery } from '../../../app/api/notificationsApi.js';
 import './NotificationDropdown.css';
 
 const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false); 
   const dropdownRef = useRef(null);
+  const navigate = useNavigate(); 
 
-  // ✅ Get unread notification count from Redux
-  const notifications = useSelector((state) => state.notifications.items);
+  const { data: notifications = [], isLoading, error } = useGetNotificationsQuery();
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  // ✅ Close dropdown if clicked outside
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkIsMobile(); 
+    window.addEventListener('resize', checkIsMobile); 
+
+    return () => {
+      window.removeEventListener('resize', checkIsMobile); 
+    };
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -21,15 +33,29 @@ const NotificationDropdown = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    if (!isMobile) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMobile]); 
+
+  const handleButtonClick = () => {
+    if (isMobile) {
+      navigate('/notifications'); 
+      setIsOpen(false); 
+    } else {
+      setIsOpen(!isOpen); 
+    }
+  };
 
   return (
     <div className="notification-dropdown-wrapper" ref={dropdownRef}>
       <button
         className="icon-button notification-button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleButtonClick} // Use the new handler
         aria-haspopup="true"
         aria-expanded={isOpen}
         aria-label={`You have ${unreadCount} new notifications`}
@@ -44,13 +70,14 @@ const NotificationDropdown = () => {
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
         </svg>
         {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
       </button>
 
-      {isOpen && (
+      {/* Render dropdown only if not mobile and it's open */}
+      {!isMobile && isOpen && (
         <div className="notifications-dropdown-menu">
           <NotificationDropdownContent onClose={() => setIsOpen(false)} />
         </div>
