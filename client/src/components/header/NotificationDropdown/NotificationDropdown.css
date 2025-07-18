@@ -42,6 +42,10 @@
     /* The button inside this wrapper will take .icon-button styles from Header.css */
 }
 
+.bell-icon {
+    stroke: var(--dropdown-text);
+}
+
 /* Dropdown Menu Container */
 .notifications-dropdown-menu {
     position: absolute;
