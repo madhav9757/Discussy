@@ -177,7 +177,7 @@
     top: 2px;
     right: 9px;
     background-color: var(--color-notification-badge);
-    color: var(--color-notification-badge);
+    color: var(--dropdown-text);
     border-radius: 50%;
     padding: 2px 6px;
     font-size: 0.6875rem;
