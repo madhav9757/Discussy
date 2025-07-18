@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
-
+import SearchBar from '../SearchBar/SearchBar';
 import {
-    MessageCircle, Search, Plus, Bell, UserCircle, Star, Heart,
-    LogIn, LogOut, Home, Compass, Info, Sun, Moon, Settings, X,
+    MessageCircle, Plus, Bell, UserCircle, Star, Heart,
+    LogIn, LogOut, Home, Compass, Info, Sun, Moon, Settings,
     LayoutDashboard, FileText, Bookmark, Shield, BarChart3,
     Flag, TrendingUp, Link as LinkIcon, User, Tag, Edit, Clock, Filter,
     ChevronDown,
@@ -20,10 +20,8 @@ const Header = ({ searchQuery, onSearchChange }) => {
     const location = useLocation();
     const dispatch = useDispatch();
 
-    // Local states
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-    // REMOVED: const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false);
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -32,47 +30,34 @@ const Header = ({ searchQuery, onSearchChange }) => {
     });
 
     const userDropdownRef = useRef(null);
-    // REMOVED: const notificationDropdownRef = useRef(null);
     const mobileMenuRef = useRef(null);
     const mobileMenuToggleButtonRef = useRef(null);
-    const searchInputRef = useRef(null);
+    // REMOVED: const searchInputRef = useRef(null); // No longer needed here
 
     const user = useSelector(state => state.auth.userInfo);
 
-    // REMOVED: Simulate unread notifications count
-    // const unreadNotificationsCount = 3;
-
-    // Scroll state for header shadow/blur
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Update theme attribute on HTML element and localStorage
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
         localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
     }, [isDarkMode]);
 
-    // Close overlays/dropdowns on route change
     useEffect(() => {
         setIsMobileMenuOpen(false);
         setIsUserDropdownOpen(false);
-        // REMOVED: setIsNotificationDropdownOpen(false);
         setIsSearchExpanded(false);
     }, [location.pathname]);
 
-    // Close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
                 setIsUserDropdownOpen(false);
             }
-            // REMOVED: notificationDropdownRef logic
-            // if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target)) {
-            //     setIsNotificationDropdownOpen(false);
-            // }
             if (
                 mobileMenuRef.current &&
                 !mobileMenuRef.current.contains(event.target) &&
@@ -81,29 +66,28 @@ const Header = ({ searchQuery, onSearchChange }) => {
             ) {
                 setIsMobileMenuOpen(false);
             }
-            if (isSearchExpanded && searchInputRef.current && !searchInputRef.current.closest('.header-search').contains(event.target)) {
-                setIsSearchExpanded(false);
-            }
+            // Logic for clicking outside searchbar is now handled within SearchBar component
+            // REMOVED: if (isSearchExpanded && searchInputRef.current && !searchInputRef.current.closest('.header-search').contains(event.target)) {
+            // REMOVED:     setIsSearchExpanded(false);
+            // REMOVED: }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isSearchExpanded]);
+    }, [isSearchExpanded]); // Keep isSearchExpanded in dependency array for header search-active class toggle
 
-    // Prevent background scroll when mobile menu or search overlay is open
     useEffect(() => {
         document.body.style.overflow = (isMobileMenuOpen || (isSearchExpanded && window.innerWidth < 768)) ? 'hidden' : '';
         return () => (document.body.style.overflow = '');
     }, [isMobileMenuOpen, isSearchExpanded]);
 
-    // Focus search input when it expands
-    useEffect(() => {
-        if (isSearchExpanded && searchInputRef.current) {
-            searchInputRef.current.focus();
-        }
-    }, [isSearchExpanded]);
+    // REMOVED: useEffect for searchInputRef focus is now in SearchBar component
+    // REMOVED: useEffect(() => {
+    // REMOVED:     if (isSearchExpanded && searchInputRef.current) {
+    // REMOVED:         searchInputRef.current.focus();
+    // REMOVED:     }
+    // REMOVED: }, [isSearchExpanded]);
 
-    // Helper to determine active navigation link
     const isActive = (path) => location.pathname === path;
 
     const handleLogout = () => {
@@ -113,13 +97,11 @@ const Header = ({ searchQuery, onSearchChange }) => {
         navigate('/login');
     };
 
-    // Framer Motion variants for mobile menu items (used within the menu panel)
     const itemVariants = {
         hidden: { x: -20, opacity: 0 },
         visible: { x: 0, opacity: 1 }
     };
 
-    // Framer Motion variants for mobile menu container (stagger effect)
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -131,12 +113,11 @@ const Header = ({ searchQuery, onSearchChange }) => {
         }
     };
 
-    // Helper function to get the Lucide icon component by name
     const getIconComponent = (iconName) => {
         const icons = {
             Home, Compass, Info, LayoutDashboard, FileText, Bookmark,
             Shield, BarChart3, Flag, TrendingUp, Link: LinkIcon, User, Tag, Edit,
-            Star, Heart, MessageCircle, Clock, Settings, LogIn, LogOut, Plus, Bell, UserCircle, Sun, Moon, Search, X
+            Star, Heart, MessageCircle, Clock, Settings, LogIn, LogOut, Plus, Bell, UserCircle, Sun, Moon
         };
         return icons[iconName] || Home;
     };
@@ -151,15 +132,6 @@ const Header = ({ searchQuery, onSearchChange }) => {
         navItems.push({ label: 'Profile', path: '/profile', icon: 'UserCircle' });
     }
 
-    // Dynamic Search Suggestions
-    const allSuggestions = ['AI Ethics', 'React Hooks', 'Frontend Frameworks 2025', 'Web Development Trends', 'User Profile Design', 'Latest News', 'GraphQL vs REST'];
-
-    const filteredSuggestions = searchQuery
-        ? allSuggestions.filter(s =>
-            s.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        : ['Latest News', 'User Profile Design', 'AI Ethics', 'Frontend Frameworks 2025'];
-
     return (
         <header className={clsx('header-main', {
             'scrolled': isScrolled,
@@ -171,7 +143,6 @@ const Header = ({ searchQuery, onSearchChange }) => {
                     onClick={() => {
                         setIsMobileMenuOpen(false);
                         setIsUserDropdownOpen(false);
-                        // REMOVED: setIsNotificationDropdownOpen(false);
                         setIsSearchExpanded(false);
                     }}
                 >
@@ -191,7 +162,6 @@ const Header = ({ searchQuery, onSearchChange }) => {
                                 onClick={() => {
                                     setIsMobileMenuOpen(false);
                                     setIsUserDropdownOpen(false);
-                                    // REMOVED: setIsNotificationDropdownOpen(false);
                                     setIsSearchExpanded(false);
                                 }}
                             >
@@ -210,69 +180,12 @@ const Header = ({ searchQuery, onSearchChange }) => {
                 </nav>
 
                 {/* Smart Search - Desktop & Mobile (integrated for a consistent look) */}
-                <div className={clsx('header-search', {
-                    'header-search--expanded': isSearchExpanded && window.innerWidth < 768
-                })}>
-                    <div className="header-search-input-wrapper">
-                        <Search className="header-search-icon" />
-                        <input
-                            type="text"
-                            placeholder="Search discussions..."
-                            value={searchQuery}
-                            onChange={(e) => onSearchChange(e.target.value)}
-                            onFocus={() => setIsSearchExpanded(true)}
-                            ref={searchInputRef}
-                            aria-label="Search"
-                        />
-                        {/* Clear button if search is active */}
-                        {isSearchExpanded && searchQuery.length > 0 && (
-                            <motion.button
-                                className="search-clear-button"
-                                onClick={() => onSearchChange('')}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                aria-label="Clear search"
-                            >
-                                <X size={18} />
-                            </motion.button>
-                        )}
-                        <span className="header-search-shortcut">⌘K</span>
-                    </div>
-                    {/* Search Suggestions/Recent (Populated dynamically) */}
-                    <AnimatePresence>
-                        {isSearchExpanded && (
-                            <motion.div
-                                className="header-dropdown search-dropdown"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 10 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                {filteredSuggestions.length > 0 ? (
-                                    <div className="dropdown-section">
-                                        <h4>{searchQuery ? 'Search Results' : 'Suggestions'}</h4>
-                                        <ul>
-                                            {filteredSuggestions.map((item) => (
-                                                <li key={item} onClick={() => {
-                                                    onSearchChange(item);
-                                                    setIsSearchExpanded(false);
-                                                }}>
-                                                    <Search size={16} className="header-icon" />
-                                                    <span>{item}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                ) : (
-                                    <div className="dropdown-section no-results">
-                                        <p>No results found for "{searchQuery}".</p>
-                                    </div>
-                                )}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                <SearchBar
+                    searchQuery={searchQuery}
+                    onSearchChange={onSearchChange}
+                    isSearchExpanded={isSearchExpanded}
+                    setIsSearchExpanded={setIsSearchExpanded}
+                />
 
                 {/* Desktop Actions */}
                 <div className="header-actions">
@@ -386,7 +299,12 @@ const Header = ({ searchQuery, onSearchChange }) => {
                         onClick={() => setIsSearchExpanded(!isSearchExpanded)}
                         aria-label="Toggle search"
                     >
-                        <Search size={20} className="header-icon" />
+                        <SearchBar
+                            searchQuery={searchQuery}
+                            onSearchChange={onSearchChange}
+                            isSearchExpanded={isSearchExpanded}
+                            setIsSearchExpanded={setIsSearchExpanded}
+                        />
                     </motion.button>
 
                     {/* Mobile Notification Bell (handled by NotificationDropdown component) */}

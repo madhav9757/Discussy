@@ -1,84 +1,91 @@
-// src/components/SearchBar/SearchBar.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import './SearchBar.css'; // Create a new CSS file for SearchBar specific styles
+import React, { useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import clsx from 'clsx';
+import { Search, X } from 'lucide-react';
+import './SearchBar.css'
 
-const SearchBar = ({ onSearchSubmit }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
+const SearchBar = ({ searchQuery, onSearchChange, isSearchExpanded, setIsSearchExpanded }) => {
     const searchInputRef = useRef(null);
 
-    // Mock search suggestions (replace with actual data fetching if needed)
-    const searchSuggestions = [
-        'Trending: AI Ethics',
-        'Post: New React Hooks',
-        'User: JaneDoe',
-        'Community: WebDev',
-        'Trending: Climate Change',
-        'Post: Svelte vs React'
-    ];
-
-    // Effect to handle click outside for closing search suggestions
+    // Focus on input when search is expanded
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (searchInputRef.current && !searchInputRef.current.contains(event.target) &&
-                !event.target.closest('.search-suggestions-dropdown')) {
-                setShowSearchSuggestions(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
-    // Filtered search suggestions based on input
-    const filteredSuggestions = searchSuggestions.filter(suggestion =>
-        suggestion.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const handleSearchSubmit = (e) => {
-        e.preventDefault(); // Prevent page reload if part of a form
-        if (onSearchSubmit) {
-            onSearchSubmit(searchTerm);
+        if (isSearchExpanded && searchInputRef.current) {
+            searchInputRef.current.focus();
         }
-        setShowSearchSuggestions(false); // Close suggestions after submit
-    };
+    }, [isSearchExpanded]);
+
+    const allSuggestions = ['AI Ethics', 'React Hooks', 'Frontend Frameworks 2025', 'Web Development Trends', 'User Profile Design', 'Latest News', 'GraphQL vs REST'];
+
+    const filteredSuggestions = searchQuery
+        ? allSuggestions.filter(s =>
+            s.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        : ['Latest News', 'User Profile Design', 'AI Ethics', 'Frontend Frameworks 2025'];
 
     return (
-        <form className="search-bar-container" onSubmit={handleSearchSubmit}>
-            <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search Discussly..."
-                className="search-input"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onFocus={() => setShowSearchSuggestions(true)}
-                aria-label="Search Discussly"
-            />
-            <button type="submit" className="search-icon-button" aria-label="Search">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            </button>
-            {showSearchSuggestions && searchTerm.length > 0 && filteredSuggestions.length > 0 && (
-                <div className="search-suggestions-dropdown">
-                    {filteredSuggestions.map((suggestion, index) => (
-                        <div
-                            key={index}
-                            className="suggestion-item"
-                            onClick={() => {
-                                setSearchTerm(suggestion);
-                                setShowSearchSuggestions(false);
-                                // Optionally, trigger search immediately on suggestion click
-                                // if (onSearchSubmit) onSearchSubmit(suggestion);
-                            }}
-                        >
-                            {suggestion}
-                        </div>
-                    ))}
-                </div>
-            )}
-        </form>
+        <div className={clsx('header-search', {
+            'header-search--expanded': isSearchExpanded && window.innerWidth < 768
+        })}>
+            <div className="header-search-input-wrapper">
+                <Search className="header-search-icon" />
+                <input
+                    type="text"
+                    placeholder="Search discussions..."
+                    value={searchQuery}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    onFocus={() => setIsSearchExpanded(true)}
+                    ref={searchInputRef}
+                    aria-label="Search"
+                />
+                {/* Clear button if search is active */}
+                {isSearchExpanded && searchQuery.length > 0 && (
+                    <motion.button
+                        className="search-clear-button"
+                        onClick={() => onSearchChange('')}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        aria-label="Clear search"
+                    >
+                        <X size={18} />
+                    </motion.button>
+                )}
+                <span className="header-search-shortcut">⌘K</span>
+            </div>
+            {/* Search Suggestions/Recent (Populated dynamically) */}
+            <AnimatePresence>
+                {isSearchExpanded && (
+                    <motion.div
+                        className="header-dropdown search-dropdown"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        {filteredSuggestions.length > 0 ? (
+                            <div className="dropdown-section">
+                                <h4>{searchQuery ? 'Search Results' : 'Suggestions'}</h4>
+                                <ul>
+                                    {filteredSuggestions.map((item) => (
+                                        <li key={item} onClick={() => {
+                                            onSearchChange(item);
+                                            setIsSearchExpanded(false);
+                                        }}>
+                                            <Search size={16} className="header-icon" />
+                                            <span>{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ) : (
+                            <div className="dropdown-section no-results">
+                                <p>No results found for "{searchQuery}".</p>
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 };
 

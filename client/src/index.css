@@ -1,43 +1,77 @@
-/* This CSS should be in a file like index.css or a dedicated theme.css */
-
-/* Default (Light) Theme */
 :root {
-  --background-color: #ffffff; /* General background color for elements if not gradient */
-  --text-color: #333333;
-  --primary-color: #007bff;
-  --app-background-gradient: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 80%, #dbeafe 100%);
-  --button-text-color: #ffffff; /* Example: Text color for primary buttons */
-  /* Add more variables for other elements like borders, shadows, cards, etc. */
+  --header-height: 60px;
+  --padding-inline: 20px;
+
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #4b5563;
+  --color-background: #ffffff;
+  --color-surface: #f9fafb;
+  --color-border: #e5e7eb;
+  --color-shadow: rgba(0, 0, 0, 0.05);
+  --color-hover-bg: #f3f4f6;
+  --color-active-bg: #e5e7eb;
+  --color-notification-badge: #ef4444;
+  --color-unread-dot: #3b82f6;
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
 }
 
-/* Dark Theme */
-body.dark {
-  --background-color: #1a1a1a;
-  --text-color: #e0e0e0;
-  --primary-color: #00bcd4; /* Example: A different primary color for dark mode */
-  --app-background-gradient: linear-gradient(120deg, #1a1a1a 0%, #333333 80%, #111111 100%); /* Dark gradient example */
-  --button-text-color: #e0e0e0; /* Adjust for dark button text if needed */
+[data-theme="dark"] {
+  --color-primary: #60a5fa;
+  --color-primary-dark: #3b82f6;
+  --color-text-primary: #e5e7eb;
+  --color-text-secondary: #9ca3af;
+  --color-background: #111827;
+  --color-surface: #1f2937;
+  --color-border: #374151;
+  --color-shadow: rgba(0, 0, 0, 0.3);
+  --color-hover-bg: #374151;
+  --color-active-bg: #4b5563;
+  --color-notification-badge: #dc2626;
+  --color-unread-dot: #60a5fa;
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
 }
 
-/* Apply variables to general elements */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 body {
-  /*
-   * IMPORTANT: Removed 'background-color: var(--background-color);' from here.
-   * The main app background is now handled by '.app-wrapper' using '--app-background-gradient'.
-   */
-  color: var(--text-color); /* Apply text color to body */
-  transition: color 0.3s ease; /* Smooth transition for text color */
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  color: var(--text-color);
+  transition: color 0.3s ease;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--text-color);
 }
 
 button {
-  color: var(--button-text-color); /* Use specific button text color variable */
+  color: var(--button-text-color);
   border: none;
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
+  background: none;
+  font-family: inherit;
 }

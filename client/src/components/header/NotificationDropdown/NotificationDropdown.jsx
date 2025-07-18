@@ -76,7 +76,6 @@ const NotificationDropdown = () => {
         {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
       </button>
 
-      {/* Render dropdown only if not mobile and it's open */}
       {!isMobile && isOpen && (
         <div className="notifications-dropdown-menu">
           <NotificationDropdownContent onClose={() => setIsOpen(false)} />
