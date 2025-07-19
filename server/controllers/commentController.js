@@ -1,5 +1,6 @@
 import Comment from '../models/Comment.js';
 import Post from '../models/Post.js';
+import buildCommentTree from '../utils/buildCommentTree.js';
 import User from '../models/User.js';
 import { createNotification } from './notificationController.js';
 
@@ -12,25 +13,27 @@ export const getCommentsByPostId = async (req, res) => {
     try {
         const { postId } = req.params;
 
-        // Optional: Check if the post actually exists before fetching comments
         const postExists = await Post.findById(postId);
         if (!postExists) {
             return res.status(404).json({ message: 'Post not found.' });
         }
 
         const comments = await Comment.find({ postId })
-            .populate('createdBy', 'username') // Populate the username of the comment creator
+            .populate('createdBy', 'username')
             .populate({
-                path: 'parentId', // Populate the parent comment if it's a reply
-                select: 'content createdBy', // Select content and createdBy for parent
+                path: 'parentId',
+                select: 'content createdBy',
                 populate: {
-                    path: 'createdBy', // Populate the creator of the parent comment
+                    path: 'createdBy',
                     select: 'username'
                 }
             })
-            .sort({ createdAt: 1 }); // Sort by creation date (oldest first)
+            .sort({ createdAt: 1 }) // or -1 for newest first
+            .lean(); // For performance and easy mutation
 
-        res.status(200).json(comments);
+        const nested = buildCommentTree(comments);
+
+        res.status(200).json(nested);
     } catch (error) {
         console.error('Error fetching comments:', error);
         res.status(500).json({ message: 'Server error fetching comments.' });
@@ -45,84 +48,82 @@ export const getCommentsByPostId = async (req, res) => {
 export const createComment = async (req, res) => {
     const { postId } = req.params;
     const { content, parentId } = req.body;
-
-    // Assuming req.user is populated by an authentication middleware
-    const createdBy = req.user._id; // The ID of the authenticated user
+    const createdBy = req.user._id;
 
     if (!content || !content.trim()) {
         return res.status(400).json({ message: 'Comment content cannot be empty.' });
     }
 
     try {
-        // Validate if the post exists
+        // ✅ Validate post
         const post = await Post.findById(postId).populate('author', 'username _id');
         if (!post) {
             return res.status(404).json({ message: 'Post not found.' });
         }
 
-        // If parentId is provided, validate if the parent comment exists
+        // ✅ Validate parent comment (if it's a reply)
         let parentComment = null;
         if (parentId) {
             parentComment = await Comment.findById(parentId).populate('createdBy', 'username _id');
             if (!parentComment) {
                 return res.status(404).json({ message: 'Parent comment not found.' });
             }
-            // Optional: Ensure parent comment belongs to the same post
             if (parentComment.postId.toString() !== postId) {
                 return res.status(400).json({ message: 'Parent comment does not belong to this post.' });
             }
         }
 
+        // ✅ Create new comment
         const newComment = new Comment({
             postId,
             content: content.trim(),
             createdBy,
-            parentId: parentId || null // Set to null if it's a top-level comment
+            parentId: parentId || null,
         });
 
         await newComment.save();
 
-        // Populate the createdBy field for the response
+        // ✅ Populate author and parent author
         await newComment.populate('createdBy', 'username');
-        // If it's a reply, also populate parentId's createdBy for the response
+
         if (newComment.parentId) {
             await newComment.populate({
                 path: 'parentId',
                 select: 'createdBy',
                 populate: {
                     path: 'createdBy',
-                    select: 'username'
-                }
+                    select: 'username',
+                },
             });
         }
 
-        // Create notification for post author (if not commenting on own post)
+        // ✅ Create notification for post author (if not commenting on own post)
         if (post.author._id.toString() !== createdBy.toString()) {
             await createNotification({
                 userId: post.author._id,
                 type: 'comment',
                 message: `${req.user.username} commented on your post: "${post.title}"`,
                 link: `/posts/${postId}`,
-                relatedUser: createdBy
+                relatedUser: createdBy,
             });
         }
 
-        // Create notification for parent comment author (if replying and not replying to self)
+        // ✅ Create notification for parent comment author (if replying and not replying to self)
         if (parentComment && parentComment.createdBy._id.toString() !== createdBy.toString()) {
             await createNotification({
                 userId: parentComment.createdBy._id,
                 type: 'comment',
                 message: `${req.user.username} replied to your comment`,
                 link: `/posts/${postId}`,
-                relatedUser: createdBy
+                relatedUser: createdBy,
             });
         }
 
-        console.log(`💬 Comment created by ${req.user.username} on post ${postId}`);
+        console.log(`💬 New comment by ${req.user.username} on post ${postId}`);
         res.status(201).json(newComment);
     } catch (error) {
-        console.error('Error creating comment:', error);
-        res.status(500).json({ message: 'Server error creating comment.' });
+        console.error('❌ Error creating comment:', error);
+        res.status(500).json({ message: 'Server error while creating comment.' });
     }
 };
 
@@ -241,7 +242,7 @@ export const toggleCommentVote = async (req, res) => {
                 if (hasDownvoted) {
                     comment.downvotes.pull(userId);
                 }
-                
+
                 // Create notification for comment author (if not voting on own comment)
                 if (comment.createdBy._id.toString() !== userId.toString()) {
                     await createNotification({

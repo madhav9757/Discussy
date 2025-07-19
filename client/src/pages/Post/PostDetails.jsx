@@ -242,7 +242,7 @@ const PostDetailsPage = () => {
                 <p className="loading">Loading comments...</p>
               ) : comments.length > 0 ? (
                 comments.map((comment) => (
-                  <CommentItem comment={comment} onRefresh={refetch} key={comment._id} />
+                  <CommentItem key={comment._id} comment={comment} onRefresh={refetch} />
                 ))
               ) : (
                 <p className="no-comments">No comments yet. Be the first to share your thoughts!</p>
