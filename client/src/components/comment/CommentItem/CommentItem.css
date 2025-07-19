@@ -1,11 +1,30 @@
-.comment-box-enhanced:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+/* Ensure this CSS file is loaded AFTER Header.css or that Header.css variables are globally available */
+
+/* General comment box styling */
+.comment-box-enhanced {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    /* Changed from #1e1e1e (hardcoded dark) to theme surface */
+    background: var(--color-surface);
+    /* Changed from #ddd (hardcoded light) to primary text color */
+    color: var(--color-text-primary);
+    /* Adjusted shadow to use theme shadow */
+    box-shadow: 0 0 5px var(--color-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease, color 0.3s ease;
 }
 
+.comment-box-enhanced:hover {
+    transform: translateY(-2px);
+    /* Adjusted shadow to be slightly stronger on hover */
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.6); /* Use a darker, universal shadow for hover */
+}
+
+/* Comment Header */
 .comment-header {
     font-size: 0.85rem;
-    color: #aaa;
+    /* Changed from #aaa (hardcoded gray) to secondary text color */
+    color: var(--color-text-secondary);
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -13,56 +32,71 @@
 }
 
 .comment-header strong {
-    color: #f5f5f5;
+    /* Changed from #f5f5f5 (hardcoded light) to primary text color */
+    color: var(--color-text-primary);
 }
 
 .comment-header em {
-    color: #ccc;
+    /* Changed from #ccc (hardcoded light) to a slightly lighter secondary text color or text-primary */
+    color: var(--color-text-secondary); /* or define a --color-text-light */
     font-style: normal;
     font-size: 0.8rem;
 }
 
+/* Comment Content */
 .comment-content {
     font-size: 1rem;
-    color: #e4e4e4;
+    /* Changed from #e4e4e4 (hardcoded light) to primary text color */
+    color: var(--color-text-primary);
     line-height: 1.6;
     margin-bottom: 0.8rem;
 }
 
 .comment-box-enhanced .react-markdown {
     font-size: 0.95rem;
-    color: #e0e0e0;
+    /* Changed from #e0e0e0 (hardcoded light) to primary text color */
+    color: var(--color-text-primary);
     line-height: 1.6;
 }
 
+/* Markdown inline code */
 .comment-box-enhanced .react-markdown code {
-    background-color: #393939;
-    color: #dcdcdc;
+    /* Adjusted background and border for code */
+    background-color: var(--color-hover-bg); /* Use a slightly darker background than surface */
+    color: var(--color-text-primary); /* Use primary text color */
     padding: 0.2em 0.4em;
     border-radius: 4px;
     font-size: 0.85em;
-    border: 1px solid #555;
+    /* Adjusted border color */
+    border: 1px solid var(--color-border);
     font-family: 'Fira Code', 'Consolas', monospace;
 }
 
+/* Markdown preformatted code blocks */
 .comment-box-enhanced .react-markdown pre {
-    background-color: #2f2f2f;
+    /* Adjusted background and border for preformatted code */
+    background-color: var(--color-background); /* Use a distinct darker background */
     padding: 0.8rem;
     border-radius: 6px;
-    border: 1px solid #555;
+    /* Adjusted border color */
+    border: 1px solid var(--color-border);
     overflow-x: auto;
     margin: 1rem 0;
-    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.15);
+    /* Adjusted shadow */
+    box-shadow: inset 0 0 4px var(--color-shadow);
 }
 
+/* Comment Actions */
 .comment-actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding-top: 0.75rem;
-    border-top: 1px solid #444;
+    /* Adjusted border color */
+    border-top: 1px solid var(--color-border);
 }
 
+/* Vote Buttons */
 .comment-vote-btn {
     background: none;
     border: 1px solid transparent;
@@ -73,40 +107,44 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #bbb;
+    /* Changed from #bbb (hardcoded gray) to secondary text color */
+    color: var(--color-text-secondary);
     transition: all 0.2s ease;
 }
 
 .comment-vote-btn:hover {
-    background-color: rgba(120, 120, 120, 0.15);
-    border-color: #777;
-    color: #fff;
+    /* Adjusted background and border for hover */
+    background-color: var(--color-hover-bg);
+    border-color: var(--color-border);
+    /* Changed from #fff (hardcoded white) to primary text color */
+    color: var(--color-text-primary);
 }
 
 .comment-vote-btn.upvoted {
-    color: #4caf50;
-    border-color: #4caf50;
+    color: var(--color-primary); /* Using primary color for upvoted */
+    border-color: var(--color-primary);
 }
 
 .comment-vote-btn.upvoted:hover {
-    background-color: rgba(76, 175, 80, 0.15);
+    background-color: rgba(76, 175, 80, 0.15); /* Keep green tint specific */
 }
 
 .comment-vote-btn.downvoted {
-    color: #f44336;
-    border-color: #f44336;
+    color: var(--color-danger); /* Using danger color for downvoted */
+    border-color: var(--color-danger);
 }
 
 .comment-vote-btn.downvoted:hover {
-    background-color: rgba(244, 67, 54, 0.15);
+    background-color: rgba(244, 67, 54, 0.15); /* Keep red tint specific */
 }
 
-
+/* Vote Count */
 .vote-count {
     font-size: 0.9rem;
     min-width: 18px;
     text-align: center;
-    color: #ccc;
+    /* Changed from #ccc (hardcoded light) to secondary text color */
+    color: var(--color-text-secondary);
     font-weight: 600;
 }
 
@@ -117,60 +155,85 @@
     gap: 0.8rem;
 }
 
+/* No Comments Message */
 .no-comments {
     padding: 1.5rem;
     text-align: center;
     font-size: 0.95rem;
-    color: #ccc;
-    border: 2px dashed #555;
+    /* Changed from #ccc (hardcoded light) to secondary text color */
+    color: var(--color-text-secondary);
+    /* Adjusted border color */
+    border: 2px dashed var(--color-border);
     border-radius: 8px;
-    background: repeating-linear-gradient(45deg, #3b3b3b, #3b3b3b 10px, #333 10px, #333 20px);
+    /* Adjusted background to use theme colors */
+    background: repeating-linear-gradient(45deg, var(--color-surface), var(--color-surface) 10px, var(--color-background) 10px, var(--color-background) 20px);
     margin-top: 1.5rem;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    /* Adjusted shadow */
+    box-shadow: inset 0 0 5px var(--color-shadow);
     font-style: italic;
 }
 
+/* Loading State */
 .comments-section .loading {
     padding: 1.2rem;
     text-align: center;
     font-size: 0.95rem;
-    color: #bbb;
+    /* Changed from #bbb (hardcoded light) to secondary text color */
+    color: var(--color-text-secondary);
     margin-top: 1.2rem;
 }
 
+/* Highlighted Comment */
 .highlighted-comment {
-    border: 1px solid #4ad991;
-    background: linear-gradient(135deg, #1e2e2e, #2f4f4f);
-    box-shadow: 0 0 10px rgba(74, 217, 145, 0.3);
+    border: 1px solid var(--color-primary); /* Using primary color for highlight */
+    background: linear-gradient(135deg,
+        rgba(var(--color-primary-rgb), 0.1), /* Use RGB values for primary color with opacity */
+        rgba(var(--color-primary-rgb), 0.2));
+    box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.3);
     transition: all 0.3s ease;
 }
 
+/* Note for highlighted-comment: You might need to define RGB versions of your --color-primary
+   in your :root and [data-theme="dark"] if you want to use rgba with them directly.
+   E.g., --color-primary-rgb: 75, 175, 80; (for light green)
+   And for dark: --color-primary-rgb: 96, 165, 250; (for light blue)
+   Or adjust the opacity method.
+*/
+
+/* User Badge */
 .user-badge {
     margin-left: 0.5rem;
-    background-color: #4ad99130;
+    /* Adjusted background and color to use theme primary with opacity */
+    background-color: rgba(var(--color-primary-rgb), 0.2);
     padding: 0.2rem 0.5rem;
     border-radius: 6px;
     font-size: 0.75rem;
-    color: #4ad991;
+    color: var(--color-primary);
     font-weight: 600;
 }
 
+/* Icon Buttons */
 .icon-btn {
     background: none;
-    border: 1px solid #666;
+    /* Adjusted border color */
+    border: 1px solid var(--color-border);
     border-radius: 6px;
     padding: 0.35rem 0.6rem;
-    color: #bbb;
+    /* Changed from #bbb (hardcoded light) to secondary text color */
+    color: var(--color-text-secondary);
     cursor: pointer;
     transition: 0.2s;
 }
 
 .icon-btn:hover {
-    color: white;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: #aaa;
+    /* Changed from white (hardcoded) to primary text color */
+    color: var(--color-text-primary);
+    /* Adjusted background and border for hover */
+    background-color: var(--color-hover-bg);
+    border-color: var(--color-primary); /* Highlight border on hover */
 }
 
+/* Edit Mode */
 .edit-mode {
     display: flex;
     flex-direction: column;
@@ -178,24 +241,31 @@
     margin-top: 0.5rem;
 }
 
+/* Edit Textarea */
 .edit-textarea {
     width: 92%;
     min-height: 80px;
     padding: 0.75rem;
     margin: auto;
-    border: 1px solid #555;
+    /* Adjusted border color */
+    border: 1px solid var(--color-border);
     border-radius: 6px;
-    background-color: #1f1f1f;
-    color: #e0e0e0;
+    /* Changed background to a slightly darker surface */
+    background-color: var(--color-surface);
+    /* Changed text color */
+    color: var(--color-text-primary);
     font-size: 0.95rem;
     resize: vertical;
     font-family: inherit;
 }
 
+/* Save Edit Button */
 .save-edit-btn {
     align-self: flex-end;
-    background-color: #4ad991;
-    color: #111;
+    /* Using primary color */
+    background-color: var(--color-primary);
+    /* Changed from #111 (hardcoded dark) to a light text color on primary */
+    color: var(--color-background); /* Or define a --color-on-primary-text variable */
     padding: 0.4rem 0.9rem;
     border: none;
     border-radius: 5px;
@@ -205,66 +275,10 @@
 }
 
 .save-edit-btn:hover {
-    background-color: #38c77d;
+    background-color: var(--color-primary-dark); /* Darker primary on hover */
 }
 
-.comment-box-enhanced {
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    background: #1e1e1e;
-    color: #ddd;
-    box-shadow: 0 0 5px #00000033;
-}
-
-.comment-header {
-    display: flex;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-    align-items: center;
-}
-
-.comment-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.5rem;
-}
-
-.vote-group {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-.comment-vote-btn {
-    background: none;
-    border: none;
-    color: #888;
-    cursor: pointer;
-}
-
-.comment-vote-btn.upvoted {
-    color: #4caf50;
-}
-
-.comment-vote-btn.downvoted {
-    color: #f44336;
-}
-
-.vote-count {
-    font-size: 0.9rem;
-}
-
-.edit-delete-group .icon-btn {
-    margin-left: 0.3rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #aaa;
-}
-
+/* Reply Box */
 .reply-box {
     display: flex;
     height: 43px;
@@ -274,35 +288,43 @@
     margin-bottom: 10px;
 }
 
-.edit-textarea,
+/* Reply Textarea */
 .reply-textarea {
     width: 100%;
     padding: 0.5rem;
     margin-top: 0.5rem;
     border-radius: 6px;
-    background: #2b2b2b;
-    border: 1px solid #444;
-    color: #ddd;
+    /* Changed background to a slightly darker surface */
+    background: var(--color-surface);
+    /* Adjusted border color */
+    border: 1px solid var(--color-border);
+    /* Changed text color */
+    color: var(--color-text-primary);
     font-size: 0.9rem;
 }
 
-.save-edit-btn,
+/* Reply Submit Button */
 .reply-submit-btn {
     margin-top: 0.3rem;
     padding: 0.3rem 0.7rem;
-    background: #2196f3;
-    color: white;
+    /* Using primary color */
+    background: var(--color-primary);
+    /* Changed from white (hardcoded) to a light text color */
+    color: var(--color-background); /* Or --color-on-primary-text */
     border: none;
     border-radius: 5px;
 }
 
+/* Comment Replies Nesting */
 .comment-replies {
     margin-top: 1rem;
     margin-left: 2rem;
-    border-left: 2px solid #444;
+    /* Adjusted border color */
+    border-left: 2px solid var(--color-border);
     padding-left: 1rem;
 }
 
+/* Keyframes (no change needed here as it's about animation, not color) */
 @keyframes fadeIn {
     from {
         opacity: 0;

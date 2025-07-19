@@ -1,7 +1,6 @@
 import Comment from '../models/Comment.js';
 import Post from '../models/Post.js';
 import buildCommentTree from '../utils/buildCommentTree.js';
-import User from '../models/User.js';
 import { createNotification } from './notificationController.js';
 
 /**
