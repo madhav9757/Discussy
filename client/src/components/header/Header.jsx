@@ -7,7 +7,7 @@ import {
     MessageCircle, Search, Plus, Bell, UserCircle, Star, Heart, // Added Search icon back as it's needed for the toggle button
     LogIn, LogOut, Home, Compass, Info, Sun, Moon, Settings, X, // X is from SearchBar, not needed in Header unless used elsewhere
     LayoutDashboard, FileText, Bookmark, Shield, BarChart3,
-    Flag, TrendingUp, Link as LinkIcon, User, Tag, Edit, Clock, Filter,
+    Flag, TrendingUp, Link as LinkIcon, User, Tag, Edit, Clock, Network ,
     ChevronDown,
 } from 'lucide-react';
 import { logoutUser } from '../../features/auth/authSlice';
@@ -106,7 +106,7 @@ const Header = ({ searchQuery, onSearchChange }) => {
         const icons = {
             Home, Compass, Info, LayoutDashboard, FileText, Bookmark,
             Shield, BarChart3, Flag, TrendingUp, Link: LinkIcon, User, Tag, Edit,
-            Star, Heart, MessageCircle, Clock, Settings, LogIn, LogOut, Plus, Bell, UserCircle, Sun, Moon, Search
+            Star, Heart, MessageCircle, Clock, Settings, LogIn, LogOut, Plus, Bell, UserCircle, Sun, Moon, Search, Network,
         };
         return icons[iconName] || Home;
     };
@@ -115,6 +115,7 @@ const Header = ({ searchQuery, onSearchChange }) => {
         { label: 'Home', path: '/', icon: 'Home' },
         { label: 'Explore', path: '/explore', icon: 'Compass' },
         { label: 'About', path: '/about', icon: 'Info' },
+        { label: 'Community', path: '/community', icon: 'Network' },
     ];
 
     if (user) {

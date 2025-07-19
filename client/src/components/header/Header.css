@@ -32,7 +32,7 @@
     justify-content: space-between;
     height: var(--header-height);
     padding: 0 var(--padding-inline);
-    max-width: 1400px;
+    max-width: 1500px;
     margin: 0 auto;
     position: relative;
 }
