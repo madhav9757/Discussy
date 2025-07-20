@@ -16,7 +16,7 @@
 
 ## 📸 Demo
 
-> [Live Demo](https://discussy-madhavs-projects-45ed597c.vercel.app/) *(optional)*
+> [Live Demo](https://discussy-madhavs-projects-45ed597c.vercel.app/) 
 
 ---
 
