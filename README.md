@@ -18,8 +18,6 @@
 
 > [Live Demo](https://discussy-madhavs-projects-45ed597c.vercel.app/) *(optional)*
 
-![Discussy UI Screenshot](https://your-screenshot-url.com) <!-- Replace with actual image link -->
-
 ---
 
 ## 🧩 Key Features
