@@ -16,7 +16,7 @@
 
 ## 📸 Demo
 
-> [Live Demo](https://your-live-url.com) *(optional)*
+> [Live Demo](https://discussy-madhavs-projects-45ed597c.vercel.app/) *(optional)*
 
 ![Discussy UI Screenshot](https://your-screenshot-url.com) <!-- Replace with actual image link -->
 
@@ -145,7 +145,6 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 
 **Madhav Semwal**  
 - [GitHub](https://github.com/madhav9757)  
-- [LinkedIn](https://www.linkedin.com/in/your-linkedin/) <!-- Replace with actual link -->
 
 ---
 
