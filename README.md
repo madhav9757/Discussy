@@ -146,10 +146,4 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 
 ---
 
-## 📌 Next Steps for You
 
-1. Replace placeholder links like:
-   - Live demo URL
-   - Screenshot/GIF preview
-   - LinkedIn profile
-2. Optionally add badges for build, deployment, or Vercel/Render status.
