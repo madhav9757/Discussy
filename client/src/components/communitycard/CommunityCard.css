@@ -1,18 +1,3 @@
-/*
-  CommunityCard.css
-
-  This file defines the styling for the CommunityCard component, which displays
-  a summary of a community. It's designed to be used within grids (like on the
-  Explore page) and should be visually appealing and interactive.
-
-  Principles applied:
-  - Clean and modern aesthetic.
-  - Interactive hover effects.
-  - Flexbox for internal layout.
-  - CSS Variables for theme consistency (colors, borders, shadows).
-  - Clear and semantic class names.
-  - Responsive adjustments for various screen sizes.
-*/
 
 /* ===================================== */
 /* 1. Community Card Base Styles         */

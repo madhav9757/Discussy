@@ -1,0 +1,344 @@
+/* Base styles - these are typically defined at the root or globally */
+:root {
+  --color-primary: #007bff;
+  --color-primary-dark: #0056b3;
+  --color-secondary: #6c757d;
+  --color-secondary-dark: #5a6268;
+  --color-border: #e0e0e0;
+  --color-surface: #fff;
+  --color-background: #f4f7f6;
+  --color-background-secondary: #f8f9fa;
+  --color-text-primary: #333;
+  --color-text-secondary: #666;
+  --color-shadow: rgba(0, 0, 0, 0.08);
+  --color-shadow-hover: rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode variables (if you have a global dark mode toggle) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #6366f1;
+    --color-primary-dark: #4f46e5;
+    --color-secondary: #9ca3af;
+    --color-secondary-dark: #6b7280;
+    --color-border: rgba(255, 255, 255, 0.15);
+    --color-surface: rgba(255, 255, 255, 0.05);
+    --color-background: #1a1a1a;
+    --color-background-secondary: #2a2a2a;
+    --color-text-primary: #e0e0e0;
+    --color-text-secondary: #a0a0a0;
+    --color-shadow: rgba(0, 0, 0, 0.3);
+    --color-shadow-hover: rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Communities Page Container */
+.communities-page-container {
+  padding: 0 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: var(--color-text-primary); /* Ensure text color is set */
+}
+
+/* Header Section */
+.communities-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-top: 5rem;
+}
+
+.communities-page-header h1 {
+  color: var(--color-text-primary);
+}
+
+.create-community-btn {
+  padding: 0.5rem 1rem;
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.create-community-btn:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Community Card Wrapper */
+.community-wrapper {
+  position: relative;
+  border: 1px solid var(--color-border);
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: 0 2px 6px var(--color-shadow);
+  transition: transform 0.2s;
+}
+
+.community-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--color-shadow-hover);
+}
+
+.trending-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background-color: #f97316;
+  color: #fff;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+  z-index: 10;
+  animation: pulse 1.5s infinite ease-in-out; /* Keep pulse animation */
+}
+
+/* New: Joined Badge */
+.joined-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background-color: #4CAF50; /* Green for joined */
+  color: #fff;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+  z-index: 10;
+}
+
+/* Controls (Search, Filter, Sort) */
+.communities-controls {
+  display: flex;
+  flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center; /* Vertically align items */
+}
+
+.community-search-input,
+.community-filter-select,
+.community-filter-input {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  flex: 1; /* Allow inputs to grow and shrink */
+  min-width: 150px; /* Minimum width before wrapping */
+}
+
+/* Trending Filter Button */
+.filter-trending-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-trending-btn.active {
+  background-color: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+/* Toggle Advanced Filters Button */
+.toggle-advanced-filters-btn {
+  padding: 0.5rem 1rem;
+  background-color: var(--color-secondary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.toggle-advanced-filters-btn:hover {
+  background-color: var(--color-secondary-dark);
+}
+
+/* Advanced Filter Panel */
+.advanced-filters-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-background-secondary);
+  margin-top: 1rem;
+  width: 100%; /* Ensure it spans full width below controls */
+}
+
+.advanced-filters-panel label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+/* Communities Grid */
+.communities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem;
+  gap: 1rem;
+  width: 100%;
+  grid-column: 1 / -1; /* Make it span all columns */
+}
+
+.empty-state-illustration {
+  width: 200px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.empty-state-message {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 6px rgba(249, 115, 22, 0);
+  }
+}
+
+/* Mobile-first adjustments (media query starts from a wider view and narrows down) */
+@media (max-width: 768px) {
+  .communities-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding-top: 1rem; /* Adjust padding for mobile header */
+    margin-bottom: 1rem;
+  }
+
+  .communities-controls {
+    flex-direction: column; /* Stack controls vertically */
+    align-items: flex-start; /* Align items to the left */
+    width: 100%; /* Ensure controls take full width */
+    position: sticky; /* Make controls sticky on scroll */
+    top: 0;
+    background-color: var(--color-background); /* Background for sticky bar */
+    padding: 0.8rem 1rem; /* Add padding to sticky bar */
+    z-index: 100;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow for sticky bar */
+    border-radius: 0 0 8px 8px; /* Rounded bottom corners for sticky bar */
+  }
+
+  .community-search-input,
+  .community-filter-select,
+  .community-filter-input,
+  .filter-trending-btn,
+  .toggle-advanced-filters-btn {
+    width: 100%; /* Make all control elements full width */
+  }
+
+  /* Ensure advanced filter panel also stacks vertically on mobile */
+  .advanced-filters-panel {
+    flex-direction: column;
+  }
+
+  .communities-grid {
+    grid-template-columns: 1fr; /* Single column layout for communities on small screens */
+    gap: 1rem; /* Slightly reduced gap */
+    padding: 0 1rem; /* Add horizontal padding to the grid itself */
+  }
+
+  /* Optional: Trending Carousel section for mobile */
+  .trending-carousel-section {
+    margin-bottom: 2rem;
+  }
+
+  .trending-carousel-section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding: 0 1rem; /* Align with container padding */
+  }
+
+  .trending-carousel-container {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 1rem;
+    padding: 0 1rem 1rem; /* Padding for scrollable area */
+  }
+
+  .carousel-item {
+    flex: 0 0 auto;
+    width: 85%; /* Adjust width for better mobile experience */
+    max-width: 300px;
+    scroll-snap-align: start;
+  }
+}
+
+/* Very small screens (e.g., old phones) */
+@media (max-width: 480px) {
+  .communities-page-container {
+    padding: 0 0.5rem;
+  }
+
+  .communities-page-header {
+    padding-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .create-community-btn {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .communities-controls {
+    padding: 0.5rem 0.5rem;
+    gap: 0.8rem;
+  }
+
+  .community-search-input,
+  .community-filter-select,
+  .community-filter-input,
+  .filter-trending-btn,
+  .toggle-advanced-filters-btn {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .communities-grid {
+    gap: 0.8rem;
+    padding: 0 0.5rem;
+  }
+
+  .community-wrapper {
+    padding: 0.8rem;
+  }
+}

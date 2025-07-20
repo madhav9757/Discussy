@@ -9,7 +9,8 @@ export const getAllCommunities = asyncHandler(async (req, res) => {
 });
 
 export const createCommunity = asyncHandler(async (req, res) => {
-    const { name, description } = req.body;
+    // ✅ Destructure 'category' from req.body
+    const { name, description, category } = req.body; 
 
     if (!name) {
         res.status(400);
@@ -26,6 +27,7 @@ export const createCommunity = asyncHandler(async (req, res) => {
     const community = await Community.create({
         name,
         description,
+        category, // ✅ Include category when creating the community
         createdBy: req.user._id,
         members: [req.user._id],
     });

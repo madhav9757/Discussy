@@ -9,7 +9,7 @@ import {
 } from "../../app/api/communitiesApi.js";
 import PostCard from '../../components/postCard/PostCard.jsx';
 import { useSelector } from "react-redux";
-import "./CommunityPage.css";
+import "./CommunityPage.css"; // Ensure this import is correct
 
 const CommunityPage = () => {
   const { id } = useParams();
@@ -79,7 +79,8 @@ const CommunityPage = () => {
 
   return (
     <div className="community-page">
-      <div className="community-header glass-box">
+      {/* Removed 'glass-box' from className as its styles are now part of .community-header */}
+      <div className="community-header">
         <h2>{community.name}</h2>
         <p>{community.description || "No description provided."}</p>
         <div className="creator-date-member-div">
@@ -91,7 +92,8 @@ const CommunityPage = () => {
             🗓️ Created on: {formatDateTime(community.createdAt)}
           </p>
 
-          <p className="members clickable" onClick={() => setShowMembersModal(true)}>
+          {/* Removed 'clickable' from className as .members already handles cursor: pointer */}
+          <p className="members" onClick={() => setShowMembersModal(true)}>
             👥 Members: {community?.members?.length || 0}
           </p>
         </div>

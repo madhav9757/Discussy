@@ -14,7 +14,8 @@ import CreatePost from './features/posts/createPost/CreatePost.jsx';
 import EditPostPage from './features/posts/updatePost/UpdatePost.jsx';
 import UpdateProfile from './features/auth/profile/updateProfile/UpdateProfile.jsx';
 import NotificationsPage from './pages/notifications/NotificationsPage.jsx';
-import CommunitiesPage from './pages/Community/communityRoute.css/CommunitiesPage.jsx';
+import CommunitiesPage from './pages/Community/communityRoute/CommunitiesPage.jsx';
+import CreateCommunityPage from './features/communities/creatCommunity/CreateCommunityPage.jsx';
 
 // Import the new ProtectedRoute component
 import ProtectedRoute from './components/ProtectedRoute'; // Adjust path as needed
@@ -39,6 +40,7 @@ const AppRouter = () => {
       <Route path="/explore" element={<Explore />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/community" element={<CommunitiesPage />} />
+      <Route path="/create-community" element={<CreateCommunityPage />} />
       <Route path="/user/:id" element={<ProfilePage />} /> {/* Public view of profiles */}
       <Route path="/community/:id" element={<CommunityPage />} />
       <Route path="/posts/:id" element={<PostDetails />} />

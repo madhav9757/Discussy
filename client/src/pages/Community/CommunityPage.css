@@ -1,8 +1,7 @@
-/* Enhanced Community Page Styles */
 .community-page {
   padding: var(--spacing-xl) var(--spacing-md);
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 3rem auto;
   color: var(--text-primary);
   font-family: var(--font-family-base);
   line-height: var(--leading-normal);

@@ -1,0 +1,144 @@
+.create-community-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align to top, not center vertically */
+  min-height: calc(100vh - var(--header-height, 60px)); /* Full height minus header */
+  align-items: center;
+  padding: 2rem;
+  background-color: var(--color-background); /* From your index.css */
+  box-sizing: border-box;
+}
+
+.create-community-card {
+  background-color: var(--color-surface); /* From your index.css */
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px var(--color-shadow); /* From your index.css */
+  width: 100%;
+  max-width: 500px; /* Limit width for better readability */
+  border: 1px solid var(--color-border); /* From your index.css */
+  color: var(--color-text-primary); /* From your index.css */
+}
+
+.create-community-card h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.create-community-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.create-community-form label {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+}
+
+.create-community-form input[type="text"],
+.create-community-form select,
+.create-community-form textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-background); /* Use a lighter background for inputs */
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box; /* Include padding in width */
+}
+
+.create-community-form input[type="text"]::placeholder,
+.create-community-form textarea::placeholder {
+  color: var(--color-text-secondary); /* Use secondary text color for placeholders */
+  opacity: 0.7;
+}
+
+.create-community-form input[type="text"]:focus,
+.create-community-form select:focus,
+.create-community-form textarea:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+.create-community-form textarea {
+  resize: vertical; /* Allow vertical resizing */
+  min-height: 100px;
+}
+
+/* Custom styling for select dropdown arrow */
+.create-community-form select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%239ca3af" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M7 10l5 5 5-5z"/></svg>'); /* Uses secondary text color for arrow */
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.2em;
+  padding-right: 2.5rem; /* Make space for custom arrow */
+  cursor: pointer;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.submit-btn:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+}
+
+.submit-btn:disabled {
+  background-color: var(--color-border); /* Greyed out when disabled */
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+}
+
+.success-message {
+  color: #22c55e; /* A success green color */
+  text-align: center;
+  margin-top: -0.5rem; /* Adjust margin to be closer to button */
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.error-message {
+  color: var(--color-danger); /* From your index.css */
+  text-align: center;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .create-community-page-container {
+    padding: 1rem;
+  }
+  .create-community-card {
+    padding: 1.5rem;
+  }
+  .create-community-card h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .create-community-form label {
+    font-size: 0.9rem;
+  }
+}

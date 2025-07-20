@@ -15,6 +15,16 @@ const extendedApi = discusslyApi.injectEndpoints({
       providesTags: (result, error, id) => [{ type: 'Community', id }],
     }),
 
+    // ✅ Create new community - UPDATED to include description and category
+    createCommunity: builder.mutation({
+      query: ({ name, description, category }) => ({ 
+        url: `${COMMUNITY_API_URL}`,
+        method: 'POST',
+        body: { name, description, category }, 
+      }),
+      invalidatesTags: ['Community'],
+    }),
+
     // ✅ Join community
     joinCommunity: builder.mutation({
       query: (communityId) => ({
@@ -53,6 +63,7 @@ const extendedApi = discusslyApi.injectEndpoints({
 export const {
   useGetCommunitiesQuery,
   useGetCommunityByIdQuery,
+  useCreateCommunityMutation,
   useJoinCommunityMutation,
   useLeaveCommunityMutation,
   useDeleteCommunityMutation
