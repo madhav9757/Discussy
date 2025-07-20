@@ -152,7 +152,7 @@ const Home = () => {
                 </motion.div>
               </Link>
 
-              <Link to="/communities" className="feature-card-link">
+              <Link to="/community" className="feature-card-link">
                 <motion.div
                   className="feature-card"
                   variants={featureCardVariants}
