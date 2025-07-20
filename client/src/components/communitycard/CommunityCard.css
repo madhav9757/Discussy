@@ -45,14 +45,14 @@
 }
 
 .community-name {
-    font-size: 1.3rem; /* Larger font for community name */
+    font-size: 1.3rem; 
     font-weight: 700;
-    color: var(--color-text-primary);
-    margin: 0; /* Remove default heading margins */
+    color: var(--color-text-primary) !important; /* Ensure name uses primary text color */
+    margin: 0; 
     line-height: 1.3;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap; /* Keep name on a single line */
+    white-space: nowrap;
 }
 
 /* ===================================== */

@@ -1,344 +1,930 @@
-/* Base styles - these are typically defined at the root or globally */
+/* --- CommunitiesPage.css --- */
+
+/* Import a modern font, e.g., Google Fonts 'Inter' - if not already in index.css */
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'); */
+/* Assuming 'Inter' is already linked via your index.css or a global setup */
+
+/* --- Component-Specific Variables (Building on Index.css) --- */
+/* These are specific to this component or overrides of base variables */
 :root {
-  --color-primary: #007bff;
-  --color-primary-dark: #0056b3;
-  --color-secondary: #6c757d;
-  --color-secondary-dark: #5a6268;
-  --color-border: #e0e0e0;
-  --color-surface: #fff;
-  --color-background: #f4f7f6;
-  --color-background-secondary: #f8f9fa;
-  --color-text-primary: #333;
-  --color-text-secondary: #666;
-  --color-shadow: rgba(0, 0, 0, 0.08);
-  --color-shadow-hover: rgba(0, 0, 0, 0.2);
+    --page-padding: 24px;
+    --card-padding: 16px;
+    --gap-xs: 4px; /* Added for small icon-text gaps */
+    --gap-sm: 8px;
+    --gap-md: 16px;
+    --gap-lg: 24px;
+    --border-radius-base: 8px;
+    --shadow-light: 0 1px 3px var(--color-shadow), 0 1px 2px var(--color-shadow);
+    --shadow-medium: 0 4px 6px var(--color-shadow), 0 1px 3px var(--color-shadow);
+    --shadow-large: 0 10px 15px -3px var(--color-shadow), 0 4px 6px -2px var(--color-shadow);
+    --trending-badge-bg: #f59e0b; /* Tailwind amber-500 equivalent */
+    --trending-badge-text: #ffffff;
+    --trending-badge-shadow: rgba(245, 158, 11, 0.3);
 }
 
-/* Dark mode variables (if you have a global dark mode toggle) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary: #6366f1;
-    --color-primary-dark: #4f46e5;
-    --color-secondary: #9ca3af;
-    --color-secondary-dark: #6b7280;
-    --color-border: rgba(255, 255, 255, 0.15);
-    --color-surface: rgba(255, 255, 255, 0.05);
-    --color-background: #1a1a1a;
-    --color-background-secondary: #2a2a2a;
-    --color-text-primary: #e0e0e0;
-    --color-text-secondary: #a0a0a0;
-    --color-shadow: rgba(0, 0, 0, 0.3);
-    --color-shadow-hover: rgba(0, 0, 0, 0.5);
-  }
-}
-
-/* Communities Page Container */
+/* --- Base Component Styles --- */
 .communities-page-container {
-  padding: 0 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  color: var(--color-text-primary); /* Ensure text color is set */
+    padding: var(--page-padding);
+    max-width: 1200px; /* Max width for content */
+    margin: 0 auto; /* Center the container */
+    min-height: calc(100vh - var(--header-height, 0)); /* Account for potential header */
+    box-sizing: border-box; /* Include padding in element's total width and height */
+    background-color: var(--color-background); /* Ensure background is set */
+    color: var(--color-text-primary); /* Ensure text color is set */
 }
 
-/* Header Section */
-.communities-page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-top: 5rem;
+h1 {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-md);
+    color: var(--color-primary); /* Use primary color for main heading */
+    margin-bottom: var(--gap-lg);
+    font-size: 2.5rem; /* Larger heading for prominence */
+    font-weight: 700;
+    justify-content: flex-start; /* Align left by default */
 }
 
-.communities-page-header h1 {
-  color: var(--color-text-primary);
+/* --- Loader & Error Messages --- */
+.error-message, .no-communities-found {
+    text-align: center;
+    color: var(--color-danger);
+    font-size: 1.1em;
+    padding: var(--card-padding);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-base);
+    background-color: var(--color-surface);
+    margin-top: var(--gap-lg);
+    box-shadow: var(--shadow-light);
 }
 
-.create-community-btn {
-  padding: 0.5rem 1rem;
-  background-color: var(--color-primary);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.create-community-btn:hover {
-  background-color: var(--color-primary-dark);
-}
-
-/* Community Card Wrapper */
-.community-wrapper {
-  position: relative;
-  border: 1px solid var(--color-border);
-  padding: 1rem;
-  border-radius: 12px;
-  background: var(--color-surface);
-  box-shadow: 0 2px 6px var(--color-shadow);
-  transition: transform 0.2s;
-}
-
-.community-wrapper:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--color-shadow-hover);
-}
-
-.trending-badge {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background-color: #f97316;
-  color: #fff;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.75rem;
-  border-radius: 20px;
-  font-weight: 600;
-  z-index: 10;
-  animation: pulse 1.5s infinite ease-in-out; /* Keep pulse animation */
-}
-
-/* New: Joined Badge */
-.joined-badge {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  background-color: #4CAF50; /* Green for joined */
-  color: #fff;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.75rem;
-  border-radius: 20px;
-  font-weight: 600;
-  z-index: 10;
-}
-
-/* Controls (Search, Filter, Sort) */
-.communities-controls {
-  display: flex;
-  flex-wrap: wrap; /* Allows items to wrap on smaller screens */
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  align-items: center; /* Vertically align items */
-}
-
-.community-search-input,
-.community-filter-select,
-.community-filter-input {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--color-border);
-  background-color: var(--color-surface);
-  color: var(--color-text-primary);
-  font-size: 1rem;
-  flex: 1; /* Allow inputs to grow and shrink */
-  min-width: 150px; /* Minimum width before wrapping */
-}
-
-/* Trending Filter Button */
-.filter-trending-btn {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--color-border);
-  background-color: var(--color-surface);
-  color: var(--color-text-primary);
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.filter-trending-btn.active {
-  background-color: var(--color-primary);
-  color: #fff;
-  border-color: var(--color-primary);
-}
-
-/* Toggle Advanced Filters Button */
-.toggle-advanced-filters-btn {
-  padding: 0.5rem 1rem;
-  background-color: var(--color-secondary);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.toggle-advanced-filters-btn:hover {
-  background-color: var(--color-secondary-dark);
-}
-
-/* Advanced Filter Panel */
-.advanced-filters-panel {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background-color: var(--color-background-secondary);
-  margin-top: 1rem;
-  width: 100%; /* Ensure it spans full width below controls */
-}
-
-.advanced-filters-panel label {
-  display: flex;
-  flex-direction: column;
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-}
-
-/* Communities Grid */
-.communities-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  transition: opacity 0.3s ease-in-out;
-}
-
-/* Empty State */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 3rem;
-  gap: 1rem;
-  width: 100%;
-  grid-column: 1 / -1; /* Make it span all columns */
-}
-
-.empty-state-illustration {
-  width: 200px;
-  height: auto;
-  margin-bottom: 1rem;
-}
-
-.empty-state-message {
-  font-size: 1.1rem;
-  color: var(--color-text-secondary);
-  margin-bottom: 1rem;
-}
-
-/* Animations */
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 6px rgba(249, 115, 22, 0);
-  }
-}
-
-/* Mobile-first adjustments (media query starts from a wider view and narrows down) */
-@media (max-width: 768px) {
-  .communities-page-header {
+.no-communities-found {
+    color: var(--color-text-secondary);
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.8rem;
-    padding-top: 1rem; /* Adjust padding for mobile header */
-    margin-bottom: 1rem;
-  }
+    align-items: center;
+    gap: var(--gap-sm);
+    padding: var(--gap-lg);
+}
 
-  .communities-controls {
-    flex-direction: column; /* Stack controls vertically */
-    align-items: flex-start; /* Align items to the left */
-    width: 100%; /* Ensure controls take full width */
-    position: sticky; /* Make controls sticky on scroll */
+.no-communities-found .icon {
+    font-size: 2.5em;
+    color: var(--color-text-secondary);
+}
+
+.no-communities-found span {
+    color: var(--color-primary);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.no-communities-found span:hover {
+    text-decoration: underline;
+}
+
+/* --- Buttons & Selects --- */
+.filter-action-bar button,
+.advanced-filters-sidebar button,
+.search-modal button {
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    padding: 10px 15px;
+    border-radius: var(--border-radius-base);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    flex-shrink: 0; /* Crucial for horizontal scrolling: prevent shrinking */
+    white-space: nowrap; /* Prevent text wrapping */
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+}
+
+.filter-action-bar button:hover,
+.advanced-filters-sidebar button:hover,
+.search-modal button:hover {
+    background-color: var(--color-hover-bg);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
+}
+
+.icon-btn {
+    width: 40px; /* Fixed width for icon-only buttons */
+    height: 40px;
+    padding: 0;
+    border-radius: 50%; /* Make them circular */
+    font-size: 1.2em;
+    justify-content: center; /* Center the icon */
+}
+
+/* Text inside compact buttons, hidden by default for icon-only appearance */
+.filter-action-bar .button-text-only-mobile {
+    display: none; /* Hide by default, will show on smaller screens */
+}
+
+.icon-btn.active {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+}
+
+.icon-btn.active:hover {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+.create-community-btn-compact {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    padding: 10px 15px;
+    border: none;
+    border-radius: var(--border-radius-base);
+}
+
+.create-community-btn-compact:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.compact-select, .filter-select {
+    padding: 10px 15px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-base);
+    background-color: var(--color-surface);
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234b5563'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0; /* Crucial for horizontal scrolling: prevent shrinking */
+    min-width: 140px; /* Ensure select boxes have a minimum readable width */
+}
+
+[data-theme="dark"] .compact-select,
+[data-theme="dark"] .filter-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+}
+
+.compact-select:hover, .filter-select:hover {
+    border-color: var(--color-primary);
+}
+
+.compact-select:focus, .filter-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* --- Filter Action Bar (Horizontal Scroll Row) --- */
+.filter-action-bar {
+    display: flex;
+    gap: var(--gap-sm); /* Space between items */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    scroll-behavior: smooth;
+    padding-bottom: var(--gap-sm); /* Space for scrollbar if present */
+    margin-bottom: var(--gap-lg);
+    border-bottom: 1px solid var(--color-border); /* Subtle separator */
+    padding-top: var(--gap-sm);
+    padding-inline: var(--gap-sm); /* Internal padding for the scrollable area */
+    align-items: center; /* Vertically align items in the row */
+
+    /* Scrollbar styling for Webkit browsers */
+    &::-webkit-scrollbar {
+        height: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: var(--color-surface);
+        border-radius: 10px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--color-primary);
+        border-radius: 10px;
+        border: 1px solid var(--color-background);
+    }
+    /* Scrollbar styling for Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) var(--color-surface);
+}
+
+
+/* --- Advanced Filters Sidebar --- */
+.advanced-filters-sidebar-overlay {
+    position: fixed;
     top: 0;
-    background-color: var(--color-background); /* Background for sticky bar */
-    padding: 0.8rem 1rem; /* Add padding to sticky bar */
-    z-index: 100;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow for sticky bar */
-    border-radius: 0 0 8px 8px; /* Rounded bottom corners for sticky bar */
-  }
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
 
-  .community-search-input,
-  .community-filter-select,
-  .community-filter-input,
-  .filter-trending-btn,
-  .toggle-advanced-filters-btn {
-    width: 100%; /* Make all control elements full width */
-  }
+.advanced-filters-sidebar-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
 
-  /* Ensure advanced filter panel also stacks vertically on mobile */
-  .advanced-filters-panel {
+.advanced-filters-sidebar {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 280px;
+    height: 100%;
+    background-color: var(--color-background);
+    box-shadow: -4px 0 10px var(--color-shadow);
+    z-index: 1000;
+    transition: right 0.3s ease;
+    display: flex;
     flex-direction: column;
-  }
+    padding: var(--page-padding);
+    box-sizing: border-box;
+}
 
-  .communities-grid {
-    grid-template-columns: 1fr; /* Single column layout for communities on small screens */
-    gap: 1rem; /* Slightly reduced gap */
-    padding: 0 1rem; /* Add horizontal padding to the grid itself */
-  }
+.advanced-filters-sidebar.open {
+    right: 0;
+}
 
-  /* Optional: Trending Carousel section for mobile */
-  .trending-carousel-section {
-    margin-bottom: 2rem;
-  }
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--gap-lg);
+    padding-bottom: var(--gap-sm);
+    border-bottom: 1px solid var(--color-border);
+}
 
-  .trending-carousel-section h2 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    padding: 0 1rem; /* Align with container padding */
-  }
+.sidebar-header h3 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 1.4rem;
+}
 
-  .trending-carousel-container {
+.sidebar-header .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: var(--color-text-secondary);
+    padding: 0;
+    width: auto;
+    height: auto;
+}
+
+.sidebar-header .close-btn:hover {
+    color: var(--color-primary);
+    background: none;
+}
+
+.filter-group {
+    margin-bottom: var(--gap-md);
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-weight: 600;
+    margin-bottom: var(--gap-sm);
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+}
+
+.filter-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-base);
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    background-color: var(--color-surface);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.trending-toggle-btn {
+    width: 100%;
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+.trending-toggle-btn.active {
+    background-color: var(--trending-badge-bg);
+    color: var(--trending-badge-text);
+    border-color: var(--trending-badge-bg);
+}
+
+.trending-toggle-btn.active:hover {
+    background-color: #d97706;
+    border-color: #d97706;
+}
+
+.filter-actions {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+    padding-top: var(--gap-md);
+    border-top: 1px solid var(--color-border);
+}
+
+.apply-filters-btn {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border: none;
+}
+
+.apply-filters-btn:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.clear-filters-btn {
+    background-color: var(--color-text-secondary);
+    color: var(--color-background);
+    border: none;
+}
+
+.clear-filters-btn:hover {
+    background-color: #6b7280;
+}
+
+/* --- Search Modal --- */
+.search-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.search-modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.search-modal {
+    background-color: var(--color-background);
+    border-radius: var(--border-radius-base);
+    box-shadow: var(--shadow-large);
+    width: 90%;
+    max-width: 600px;
+    margin-top: 5vh;
+    padding: var(--page-padding);
+    box-sizing: border-box;
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    position: relative;
+}
+
+.search-modal-overlay.open .search-modal {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.search-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--gap-md);
+    padding-bottom: var(--gap-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.search-modal-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--color-text-primary);
+}
+
+.search-modal-header .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: var(--color-text-secondary);
+    padding: 0;
+    width: auto;
+    height: auto;
+}
+
+.search-modal-header .close-btn:hover {
+    color: var(--color-primary);
+    background: none;
+}
+
+.search-modal-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--gap-md);
+}
+
+.search-modal-input-wrapper .fa-search {
+    position: absolute;
+    left: var(--gap-sm);
+    color: var(--color-text-secondary);
+}
+
+.search-modal-input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-base);
+    font-size: 1.1rem;
+    color: var(--color-text-primary);
+    background-color: var(--color-surface);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-modal-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.clear-search-btn {
+    position: absolute;
+    right: var(--gap-sm);
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 1em;
+    padding: 0;
+    width: auto;
+    height: auto;
+}
+
+.clear-search-btn:hover {
+    color: var(--color-danger);
+}
+
+.search-results-list {
+    list-style: none;
+    padding: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-base);
+    background-color: var(--color-surface);
+}
+
+.search-results-list li {
+    display: flex;
+    align-items: center;
+    padding: var(--gap-sm) var(--gap-md);
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.search-results-list li:last-child {
+    border-bottom: none;
+}
+
+.search-results-list li:hover {
+    background-color: var(--color-hover-bg);
+}
+
+.search-results-list .result-icon {
+    font-size: 1.8em;
+    margin-right: var(--gap-md);
+    flex-shrink: 0;
+}
+
+.search-results-list .result-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.search-results-list .result-name {
+    font-weight: 600;
+    color: var(--color-primary);
+    font-size: 1.1em;
+}
+
+.search-results-list .result-members {
+    font-size: 0.9em;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+}
+
+/* --- Trending Communities Carousel --- */
+.trending-communities-carousel {
+    position: relative;
+    margin-bottom: var(--gap-lg);
+    padding: var(--card-padding);
+    background-color: var(--color-background);
+    border-radius: var(--border-radius-base);
+    box-shadow: var(--shadow-medium);
+}
+
+.trending-communities-carousel h3 {
+    margin-top: 0;
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+}
+
+.carousel-container {
     display: flex;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    gap: 1rem;
-    padding: 0 1rem 1rem; /* Padding for scrollable area */
-  }
-
-  .carousel-item {
-    flex: 0 0 auto;
-    width: 85%; /* Adjust width for better mobile experience */
-    max-width: 300px;
-    scroll-snap-align: start;
-  }
+    scroll-behavior: smooth;
+    padding-bottom: var(--gap-sm);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+    gap: var(--gap-md);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) var(--color-border);
 }
 
-/* Very small screens (e.g., old phones) */
+.carousel-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.carousel-container::-webkit-scrollbar-track {
+    background: var(--color-border);
+    border-radius: 10px;
+}
+
+.carousel-container::-webkit-scrollbar-thumb {
+    background-color: var(--color-primary);
+    border-radius: 10px;
+    border: 2px solid var(--color-background);
+}
+
+.trending-card {
+    flex: 0 0 auto;
+    width: 200px;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius-base);
+    padding: var(--card-padding);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.trending-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+}
+
+.trending-card .card-icon {
+    font-size: 3em;
+    margin-bottom: var(--gap-sm);
+}
+
+.trending-card .card-name {
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-bottom: var(--gap-xs);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.trending-card .card-metric {
+    font-size: 0.9em;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+}
+
+.carousel-nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    color: var(--color-primary);
+    box-shadow: var(--shadow-light);
+    z-index: 10;
+}
+
+.carousel-nav-arrow:hover {
+    background-color: var(--color-hover-bg);
+    color: var(--color-primary-dark);
+    box-shadow: var(--shadow-medium);
+}
+
+.carousel-nav-arrow.left {
+    left: var(--gap-md);
+}
+
+.carousel-nav-arrow.right {
+    right: var(--gap-md);
+}
+
+@media (max-width: 768px) {
+    .carousel-nav-arrow {
+        display: none;
+    }
+}
+
+/* --- Community Cards Grid/List --- */
+.communities-grid-scroll-wrapper {
+    padding-bottom: var(--gap-lg);
+}
+
+.communities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--gap-lg);
+    justify-items: center;
+}
+
+.community-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 350px;
+}
+
+.community-card {
+    background-color: var(--color-background);
+    border-radius: var(--border-radius-base);
+    box-shadow: var(--shadow-medium);
+    padding: var(--card-padding);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--gap-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.community-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-large);
+}
+
+.community-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+    width: 100%;
+}
+
+.community-card .card-icon {
+    font-size: 2.5em;
+    flex-shrink: 0;
+}
+
+.community-card .card-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.community-card .card-name {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.community-card .card-category {
+    font-size: 0.9em;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    text-transform: capitalize;
+}
+
+.community-card .card-description {
+    font-size: 0.95em;
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    display: -webkit-box;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.community-card .card-stats {
+    display: flex;
+    gap: var(--gap-md);
+    font-size: 0.9em;
+    color: var(--color-text-secondary);
+    margin-top: auto;
+}
+
+.community-card .card-stat {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+}
+
+.trending-badge {
+    position: absolute;
+    top: var(--gap-sm);
+    right: var(--gap-sm);
+    background-color: var(--trending-badge-bg);
+    color: var(--trending-badge-text);
+    padding: var(--gap-xs) var(--gap-sm);
+    border-radius: var(--border-radius-base);
+    font-size: 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 5;
+    box-shadow: 0 2px 5px var(--trending-badge-shadow);
+}
+
+.animate-pulse {
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+
+/* --- Responsive Adjustments --- */
+/*
+  The goal is for the .filter-action-bar to ALWAYS be a flex row with horizontal
+  scrolling if content overflows. We'll adjust the appearance of elements INSIDE
+  it based on screen size, but the row layout itself should remain.
+*/
+
+/* Styles for screens 769px and up (Desktop/Larger Tablets) */
+@media (min-width: 769px) {
+    .filter-action-bar {
+        /* No changes needed here, flex + overflow-x: auto is already set */
+        /* Optionally: if you don't want scrollbar always visible on desktop: */
+        overflow-x: hidden; /* Hide scrollbar if not needed, but keep flex row */
+        justify-content: flex-start; /* Align items to the start */
+        padding-inline: 0; /* No need for extra padding when not scrolling much */
+        border-bottom: none; /* Remove border if you prefer clean desktop look */
+    }
+
+    .filter-action-bar .button-text {
+        display: inline; /* Show "Create" text on desktop */
+    }
+
+    .filter-action-bar .button-text-only-mobile {
+        display: none; /* Hide search/filter text on desktop */
+    }
+
+    .create-community-btn-compact {
+        /* Adjust width for desktop, allowing text */
+        min-width: 150px;
+        padding: 10px 15px; /* Standard padding */
+        border-radius: var(--border-radius-base); /* Standard corners */
+    }
+
+    .icon-btn {
+        width: 40px; /* Revert to icon-only size */
+        height: 40px;
+        border-radius: 50%; /* Keep circular */
+    }
+}
+
+/* Styles for screens 768px and down (Mobile/Smaller Tablets) */
+@media (max-width: 768px) {
+    .communities-page-container {
+        padding: var(--gap-md);
+    }
+
+    h1 {
+        font-size: 2rem;
+        justify-content: center; /* Center heading on mobile */
+        text-align: center;
+    }
+
+    .filter-action-bar {
+        /* Ensure it remains a flex row, scrollable */
+        flex-direction: row;
+        flex-wrap: nowrap; /* Prevent wrapping to force horizontal scroll */
+        justify-content: flex-start; /* Align items to the start of the scrollable area */
+        padding-inline: var(--gap-md); /* Add more padding on sides for smaller screens */
+        padding-bottom: var(--gap-md); /* More space for scrollbar/shadow */
+    }
+
+    /* Show button text on mobile for search/filter icons */
+    .filter-action-bar .button-text-only-mobile {
+        display: inline;
+    }
+    .filter-action-bar .button-text {
+        display: none; /* Hide "Create" text, keep icon and "Create" text for mobile create button */
+    }
+
+    /* Adjust the create button for mobile to ensure it always has text */
+    .create-community-btn-compact {
+        padding: 10px 15px; /* Consistent padding */
+        font-size: 1rem; /* Consistent font size */
+        border-radius: var(--border-radius-base); /* Standard corners */
+        width: auto; /* Allow width to be determined by content */
+        min-width: unset; /* Remove min-width from desktop */
+    }
+
+    /* Make icon buttons a bit larger for touch on mobile, but keep them compact in row */
+    .icon-btn {
+        width: 50px; /* Slightly wider to accommodate text and touch */
+        height: 40px; /* Keep height consistent */
+        border-radius: var(--border-radius-base); /* Make them square on mobile, or keep circular if preferred */
+    }
+
+    /* Ensure selects have appropriate width on mobile */
+    .compact-select {
+        min-width: 150px; /* Ensure enough width for options */
+    }
+
+    .advanced-filters-sidebar {
+        width: 100%;
+        right: -100%;
+        padding: var(--gap-md);
+    }
+
+    .advanced-filters-sidebar.open {
+        right: 0;
+    }
+
+    .search-modal {
+        width: 95%;
+        margin-top: 2vh;
+        padding: var(--gap-md);
+    }
+
+    .trending-card {
+        width: 160px;
+    }
+
+    .community-card .card-icon {
+        font-size: 2em;
+    }
+
+    .community-card .card-name {
+        font-size: 1.2em;
+    }
+
+    .community-card .card-description {
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+    }
+}
+
+/* Very Small Screens (e.g., iPhone SE portrait) */
 @media (max-width: 480px) {
-  .communities-page-container {
-    padding: 0 0.5rem;
-  }
-
-  .communities-page-header {
-    padding-top: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .create-community-btn {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
-  }
-
-  .communities-controls {
-    padding: 0.5rem 0.5rem;
-    gap: 0.8rem;
-  }
-
-  .community-search-input,
-  .community-filter-select,
-  .community-filter-input,
-  .filter-trending-btn,
-  .toggle-advanced-filters-btn {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
-  }
-
-  .communities-grid {
-    gap: 0.8rem;
-    padding: 0 0.5rem;
-  }
-
-  .community-wrapper {
-    padding: 0.8rem;
-  }
+    .filter-action-bar {
+        /* Keep it as a row, just make padding tighter */
+        padding-inline: var(--gap-sm);
+    }
+    .create-community-btn-compact {
+        /* On very small mobile, allow create button to shrink more if needed */
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+    .icon-btn {
+        width: 45px; /* A bit smaller for very compact screens */
+        height: 38px;
+    }
+    .compact-select {
+        min-width: 130px; /* Smaller min-width for very compact screens */
+    }
 }

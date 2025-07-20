@@ -21,7 +21,7 @@
 [data-theme="dark"] {
   --color-primary: #60a5fa;
   --color-primary-dark: #3b82f6;
-  --color-text-primary: #e5e7eb;
+  --color-text-primary: #d5e1fb;
   --color-text-secondary: #9ca3af;
   --color-background: #111827;
   --color-surface: #1f2937;
@@ -52,7 +52,6 @@ body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
-  color: var(--text-color);
   transition: color 0.3s ease;
 }
 
@@ -62,7 +61,7 @@ h3,
 h4,
 h5,
 h6 {
-  color: var(--text-color);
+  color: var(--color-text-primary);
 }
 
 button {
