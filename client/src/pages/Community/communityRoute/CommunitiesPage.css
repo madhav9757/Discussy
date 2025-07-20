@@ -1,15 +1,8 @@
-/* --- CommunitiesPage.css --- */
-
-/* Import a modern font, e.g., Google Fonts 'Inter' - if not already in index.css */
-/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'); */
-/* Assuming 'Inter' is already linked via your index.css or a global setup */
-
-/* --- Component-Specific Variables (Building on Index.css) --- */
-/* These are specific to this component or overrides of base variables */
 :root {
     --page-padding: 24px;
     --card-padding: 16px;
-    --gap-xs: 4px; /* Added for small icon-text gaps */
+    --gap-xs: 4px;
+    /* Added for small icon-text gaps */
     --gap-sm: 8px;
     --gap-md: 16px;
     --gap-lg: 24px;
@@ -17,7 +10,8 @@
     --shadow-light: 0 1px 3px var(--color-shadow), 0 1px 2px var(--color-shadow);
     --shadow-medium: 0 4px 6px var(--color-shadow), 0 1px 3px var(--color-shadow);
     --shadow-large: 0 10px 15px -3px var(--color-shadow), 0 4px 6px -2px var(--color-shadow);
-    --trending-badge-bg: #f59e0b; /* Tailwind amber-500 equivalent */
+    --trending-badge-bg: #f59e0b;
+    /* Tailwind amber-500 equivalent */
     --trending-badge-text: #ffffff;
     --trending-badge-shadow: rgba(245, 158, 11, 0.3);
 }
@@ -25,27 +19,37 @@
 /* --- Base Component Styles --- */
 .communities-page-container {
     padding: var(--page-padding);
-    max-width: 1200px; /* Max width for content */
-    margin: 0 auto; /* Center the container */
-    min-height: calc(100vh - var(--header-height, 0)); /* Account for potential header */
-    box-sizing: border-box; /* Include padding in element's total width and height */
-    background-color: var(--color-background); /* Ensure background is set */
-    color: var(--color-text-primary); /* Ensure text color is set */
+    max-width: 1200px;
+    /* Max width for content */
+    margin: 3rem auto;
+    /* Center the container */
+    min-height: calc(100vh - var(--header-height, 0));
+    /* Account for potential header */
+    box-sizing: border-box;
+    /* Include padding in element's total width and height */
+    background-color: var(--color-background);
+    /* Ensure background is set */
+    color: var(--color-text-primary);
+    /* Ensure text color is set */
 }
 
 h1 {
     display: flex;
     align-items: center;
     gap: var(--gap-md);
-    color: var(--color-primary); /* Use primary color for main heading */
+    color: var(--color-primary);
+    /* Use primary color for main heading */
     margin-bottom: var(--gap-lg);
-    font-size: 2.5rem; /* Larger heading for prominence */
+    font-size: 2.5rem;
+    /* Larger heading for prominence */
     font-weight: 700;
-    justify-content: flex-start; /* Align left by default */
+    justify-content: flex-start;
+    /* Align left by default */
 }
 
 /* --- Loader & Error Messages --- */
-.error-message, .no-communities-found {
+.error-message,
+.no-communities-found {
     text-align: center;
     color: var(--color-danger);
     font-size: 1.1em;
@@ -93,8 +97,10 @@ h1 {
     font-size: 1rem;
     font-weight: 500;
     transition: all 0.2s ease;
-    flex-shrink: 0; /* Crucial for horizontal scrolling: prevent shrinking */
-    white-space: nowrap; /* Prevent text wrapping */
+    flex-shrink: 0;
+    /* Crucial for horizontal scrolling: prevent shrinking */
+    white-space: nowrap;
+    /* Prevent text wrapping */
     display: flex;
     align-items: center;
     gap: var(--gap-xs);
@@ -111,17 +117,21 @@ h1 {
 }
 
 .icon-btn {
-    width: 40px; /* Fixed width for icon-only buttons */
+    width: 40px;
+    /* Fixed width for icon-only buttons */
     height: 40px;
     padding: 0;
-    border-radius: 50%; /* Make them circular */
+    border-radius: 50%;
+    /* Make them circular */
     font-size: 1.2em;
-    justify-content: center; /* Center the icon */
+    justify-content: center;
+    /* Center the icon */
 }
 
 /* Text inside compact buttons, hidden by default for icon-only appearance */
 .filter-action-bar .button-text-only-mobile {
-    display: none; /* Hide by default, will show on smaller screens */
+    display: inline;
+    /* Hide by default, will show on smaller screens */
 }
 
 .icon-btn.active {
@@ -147,7 +157,8 @@ h1 {
     background-color: var(--color-primary-dark);
 }
 
-.compact-select, .filter-select {
+.compact-select,
+.filter-select {
     padding: 10px 15px;
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-base);
@@ -161,8 +172,10 @@ h1 {
     background-size: 16px;
     cursor: pointer;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    flex-shrink: 0; /* Crucial for horizontal scrolling: prevent shrinking */
-    min-width: 140px; /* Ensure select boxes have a minimum readable width */
+    flex-shrink: 0;
+    /* Crucial for horizontal scrolling: prevent shrinking */
+    min-width: 140px;
+    /* Ensure select boxes have a minimum readable width */
 }
 
 [data-theme="dark"] .compact-select,
@@ -170,11 +183,13 @@ h1 {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-.compact-select:hover, .filter-select:hover {
+.compact-select:hover,
+.filter-select:hover {
     border-color: var(--color-primary);
 }
 
-.compact-select:focus, .filter-select:focus {
+.compact-select:focus,
+.filter-select:focus {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
@@ -183,30 +198,40 @@ h1 {
 /* --- Filter Action Bar (Horizontal Scroll Row) --- */
 .filter-action-bar {
     display: flex;
-    gap: var(--gap-sm); /* Space between items */
-    overflow-x: auto; /* Enable horizontal scrolling */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    gap: var(--gap-sm);
+    /* Space between items */
+    overflow-x: auto;
+    /* Enable horizontal scrolling */
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
     scroll-behavior: smooth;
-    padding-bottom: var(--gap-sm); /* Space for scrollbar if present */
+    padding-bottom: var(--gap-sm);
+    /* Space for scrollbar if present */
     margin-bottom: var(--gap-lg);
-    border-bottom: 1px solid var(--color-border); /* Subtle separator */
+    border-bottom: 1px solid var(--color-border);
+    /* Subtle separator */
     padding-top: var(--gap-sm);
-    padding-inline: var(--gap-sm); /* Internal padding for the scrollable area */
-    align-items: center; /* Vertically align items in the row */
+    padding-inline: var(--gap-sm);
+    /* Internal padding for the scrollable area */
+    align-items: center;
+    /* Vertically align items in the row */
 
     /* Scrollbar styling for Webkit browsers */
     &::-webkit-scrollbar {
         height: 6px;
     }
+
     &::-webkit-scrollbar-track {
         background: var(--color-surface);
         border-radius: 10px;
     }
+
     &::-webkit-scrollbar-thumb {
         background-color: var(--color-primary);
         border-radius: 10px;
         border: 1px solid var(--color-background);
     }
+
     /* Scrollbar styling for Firefox */
     scrollbar-width: thin;
     scrollbar-color: var(--color-primary) var(--color-surface);
@@ -626,13 +651,13 @@ h1 {
     background-color: var(--color-background);
     border: 1px solid var(--color-border);
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.2em;
-    color: var(--color-primary);
+    color: var(--color-text-primary);
     box-shadow: var(--shadow-light);
     z-index: 10;
 }
@@ -779,53 +804,54 @@ h1 {
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.9; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 
 /* --- Responsive Adjustments --- */
-/*
-  The goal is for the .filter-action-bar to ALWAYS be a flex row with horizontal
-  scrolling if content overflows. We'll adjust the appearance of elements INSIDE
-  it based on screen size, but the row layout itself should remain.
-*/
 
-/* Styles for screens 769px and up (Desktop/Larger Tablets) */
 @media (min-width: 769px) {
     .filter-action-bar {
-        /* No changes needed here, flex + overflow-x: auto is already set */
-        /* Optionally: if you don't want scrollbar always visible on desktop: */
-        overflow-x: hidden; /* Hide scrollbar if not needed, but keep flex row */
-        justify-content: flex-start; /* Align items to the start */
-        padding-inline: 0; /* No need for extra padding when not scrolling much */
-        border-bottom: none; /* Remove border if you prefer clean desktop look */
+        overflow-x: hidden;
+        justify-content: flex-start;
+        padding-inline: 0;
+        border-bottom: none;
     }
 
     .filter-action-bar .button-text {
-        display: inline; /* Show "Create" text on desktop */
+        display: inline;
     }
 
     .filter-action-bar .button-text-only-mobile {
-        display: none; /* Hide search/filter text on desktop */
+        display: inline;
     }
 
     .create-community-btn-compact {
-        /* Adjust width for desktop, allowing text */
         min-width: 150px;
-        padding: 10px 15px; /* Standard padding */
-        border-radius: var(--border-radius-base); /* Standard corners */
+        padding: 10px 15px;
+        border-radius: var(--border-radius-base);
     }
 
     .icon-btn {
-        width: 40px; /* Revert to icon-only size */
+        width: 40px;
         height: 40px;
-        border-radius: 50%; /* Keep circular */
+        border-radius: 50%;
     }
 }
 
-/* Styles for screens 768px and down (Mobile/Smaller Tablets) */
 @media (max-width: 768px) {
     .communities-page-container {
         padding: var(--gap-md);
@@ -833,46 +859,55 @@ h1 {
 
     h1 {
         font-size: 2rem;
-        justify-content: center; /* Center heading on mobile */
+        justify-content: center;
         text-align: center;
     }
 
     .filter-action-bar {
-        /* Ensure it remains a flex row, scrollable */
         flex-direction: row;
-        flex-wrap: nowrap; /* Prevent wrapping to force horizontal scroll */
-        justify-content: flex-start; /* Align items to the start of the scrollable area */
-        padding-inline: var(--gap-md); /* Add more padding on sides for smaller screens */
-        padding-bottom: var(--gap-md); /* More space for scrollbar/shadow */
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        padding-inline: var(--gap-md);
+        padding-bottom: var(--gap-md);
     }
 
-    /* Show button text on mobile for search/filter icons */
     .filter-action-bar .button-text-only-mobile {
-        display: inline;
+        display: none;
     }
+
     .filter-action-bar .button-text {
-        display: none; /* Hide "Create" text, keep icon and "Create" text for mobile create button */
+        display: none;
+        /* Hide "Create" text, keep icon and "Create" text for mobile create button */
     }
 
     /* Adjust the create button for mobile to ensure it always has text */
     .create-community-btn-compact {
-        padding: 10px 15px; /* Consistent padding */
-        font-size: 1rem; /* Consistent font size */
-        border-radius: var(--border-radius-base); /* Standard corners */
-        width: auto; /* Allow width to be determined by content */
-        min-width: unset; /* Remove min-width from desktop */
+        padding: 10px 15px;
+        /* Consistent padding */
+        font-size: 1rem;
+        /* Consistent font size */
+        border-radius: var(--border-radius-base);
+        /* Standard corners */
+        width: auto;
+        /* Allow width to be determined by content */
+        min-width: unset;
+        /* Remove min-width from desktop */
     }
 
     /* Make icon buttons a bit larger for touch on mobile, but keep them compact in row */
     .icon-btn {
-        width: 50px; /* Slightly wider to accommodate text and touch */
-        height: 40px; /* Keep height consistent */
-        border-radius: var(--border-radius-base); /* Make them square on mobile, or keep circular if preferred */
+        width: 50px;
+        /* Slightly wider to accommodate text and touch */
+        height: 40px;
+        /* Keep height consistent */
+        border-radius: var(--border-radius-base);
+        /* Make them square on mobile, or keep circular if preferred */
     }
 
     /* Ensure selects have appropriate width on mobile */
     .compact-select {
-        min-width: 150px; /* Ensure enough width for options */
+        min-width: 150px;
+        /* Ensure enough width for options */
     }
 
     .advanced-filters-sidebar {
@@ -915,16 +950,21 @@ h1 {
         /* Keep it as a row, just make padding tighter */
         padding-inline: var(--gap-sm);
     }
+
     .create-community-btn-compact {
         /* On very small mobile, allow create button to shrink more if needed */
         font-size: 0.9rem;
         padding: 8px 12px;
     }
+
     .icon-btn {
-        width: 45px; /* A bit smaller for very compact screens */
+        width: 45px;
+        /* A bit smaller for very compact screens */
         height: 38px;
     }
+
     .compact-select {
-        min-width: 130px; /* Smaller min-width for very compact screens */
+        min-width: 130px;
+        /* Smaller min-width for very compact screens */
     }
 }
