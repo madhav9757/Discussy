@@ -40,14 +40,24 @@
 
 ```
 Discussy/
-├── client/          # React Frontend
-│   ├── components/
-│   ├── pages/
-│   └── features/
-└── server/          # Node.js Backend
-    ├── models/
-    ├── routes/
-    └── controllers/
+├── client/          # React Frontend Application
+│   ├── public/
+│   ├── src/
+│   │   ├── app/             # Redux store and API setup
+│   │   ├── assets/          # Images, fonts, etc.
+│   │   ├── components/      # Reusable UI components
+│   │   ├── features/        # Redux slices and logic for specific features (e.g., auth, posts)
+│   │   ├── pages/           # Top-level page components (e.g., Home, Community, Create Post)
+│   │   └── styles/          # Global styles, variables
+│   └── .env                 # Frontend environment variables
+└── server/          # Node.js Express Backend API
+    ├── config/          # Database connection, JWT config
+    ├── controllers/     # Business logic for routes
+    ├── middleware/      # Authentication middleware, error handling
+    ├── models/          # Mongoose schemas
+    ├── routes/          # API endpoints
+    ├── .env             # Backend environment variables
+    └── server.js        # Main server entry point
 ```
 
 ---
@@ -108,10 +118,11 @@ npm run dev
 
 Discussy was built as a full-stack learning project, focusing on:
 
-- Scalable component design
-- State management using RTK Query
-- Backend route protection
-- Dynamic data filtering + client-side performance
+ - Scalable Component Design: Architecting reusable and maintainable React components.
+ - Advanced State Management: Effectively utilizing Redux Toolkit and RTK Query for complex application states and optimized data fetching.
+ - Backend Security: Implementing robust route protection and user authentication with JWT.
+ - Dynamic Data Handling: Mastering real-time data filtering, sorting, and search for optimal client-side performance.
+ - Modern UI/UX Implementation: Translating design concepts like Glassmorphism into a functional and aesthetic user interface.
 
 ---
 
