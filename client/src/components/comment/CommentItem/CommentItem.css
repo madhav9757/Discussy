@@ -1,15 +1,9 @@
-/* Ensure this CSS file is loaded AFTER Header.css or that Header.css variables are globally available */
-
-/* General comment box styling */
 .comment-box-enhanced {
-    padding: 1rem;
+    padding: 5px;
     border-radius: 8px;
-    margin-bottom: 1rem;
-    /* Changed from #1e1e1e (hardcoded dark) to theme surface */
+    margin-bottom: 10px;
     background: var(--color-surface);
-    /* Changed from #ddd (hardcoded light) to primary text color */
     color: var(--color-text-primary);
-    /* Adjusted shadow to use theme shadow */
     box-shadow: 0 0 5px var(--color-shadow);
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease, color 0.3s ease;
 }
@@ -317,11 +311,10 @@
 
 /* Comment Replies Nesting */
 .comment-replies {
-    margin-top: 1rem;
-    margin-left: 2rem;
-    /* Adjusted border color */
+    margin-top: 5px;
+    margin-left: 5px;
     border-left: 2px solid var(--color-border);
-    padding-left: 1rem;
+    padding-left: 10px;
 }
 
 /* Keyframes (no change needed here as it's about animation, not color) */

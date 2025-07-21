@@ -2,9 +2,9 @@
 #create-post-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   padding: 4rem 1.5rem;
-  background-color: #121212;
+  background-color: var(--color-background);
   min-height: 100vh;
   box-sizing: border-box;
 }
@@ -13,10 +13,10 @@
 #post-form-box {
   width: 100%;
   max-width: 550px;
-  background: #1e1e1e;
+  background: var(--color-surface);
   border-radius: 16px;
   padding: 2.5rem 2rem;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 30px var(--color-shadow);
   transition: transform 0.3s ease;
 }
 
@@ -44,8 +44,8 @@
   font-size: 1rem;
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  border: 1px solid #3a3a3a;
-  background-color: #2a2a2a;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background);
   color: #e0e0e0;
   transition: border-color 0.3s;
 }

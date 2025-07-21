@@ -1,10 +1,3 @@
-/* PostDetails.css - Enhanced Modern Design with CSS Variables */
-
-/* Base styles */
-* {
-  box-sizing: border-box;
-}
-
 /* Main container */
 .post-details-page {
   min-height: 100vh;
@@ -676,9 +669,9 @@
 /* Vote controls */
 .sidebar-vote-controls {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem 2rem;
   gap: 0;
-  position: relative;
 }
 
 /* Vertical separator between vote buttons */
@@ -708,18 +701,19 @@
   transition: all 0.2s ease;
   font-weight: 500;
   min-height: 44px;
+  width: 100%;
   position: relative;
   overflow: hidden;
   z-index: 2;
 }
 
 .vote-button:first-child {
-  border-radius: 12px 12px 0 0;
+  border-radius: 12px 0 0 12px;
   border-bottom: none;
 }
 
 .vote-button:last-child {
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 12px 12px 0;
   border-top: none;
 }
 
