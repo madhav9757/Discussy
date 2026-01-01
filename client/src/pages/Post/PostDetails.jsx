@@ -1,303 +1,336 @@
-import React, { useState, useEffect, useRef } from 'react'; // Import useRef
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { MdArrowBack } from 'react-icons/md';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
-import 'highlight.js/styles/github-dark.css';
-import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
-import { User, Copy, Check } from 'lucide-react'; // Import Copy and Check icons
+import React, { useState } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import { useSelector } from "react-redux";
+import { toast } from "sonner";
+import {
+  ArrowLeft,
+  ThumbsUp,
+  ThumbsDown,
+  MessageSquare,
+  Trash2,
+  Pencil,
+  User as UserIcon,
+  Copy,
+  Check,
+  Share2,
+  ExternalLink
+} from "lucide-react";
 
-import './PostDetails.css';
-import CommentInput from '../../components/comment/commentInput/CommentInput.jsx';
-import CommentItem from '../../components/comment/CommentItem/CommentItem.jsx';
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-import { useGetPostByIdQuery, useToggleVoteMutation, useDeletePostMutation, useUpdatePostMutation } from '../../app/api/postsApi';
-import { useGetCommentsByPostIdQuery } from '../../app/api/commentsApi';
+import CommentInput from "@/components/comment/commentInput/CommentInput";
+import CommentItem from "@/components/comment/CommentItem/CommentItem";
 
-const formatDateTime = (isoString) => {
-  const date = new Date(isoString);
-  return date.toLocaleString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
-};
+import {
+  useGetPostByIdQuery,
+  useToggleVoteMutation,
+  useDeletePostMutation,
+} from "@/app/api/postsApi";
+import { useGetCommentsByPostIdQuery } from "@/app/api/commentsApi";
 
 const PostDetailsPage = () => {
-  const navigate = useNavigate();
   const { id } = useParams();
-  const user = useSelector((state) => state.auth.userInfo);
+  const navigate = useNavigate();
+  const user = useSelector((s) => s.auth.userInfo);
 
-  const { data: post, isLoading, isError, refetch } = useGetPostByIdQuery(id);
-  const { data: comments = [], isLoading: loadingComments } = useGetCommentsByPostIdQuery(id);
+  const { data: post, isLoading } = useGetPostByIdQuery(id);
+  const { data: comments = [] } = useGetCommentsByPostIdQuery(id);
+
   const [toggleVote] = useToggleVoteMutation();
   const [deletePost] = useDeletePostMutation();
 
-  const [upvoteCount, setUpvoteCount] = useState(0);
-  const [downvoteCount, setDownvoteCount] = useState(0);
-  const [copiedCodeBlocks, setCopiedCodeBlocks] = useState({}); // State to track copied status per block
+  const [copied, setCopied] = useState(null);
 
-  const progressBarRef = useRef(null); // Ref for the progress bar
+  if (isLoading || !post) return <PostSkeleton />;
 
-  useEffect(() => {
-    if (post) {
-      setUpvoteCount(post.upvotes?.length || 0);
-      setDownvoteCount(post.downvotes?.length || 0);
+  const currentVote =
+    post.upvotes.includes(user?._id)
+      ? "up"
+      : post.downvotes.includes(user?._id)
+      ? "down"
+      : null;
+
+  const handleVote = async (type) => {
+    if (!user) return navigate("/login");
+    try {
+      await toggleVote({ id, type }).unwrap();
+    } catch (err) {
+      toast.error("Failed to update vote");
     }
-  }, [post]);
+  };
 
-  // Reading Progress Bar Logic
-  useEffect(() => {
-    const handleScroll = () => {
-      if (progressBarRef.current) {
-        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-        const scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
-        progressBarRef.current.style.width = `${scrollPercent}%`;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleDeletePost = async () => {
-    if (!window.confirm("Are you sure you want to delete this post?")) return;
-
+  const handleDelete = async () => {
     try {
       await deletePost(post._id).unwrap();
-      toast.success("Post deleted successfully!");
-      navigate(`/community/${post.community?._id || ''}`);
+      toast.success("Post deleted");
+      navigate(`/community/${post.community._id}`);
     } catch (err) {
-      console.error("Delete failed", err);
       toast.error("Failed to delete post");
     }
   };
 
-  const handleVote = async (type) => {
-    if (!user) {
-      toast.info("Please log in to vote.");
-      navigate('/login');
-      return;
-    }
-    try {
-      const res = await toggleVote({ id, type }).unwrap();
-      setUpvoteCount(res.upvotes);
-      setDownvoteCount(res.downvotes);
-    } catch (err) {
-      console.error('Vote failed:', err);
-      toast.error("Failed to cast vote.");
-    }
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopied(text);
+    toast.success("Copied to clipboard");
+    setTimeout(() => setCopied(null), 2000);
   };
-
-  const handleUpvote = () => handleVote('upvote');
-  const handleDownvote = () => handleVote('downvote');
-
-  const currentUserVote = post?.upvotes?.includes(user?._id)
-    ? 'upvote'
-    : post?.downvotes?.includes(user?._id)
-      ? 'downvote'
-      : null;
-
-  // Custom renderer for code blocks to add copy button
-  const components = {
-    code({ node, inline, className, children, ...props }) {
-      const match = /language-(\w+)/.exec(className || '');
-      const codeContent = String(children).replace(/\n$/, '');
-      const codeId = `code-block-${node.position.start.line}-${node.position.start.column}`; // Simple unique ID
-
-      const handleCopyCode = async () => {
-        try {
-          await navigator.clipboard.writeText(codeContent);
-          setCopiedCodeBlocks(prev => ({ ...prev, [codeId]: true }));
-          setTimeout(() => {
-            setCopiedCodeBlocks(prev => ({ ...prev, [codeId]: false }));
-          }, 2000); // Reset "Copied!" state after 2 seconds
-          toast.success("Code copied to clipboard!");
-        } catch (err) {
-          console.error("Failed to copy code: ", err);
-          toast.error("Failed to copy code.");
-        }
-      };
-
-      return !inline && match ? (
-        <div style={{ position: 'relative' }}> {/* Wrapper for relative positioning */}
-          <pre className={className} {...props}>
-            <button
-              className={`copy-code-button ${copiedCodeBlocks[codeId] ? 'copied' : ''}`}
-              onClick={handleCopyCode}
-              aria-label="Copy code to clipboard"
-            >
-              {copiedCodeBlocks[codeId] ? <Check size={16} /> : <Copy size={16} />}
-              {copiedCodeBlocks[codeId] ? ' Copied!' : ' Copy'}
-            </button>
-            <code className={className} {...props}>
-              {codeContent}
-            </code>
-          </pre>
-        </div>
-      ) : (
-        <code className={className} {...props}>
-          {children}
-        </code>
-      );
-    }
-  };
-
-  if (isLoading) return <div className="loading">Loading post...</div>;
-  if (isError || !post) return <div className="error">❌ Post not found or failed to load.</div>;
 
   return (
-    <div className="post-details-page"> {/* New top-level container */}
-      <div className="reading-progress-bar" ref={progressBarRef}></div> {/* Progress bar */}
+    <TooltipProvider>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="container max-w-6xl py-8 px-4"
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mb-6 hover:bg-primary/5 text-muted-foreground transition-colors"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to feed
+        </Button>
 
-      {/* Parallax Header */}
-      <div className="parallax-header">
-        <div className="parallax-content">
-          <h1>{post.title}</h1>
-          <div className="parallax-metadata">
-            <span className="parallax-meta-item parallax-category">
-              🎮 {post.category || 'Discussion'}
-            </span>
-            <span className="parallax-meta-item">
-              🌐 <Link className="parallax-meta-link" to={`/community/${post.community._id}`}>
-                r/{post.community.name}
-              </Link>
-            </span>
-            <span className="parallax-meta-item">
-              👤 <Link className="parallax-meta-link" to={`/user/${post.author._id}`}>
-                {post.author.username}
-              </Link>
-            </span>
-            <span className="parallax-meta-item">
-              ⏰ {formatDateTime(post.createdAt)}
-            </span>
-          </div>
-        </div>
-      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Main Content Area */}
+          <div className="lg:col-span-8 space-y-8">
+            <Card className="border-border/60 overflow-hidden shadow-sm">
+              <CardHeader className="p-6 pb-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-none">
+                    {post.category}
+                  </Badge>
+                  <Separator orientation="vertical" className="h-4" />
+                  <Link to={`/community/${post.community._id}`} className="text-sm font-medium hover:text-primary transition-colors">
+                    r/{post.community.name}
+                  </Link>
+                </div>
+                
+                <h1 className="text-3xl font-bold tracking-tight leading-tight">
+                  {post.title}
+                </h1>
+              </CardHeader>
 
-      <div className="post-details-container"> {/* This is the main content area now */}
-        <button className="back-button" onClick={() => navigate(-1)} aria-label="Go back">
-          <MdArrowBack /> Back to Community
-        </button>
-
-        <div className="post-content-wrapper">
-          <div className="main-post-column">
-            <div className="post-box">
-              {/* The actual post content, excluding the title which is now in parallax header */}
-              {/* <h1 className="post-title">{post.title}</h1> This is moved to parallax header */}
-
-              <div className="post-meta">
-                <span className="meta-item">
-                  🌐 <Link className="meta-link" to={`/community/${post.community._id}`}>r/{post.community.name}</Link>
-                </span>
-                <span className="meta-item">
-                  👤 <Link className="meta-link" to={`/user/${post.author._id}`}>{post.author.username}</Link>
-                </span>
-                <span className="meta-item">
-                  ⏰ {formatDateTime(post.createdAt)}
-                </span>
-              </div>
-
-              <div className="post-content">
+              <CardContent className="px-6 prose prose-slate dark:prose-invert max-w-none pb-8">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeHighlight]}
-                  components={components} // Pass custom components here
+                  components={{
+                    pre: ({ children }) => <div className="relative group">{children}</div>,
+                    code({ inline, children, className }) {
+                      const value = String(children).replace(/\n$/, "");
+                      if (inline) return <code className="bg-muted px-1.5 py-0.5 rounded text-sm">{children}</code>;
+                      return (
+                        <div className="my-4 rounded-lg overflow-hidden border bg-zinc-950">
+                          <div className="flex items-center justify-between px-4 py-2 bg-zinc-900 border-b border-zinc-800">
+                            <span className="text-xs text-zinc-400 font-mono">code snippet</span>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6 text-zinc-400 hover:text-white"
+                              onClick={() => copyToClipboard(value)}
+                            >
+                              {copied === value ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                            </Button>
+                          </div>
+                          <pre className="p-4 overflow-x-auto text-sm leading-relaxed">
+                            <code className={className}>{children}</code>
+                          </pre>
+                        </div>
+                      );
+                    },
+                  }}
                 >
                   {post.content}
                 </ReactMarkdown>
+              </CardContent>
+
+              <Separator className="bg-border/40" />
+
+              <CardFooter className="p-4 bg-muted/20 flex items-center justify-between">
+                <div className="flex items-center gap-1 bg-background rounded-full p-1 border shadow-sm">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`h-9 w-9 rounded-full transition-all ${currentVote === "up" ? "text-emerald-500 bg-emerald-500/10" : "hover:text-emerald-500"}`}
+                        onClick={() => handleVote("upvote")}
+                      >
+                        <ThumbsUp className={`h-4.5 w-4.5 ${currentVote === "up" ? "fill-current" : ""}`} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Appreciate</TooltipContent>
+                  </Tooltip>
+
+                  <span className="text-sm font-bold px-2 tabular-nums">
+                    {(post.upvotes.length || 0) - (post.downvotes.length || 0)}
+                  </span>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`h-9 w-9 rounded-full transition-all ${currentVote === "down" ? "text-rose-500 bg-rose-500/10" : "hover:text-rose-500"}`}
+                        onClick={() => handleVote("downvote")}
+                      >
+                        <ThumbsDown className={`h-4.5 w-4.5 ${currentVote === "down" ? "fill-current" : ""}`} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Dislike</TooltipContent>
+                  </Tooltip>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={() => copyToClipboard(window.location.href)}>
+                    <Share2 className="h-4 w-4" />
+                    Share
+                  </Button>
+                  
+                  {(user?._id === post.author._id || user?._id === post.community.createdBy) && (
+                    <>
+                      <Button variant="ghost" size="sm" className="gap-2 text-amber-600 hover:bg-amber-50" onClick={() => navigate(`/edit-post/${post._id}`)}>
+                        <Pencil className="h-4 w-4" />
+                        Edit
+                      </Button>
+                      <Button variant="ghost" size="sm" className="gap-2 text-destructive hover:bg-destructive/5" onClick={handleDelete}>
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </CardFooter>
+            </Card>
+
+            {/* Comments Section */}
+            <div className="space-y-6" id="comments">
+              <div className="flex items-center gap-3">
+                <MessageSquare className="h-5 w-5 text-primary" />
+                <h3 className="text-xl font-bold">Discussion ({comments.length})</h3>
               </div>
 
-              <div className="post-engagement">
-                {(user?._id === post.author._id || user?._id === post.community.createdBy) && (
-                  <div className="post-actions">
-                    <button className="edit-post-btn" onClick={() => navigate(`/edit-post/${post._id}`)}>
-                      ✏️ Edit
-                    </button>
-                    <button className="delete-post-btn" onClick={handleDeletePost}>
-                      🗑️ Delete
-                    </button>
-                  </div>
+              {user ? (
+                <div className="bg-card border rounded-xl p-4">
+                   <CommentInput postId={id} />
+                </div>
+              ) : (
+                <Card className="bg-muted/30 border-dashed">
+                  <CardContent className="p-6 text-center">
+                    <p className="text-sm text-muted-foreground mb-4">Log in to join the conversation</p>
+                    <Button variant="outline" size="sm" onClick={() => navigate("/login")}>Sign In</Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="space-y-4">
+                {comments.length > 0 ? (
+                  comments.map((c) => <CommentItem key={c._id} comment={c} />)
+                ) : (
+                  <p className="text-center py-12 text-muted-foreground italic">No comments yet. Be the first to speak up!</p>
                 )}
-                <button
-                  className="comment-button"
-                  onClick={() => document.getElementById('comments-section-id')?.scrollIntoView({ behavior: 'smooth' })}
-                  aria-label="Scroll to comments"
-                >
-                  💬 {comments.length === 0 ? 'No Comments Yet' : `Comments (${comments.length})`}
-                </button>
               </div>
-            </div>
-
-            <div className="comments-section" id="comments-section-id">
-              <h3>Comments</h3>
-              {user && !comments.some(c => c.createdBy?._id === user._id) ? (
-                <CommentInput postId={id} onCommentAdded={refetch} />
-              ) : (
-                user && <p className="already-commented-msg">You’ve already commented on this post.</p>
-              )}
-
-              {loadingComments ? (
-                <p className="loading">Loading comments...</p>
-              ) : comments.length > 0 ? (
-                comments.map((comment) => (
-                  <CommentItem key={comment._id} comment={comment} onRefresh={refetch} />
-                ))
-              ) : (
-                <p className="no-comments">No comments yet. Be the first to share your thoughts!</p>
-              )}
             </div>
           </div>
 
-          <div className="post-sidebar">
-            <div className="sidebar-module sidebar-vote-controls">
-              <button
-                className={`vote-button upvote-button ${currentUserVote === 'upvote' ? 'active' : ''}`}
-                onClick={handleUpvote}
-                data-tooltip="Upvote"
-                aria-label="Upvote this post"
-              >
-                👍 <span className="vote-count">{upvoteCount}</span>
-              </button>
-              <button
-                className={`vote-button downvote-button ${currentUserVote === 'downvote' ? 'active' : ''}`}
-                onClick={handleDownvote}
-                data-tooltip="Downvote"
-                aria-label="Downvote this post"
-              >
-                👎 <span className="vote-count">{downvoteCount}</span>
-              </button>
-            </div>
+          {/* Sidebar Area */}
+          <aside className="lg:col-span-4 space-y-6">
+            <Card className="border-border/60 shadow-sm sticky top-24">
+              <CardHeader className="pb-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Original Poster</h4>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${post.author.username}`} />
+                    <AvatarFallback><UserIcon /></AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <Link to={`/user/${post.author._id}`} className="font-bold hover:text-primary transition-colors block truncate">
+                      u/{post.author.username}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">
+                      Joined {new Date(post.author.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="sidebar-module author-card-module">
-              <h4>About the Author</h4>
-              <img
-                src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${post.author.username}`}
-                alt={post.author.username}
-                className="author-avatar"
-              />
-              <Link to={`/user/${post.author._id}`} className="author-username">
-                {post.author.username}
-              </Link>
-              {post.author.bio && <p className="author-bio">{post.author.bio}</p>}
-              <div className="author-stats">
-                <div className="author-stat-item">
-                  Member since {new Date(post.author.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                {post.author.bio && (
+                  <p className="text-sm leading-relaxed text-muted-foreground italic">
+                    "{post.author.bio}"
+                  </p>
+                )}
+
+                <div className="grid grid-cols-2 gap-4 p-3 bg-muted/30 rounded-lg text-center">
+                  <div>
+                    <p className="text-lg font-bold">{post.author.postsCount || 0}</p>
+                    <p className="text-[10px] uppercase font-semibold text-muted-foreground">Posts</p>
+                  </div>
+                  <div className="border-l border-border/50">
+                    <p className="text-lg font-bold">{post.author.commentsCount || 0}</p>
+                    <p className="text-[10px] uppercase font-semibold text-muted-foreground">Comments</p>
+                  </div>
                 </div>
-                <div className="author-stat-item">
-                  {post.author.postsCount || 0} posts · {post.author.commentsCount || 0} comments
+
+                <Button variant="outline" className="w-full gap-2 group" asChild>
+                  <Link to={`/user/${post.author._id}`}>
+                    <UserIcon className="h-4 w-4 transition-transform group-hover:scale-110" />
+                    View Full Profile
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-primary/[0.02] border-primary/10">
+              <CardContent className="p-4 flex items-start gap-3">
+                <div className="mt-1 p-1.5 rounded-md bg-primary/10">
+                  <ExternalLink className="h-3 w-3 text-primary" />
                 </div>
-              </div>
-              <Link to={`/user/${post.author._id}`} className="view-profile-button">
-                <User size={16} /> View Profile
-              </Link>
-            </div>
-          </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-bold uppercase tracking-tighter text-primary">Community Guidelines</p>
+                  <p className="text-xs text-muted-foreground leading-snug">
+                    Remember to be civil and follow community rules for r/{post.community.name}.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </aside>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </TooltipProvider>
   );
 };
+
+const PostSkeleton = () => (
+  <div className="container max-w-6xl py-12 px-4 space-y-8 animate-pulse">
+    <div className="h-8 w-32 bg-muted rounded" />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="lg:col-span-8 space-y-6">
+        <div className="h-[400px] w-full bg-muted rounded-xl" />
+        <div className="h-24 w-full bg-muted rounded-xl" />
+      </div>
+      <div className="lg:col-span-4">
+        <div className="h-64 w-full bg-muted rounded-xl" />
+      </div>
+    </div>
+  </div>
+);
 
 export default PostDetailsPage;

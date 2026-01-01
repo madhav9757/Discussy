@@ -1,176 +1,138 @@
-// src/App.jsx
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import AppRouter from './router.jsx';
-import Header from './components/header/Header.jsx';
-import { setCredentials } from './features/auth/authSlice.js';
-import { ToastContainer } from 'react-toastify';
-import { Toaster, toast } from 'react-hot-toast';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
 
-import { ThemeProvider } from './context/ThemeContext';
-import socket from './socket';
+import AppRouter from "./router.jsx";
+import Header from "./components/header/Header.jsx";
+import { setCredentials } from "./features/auth/authSlice.js";
+import { notificationsApi, useGetNotificationsQuery } from "./app/api/notificationsApi.js";
 
-import {
-  useGetNotificationsQuery,
-  notificationsApi,  
-} from './app/api/notificationsApi.js';
+import { ThemeProvider } from "./context/ThemeContext.jsx";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
+import socket from "./socket";
 
 function App() {
   const dispatch = useDispatch();
+  const location = useLocation();
   const userInfo = useSelector((state) => state.auth.userInfo);
 
-  // ✅ Load credentials on mount
+  // Sync Auth State
   useEffect(() => {
-    const getUserInfoFromStorage = () => {
-      try {
-        const userInfo = localStorage.getItem('userInfo');
-        const token = localStorage.getItem('token');
-        if (userInfo && token && userInfo !== 'undefined' && token !== 'undefined') {
-          return {
-            user: JSON.parse(userInfo),
+    try {
+      const user = localStorage.getItem("userInfo");
+      const token = localStorage.getItem("token");
+      if (user && token) {
+        dispatch(
+          setCredentials({
+            user: JSON.parse(user),
             token,
-          };
-        }
-        return null;
-      } catch (err) {
-        console.warn('Invalid userInfo in storage:', err);
-        localStorage.removeItem('userInfo');
-        localStorage.removeItem('token');
-        return null;
+          })
+        );
       }
-    };
-
-    const userData = getUserInfoFromStorage();
-    if (userData) {
-      dispatch(setCredentials(userData));
+    } catch {
+      localStorage.removeItem("userInfo");
+      localStorage.removeItem("token");
     }
   }, [dispatch]);
 
-  // ✅ Fetch notifications only when user is logged in
-  const {
-    data: fetchedNotifications,
-    isError,
-    error,
-    refetch: refetchNotifications
-  } = useGetNotificationsQuery(undefined, {
+  // Notifications Sync
+  const { refetch } = useGetNotificationsQuery(undefined, {
     skip: !userInfo?._id,
-    pollingInterval: 30000, // Poll every 30 seconds
-    refetchOnMountOrArgChange: true, // Refetch on component mount and arg changes
+    pollingInterval: 30000,
+    refetchOnMountOrArgChange: true,
   });
 
-  // ✅ WebSocket setup for real-time notifications
+  // Socket Logic
   useEffect(() => {
-    if (userInfo?._id) {
-      console.log('🔌 Connecting user to socket:', userInfo._id);
-      
-      // Join the user to their notification room
-      socket.emit('join', userInfo._id);
-      
-      // Listen for new notifications
-      const handleNewNotification = (newNotif) => {
-        console.log('📨 New notification received:', newNotif);
-        
-        toast.success(newNotif.message, {
-          duration: 4000,
-          position: 'top-right',
-        });
+    if (!userInfo?._id) return;
 
-        dispatch(
-          notificationsApi.util.updateQueryData('getNotifications', undefined, (draft) => {
-            const exists = draft.find(n => n._id === newNotif._id);
-            if (!exists) {
-              draft.unshift(newNotif);
-            }
-          })
-        );
-      };
+    socket.emit("join", userInfo._id);
 
-      const handleNotificationsMarkedRead = () => {
-        console.log('✅ All notifications marked as read');
-        dispatch(
-          notificationsApi.util.updateQueryData('getNotifications', undefined, (draft) => {
-            draft.forEach((notif) => (notif.isRead = true));
-          })
-        );
-      };
+    const onNotification = (notification) => {
+      // Enhanced Shadcn Toast
+      toast.message("New Notification", {
+        description: notification.message,
+      });
 
-      const handleNotificationRead = (notificationId) => {
-        console.log('✅ Notification marked as read:', notificationId);
-        dispatch(
-          notificationsApi.util.updateQueryData('getNotifications', undefined, (draft) => {
-            const notification = draft.find(n => n._id === notificationId);
-            if (notification) {
-              notification.isRead = true;
-            }
-          })
-        );
-      };
+      dispatch(
+        notificationsApi.util.updateQueryData("getNotifications", undefined, (draft) => {
+          if (!draft.find((n) => n._id === notification._id)) {
+            draft.unshift(notification);
+          }
+        })
+      );
+    };
 
-      socket.on('notification', handleNewNotification);
-      socket.on('notificationsMarkedRead', handleNotificationsMarkedRead);
-      socket.on('notificationRead', handleNotificationRead);
+    const onReadAll = () => {
+      dispatch(
+        notificationsApi.util.updateQueryData("getNotifications", undefined, (draft) => {
+          draft.forEach((n) => (n.isRead = true));
+        })
+      );
+    };
 
-      return () => {
-        console.log('🔌 Disconnecting user from socket:', userInfo._id);
-        socket.off('notification', handleNewNotification);
-        socket.off('notificationsMarkedRead', handleNotificationsMarkedRead);
-        socket.off('notificationRead', handleNotificationRead);
-        socket.emit('leave', userInfo._id);
-      };
-    }
+    const onReadOne = (id) => {
+      dispatch(
+        notificationsApi.util.updateQueryData("getNotifications", undefined, (draft) => {
+          const n = draft.find((x) => x._id === id);
+          if (n) n.isRead = true;
+        })
+      );
+    };
+
+    socket.on("notification", onNotification);
+    socket.on("notificationsMarkedRead", onReadAll);
+    socket.on("notificationRead", onReadOne);
+
+    return () => {
+      socket.emit("leave", userInfo._id);
+      socket.off("notification", onNotification);
+      socket.off("notificationsMarkedRead", onReadAll);
+      socket.off("notificationRead", onReadOne);
+    };
   }, [userInfo?._id, dispatch]);
 
   useEffect(() => {
-    const handleConnect = () => {
-      console.log('🔌 Socket connected');
+    const onReconnect = () => {
       if (userInfo?._id) {
-        socket.emit('join', userInfo._id);
+        socket.emit("join", userInfo._id);
+        refetch();
       }
     };
 
-    const handleDisconnect = () => {
-      console.log('🔌 Socket disconnected');
-    };
-
-    const handleReconnect = () => {
-      console.log('🔌 Socket reconnected');
-      if (userInfo?._id) {
-        socket.emit('join', userInfo._id);
-        // Refetch notifications on reconnect to sync
-        refetchNotifications();
-      }
-    };
-
-    socket.on('connect', handleConnect);
-    socket.on('disconnect', handleDisconnect);
-    socket.on('reconnect', handleReconnect);
-
-    return () => {
-      socket.off('connect', handleConnect);
-      socket.off('disconnect', handleDisconnect);
-      socket.off('reconnect', handleReconnect);
-    };
-  }, [userInfo?._id, refetchNotifications]);
+    socket.on("reconnect", onReconnect);
+    return () => socket.off("reconnect", onReconnect);
+  }, [userInfo?._id, refetch]);
 
   return (
-    <ThemeProvider>
-      <div className="app-wrapper">
+    <ThemeProvider defaultTheme="system" storageKey="ui-theme">
+      <div className="relative min-h-screen bg-background font-sans antialiased flex flex-col selection:bg-primary/10 selection:text-primary">
+        
         <Header />
-        <main className="main-content">
-          <AppRouter />
-        </main>
-        <Toaster 
-          position="top-center"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#363636',
-              color: '#fff',
-            },
-          }}
-        />
-        <ToastContainer position="top-right" autoClose={3000} />
+
+        <div className="flex-1 flex flex-col relative">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.main
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ 
+                duration: 0.2, 
+                ease: [0.23, 1, 0.32, 1] // Native-feeling cubic bezier
+              }}
+              className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+            >
+              <AppRouter />
+            </motion.main>
+          </AnimatePresence>
+        </div>
+
+        {/* Shadcn UI Toaster */}
+        <Toaster closeButton richColors position="bottom-right" />
+        
       </div>
     </ThemeProvider>
   );

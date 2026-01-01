@@ -1,212 +1,200 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import clsx from 'clsx'; // Make sure clsx is installed: npm install clsx
-import { Search, X } from 'lucide-react'; // Make sure lucide-react is installed: npm install lucide-react
-import './SearchBar.css';
+import { Search, X, Loader2, Command, ArrowRight, History, Sparkles } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-const SearchBar = ({ searchQuery, onSearchChange, isSearchExpanded, setIsSearchExpanded }) => {
-    const searchInputRef = useRef(null);
-    const searchBarRef = useRef(null); // Ref for the entire search bar container
+const SearchBar = ({ searchQuery, onSearchChange }) => {
+  const searchInputRef = useRef(null);
+  const searchBarRef = useRef(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-    // State for actual search results
-    const [searchResults, setSearchResults] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
+  const suggestions = [
+    { text: 'React Hooks Patterns', icon: Sparkles },
+    { text: 'AI in Web Dev 2026', icon: History },
+    { text: 'Discussly Community Guidelines', icon: History },
+  ];
 
-    // Dummy suggestions (can be removed if you only want real search results)
-    const allSuggestions = ['AI Ethics', 'React Hooks', 'Frontend Frameworks 2025', 'Web Development Trends', 'User Profile Design', 'Latest News', 'GraphQL vs REST'];
-    const filteredSuggestions = searchQuery
-        ? allSuggestions.filter(s =>
-            s.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        : ['Latest News', 'User Profile Design', 'AI Ethics', 'Frontend Frameworks 2025'];
-
-    // Focus on input when search is expanded
-    useEffect(() => {
-        if (isSearchExpanded && searchInputRef.current) {
-            searchInputRef.current.focus();
-        }
-    }, [isSearchExpanded]);
-
-    // Function to simulate fetching search results from an API
-    // 💡 IMPORTANT: Replace this with your actual API call (e.g., using axios or the native fetch API)
-    const fetchResults = useCallback(async (query) => {
-        if (!query?.trim()) { // Use optional chaining for query to be safe
-            setSearchResults([]);
-            return;
-        }
-
-        setIsLoading(true);
-        setError(null);
-        try {
-            // --- YOUR ACTUAL API CALL GOES HERE ---
-            // Example using fetch:
-            // const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-            // if (!response.ok) {
-            //     throw new Error(`HTTP error! status: ${response.status}`);
-            // }
-            // const data = await response.json();
-            // setSearchResults(data.results);
-
-            // Simulated network delay and dummy results for demonstration
-            await new Promise(resolve => setTimeout(resolve, 500));
-            const dummyResults = [
-                { id: 1, title: `Result for "${query}" - Article 1`, url: '#', snippet: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
-                { id: 2, title: `Result for "${query}" - Guide 2`, url: '#', snippet: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.' },
-                { id: 3, title: `Result for "${query}" - Video 3`, url: '#', snippet: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.' },
-            ].filter(result => result.title.toLowerCase().includes(query.toLowerCase())); // Filter dummy results
-
-            setSearchResults(dummyResults);
-        } catch (err) {
-            console.error("Failed to fetch search results:", err);
-            setError("Failed to fetch search results. Please try again.");
-            setSearchResults([]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []); // Empty dependency array means this function is created once
-
-    // Debounce effect for search query
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            if (searchQuery) { // Only fetch if there's a query
-                fetchResults(searchQuery);
-            } else {
-                setSearchResults([]); // Clear results if query is empty
-            }
-        }, 300); // Debounce for 300ms
-
-        return () => {
-            clearTimeout(handler); // Cleanup the timeout on unmount or if searchQuery changes
-        };
-    }, [searchQuery, fetchResults]); // Re-run when searchQuery or fetchResults changes
-
-    // Effect to close search dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (searchBarRef.current && !searchBarRef.current.contains(event.target)) {
-                setIsSearchExpanded(false);
-            }
-        };
-
-        if (isSearchExpanded) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isSearchExpanded, setIsSearchExpanded]);
-
-    // Function to handle Enter key press (optional, as debounce handles search-as-you-type)
-    const handleKeyDown = (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault(); // Prevent default form submission
-            // If you want to trigger an immediate search on Enter without debounce:
-            // fetchResults(searchQuery);
-            // Optionally, collapse the search bar after pressing enter
-            // setIsSearchExpanded(false);
-        }
+  // Handle Command + K shortcut
+  useEffect(() => {
+    const down = (e) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setIsExpanded(true);
+        searchInputRef.current?.focus();
+      }
     };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
-    return (
-        <div className={clsx('header-search', {
-            'header-search--expanded': isSearchExpanded && window.innerWidth < 768 // For mobile expansion
-        })}
-        ref={searchBarRef} // Attach ref to the main search bar container
-        >
-            <div className="header-search-input-wrapper">
-                <Search className="header-search-icon" />
-                <input
-                    type="text"
-                    placeholder="Search discussions..."
-                    value={searchQuery}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    onFocus={() => setIsSearchExpanded(true)} // Expand search on focus
-                    onKeyDown={handleKeyDown} // Add keydown handler
-                    ref={searchInputRef} // Attach ref to the input for focus
-                />
-                {isSearchExpanded && window.innerWidth < 768 && (
-                    <button className="close-search-button" onClick={() => {
-                        setIsSearchExpanded(false);
-                        onSearchChange(''); // Clear search query when closing mobile search
-                    }}>
-                        <X size={20} />
+  // Click Outside logic
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchBarRef.current && !searchBarRef.current.contains(e.target)) {
+        setIsExpanded(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const fetchResults = useCallback(async (query) => {
+    if (!query?.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      // Simulate high-fidelity search delay
+      await new Promise(resolve => setTimeout(resolve, 350));
+      const dummyResults = [
+        { id: 1, title: `Optimizing React for 2026`, category: 'Tech', type: 'Post' },
+        { id: 2, title: `The AI Ethics Debate`, category: 'Philosophy', type: 'Community' },
+      ];
+      setSearchResults(dummyResults);
+    } catch (err) {
+      setError("Search failed");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) fetchResults(searchQuery);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [searchQuery, fetchResults]);
+
+  return (
+    <div ref={searchBarRef} className="relative z-50">
+      <div 
+        className={cn(
+          "relative flex items-center h-10 transition-all duration-300 rounded-xl border bg-muted/40",
+          isExpanded ? "w-[300px] md:w-[420px] bg-background ring-2 ring-primary/20 border-primary/50 shadow-lg" : "w-[240px] border-transparent hover:bg-muted/60"
+        )}
+      >
+        <div className="pl-3 pointer-events-none">
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          ) : (
+            <Search className={cn("h-4 w-4 transition-colors", isExpanded ? "text-primary" : "text-muted-foreground")} />
+          )}
+        </div>
+
+        <input
+          ref={searchInputRef}
+          type="text"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          onFocus={() => setIsExpanded(true)}
+          placeholder="Search Discussly..."
+          className="flex-1 bg-transparent px-3 text-sm font-medium outline-none placeholder:text-muted-foreground/70"
+        />
+
+        <div className="pr-2 flex items-center gap-1.5">
+          {searchQuery && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6 hover:bg-muted rounded-md"
+              onClick={() => { onSearchChange(''); searchInputRef.current?.focus(); }}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+          {!isExpanded && (
+            <kbd className="hidden md:inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-bold text-muted-foreground shadow-sm">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          )}
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.98 }}
+            className="absolute top-full mt-2 w-full overflow-hidden rounded-2xl border bg-popover/95 backdrop-blur-xl shadow-2xl"
+          >
+            <div className="max-h-[420px] overflow-y-auto p-2 scrollbar-hide">
+              {/* Results Section */}
+              {searchResults.length > 0 && searchQuery && (
+                <div className="mb-4">
+                  <header className="px-3 py-2 flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Top Results</span>
+                    <Badge variant="outline" className="text-[9px] uppercase font-bold opacity-50">Global Search</Badge>
+                  </header>
+                  {searchResults.map((result) => (
+                    <button
+                      key={result.id}
+                      className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all hover:bg-primary/5 active:scale-[0.98]"
+                    >
+                      <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                        {result.type[0]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">{result.title}</p>
+                        <p className="text-[10px] text-muted-foreground font-medium uppercase">{result.category} • {result.type}</p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 text-primary" />
                     </button>
-                )}
-                {!isSearchExpanded && window.innerWidth >= 768 && (
-                    <span className="header-search-shortcut">⌘K</span>
-                )}
+                  ))}
+                </div>
+              )}
+
+              {/* Suggestions Section */}
+              <div className="space-y-1">
+                <header className="px-3 py-2">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                    {searchQuery ? "Suggested Queries" : "Recent & Popular"}
+                  </span>
+                </header>
+                {suggestions.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => onSearchChange(item.text)}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-foreground/80 transition-all hover:bg-accent hover:text-primary active:bg-accent/80"
+                  >
+                    <item.icon className="h-4 w-4 text-muted-foreground/50" />
+                    <span className="flex-1 text-left truncate">{item.text}</span>
+                    <Command className="h-3 w-3 text-muted-foreground/30" />
+                  </button>
+                ))}
+              </div>
+
+              {/* Empty State */}
+              {searchQuery && !isLoading && searchResults.length === 0 && (
+                <div className="py-12 text-center">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted/50 mb-3">
+                    <Search className="h-6 w-6 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground">No matches for "{searchQuery}"</p>
+                  <p className="text-[11px] text-muted-foreground/50 mt-1">Try checking for typos or broader terms</p>
+                </div>
+              )}
             </div>
 
-            <AnimatePresence>
-                {/* Conditionally render dropdown when expanded and either query has length, or there are suggestions */}
-                {isSearchExpanded && (searchQuery?.length > 0 || filteredSuggestions.length > 0) && (
-                    <motion.div
-                        className="search-dropdown"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                        {isLoading && (
-                            <div className="dropdown-section no-results">
-                                <p>Searching...</p>
-                            </div>
-                        )}
-                        {error && (
-                            <div className="dropdown-section no-results error-message">
-                                <p>{error}</p>
-                            </div>
-                        )}
-                        {/* Show actual results if found and not loading/error */}
-                        {!isLoading && !error && searchQuery && searchResults?.length > 0 && (
-                            <div className="dropdown-section">
-                                <h4>Search Results for "{searchQuery}"</h4>
-                                <ul>
-                                    {searchResults.map((result) => (
-                                        <li key={result.id} onClick={() => {
-                                            // Handle click on a search result (e.g., navigate to URL)
-                                            window.location.href = result.url; // Or use navigate(result.url) from react-router-dom
-                                            setIsSearchExpanded(false);
-                                            onSearchChange(''); // Clear search after selection
-                                        }}>
-                                            <Search size={16} className="header-icon" />
-                                            <span>{result.title}</span>
-                                            <p className="search-result-snippet">{result.snippet}</p>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                        {/* Show "No results" message if query has results but searchResults is empty */}
-                        {!isLoading && !error && searchQuery && searchResults?.length === 0 && (
-                            <div className="dropdown-section no-results">
-                                <p>No results found for "{searchQuery}".</p>
-                            </div>
-                        )}
-                        {/* Show suggestions if no search query, or if search query has no results and no error */}
-                        {!isLoading && !error && !searchQuery && filteredSuggestions.length > 0 && (
-                            <div className="dropdown-section">
-                                <h4>Suggestions</h4>
-                                <ul>
-                                    {filteredSuggestions.map((item) => (
-                                        <li key={item} onClick={() => {
-                                            onSearchChange(item);
-                                            setIsSearchExpanded(false);
-                                        }}>
-                                            <Search size={16} className="header-icon" />
-                                            <span>{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    );
+            {/* Footer Hints */}
+            <footer className="flex items-center justify-between border-t bg-muted/20 px-4 py-2 text-[9px] font-bold uppercase tracking-tighter text-muted-foreground/50">
+              <div className="flex gap-4">
+                <span className="flex items-center gap-1"><kbd className="bg-background border rounded px-1">↑↓</kbd> Select</span>
+                <span className="flex items-center gap-1"><kbd className="bg-background border rounded px-1">esc</kbd> Close</span>
+              </div>
+              <span className="text-primary/40 font-black">Discussly Search Engine v2.0</span>
+            </footer>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 };
 
 export default SearchBar;

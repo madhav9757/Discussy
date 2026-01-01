@@ -1,234 +1,209 @@
 import React, { useState } from 'react';
-import './RegisterPage.css';
 import { motion } from 'framer-motion';
-import { UserPlus, Mail, Lock, User, Eye, EyeOff, Sun, Moon } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, Eye, EyeOff, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser, loginUser } from '../authSlice';
-import { toast } from 'react-toastify';
 import { useNavigate, Link } from 'react-router-dom';
-import { useTheme } from '../../../context/ThemeContext';
+import { toast } from 'sonner';
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const RegisterPage = () => {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const { isLoading } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isLoading } = useSelector((state) => state.auth);
 
-    const { theme, toggleTheme } = useTheme();
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
 
-    const [formData, setFormData] = useState({
-        username: '',
-        email: '',
-        password: '',
-    });
-    const [errors, setErrors] = useState({});
-    const [showPassword, setShowPassword] = useState(false);
-    const [passwordStrength, setPasswordStrength] = useState(0); // 0-6 for 6 strength bars
+  const checkPasswordStrength = (pwd) => {
+    let strength = 0;
+    if (pwd.length >= 6) strength++;
+    if (pwd.length >= 10) strength++;
+    if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) strength++;
+    if (/[0-9]/.test(pwd)) strength++;
+    if (/[^A-Za-z0-9]/.test(pwd)) strength++;
+    if (pwd.length >= 12 && strength >= 4) strength++;
+    return strength;
+  };
 
-    // Validation functions
-    const validateUsername = (value) => {
-        if (!value) return 'Username is required.';
-        if (value.length < 3) return 'Username must be at least 3 characters.';
-        if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Username can only contain letters, numbers, and underscores.';
-        return '';
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'password') {
+      setPasswordStrength(checkPasswordStrength(value));
+    }
+  };
 
-    const validateEmail = (value) => {
-        if (!value) return 'Email is required.';
-        if (!/\S+@\S+\.\S+/.test(value)) return 'Email address is invalid.';
-        return '';
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await dispatch(registerUser(formData)).unwrap();
+      toast.success('Account created successfully!');
+      
+      // Auto-login logic
+      await dispatch(loginUser({ 
+        usernameOrEmail: formData.email, 
+        password: formData.password 
+      })).unwrap();
+      
+      navigate('/');
+    } catch (err) {
+      toast.error(err?.data?.message || 'Registration failed');
+    }
+  };
 
-    const validatePassword = (pwd) => {
-        // Changed minimum length from 8 to 6 characters
-        if (!pwd) return 'Password is required.';
-        if (pwd.length < 6) return 'Password must be at least 6 characters.';
-        if (!/[A-Z]/.test(pwd)) return 'Password must contain at least one uppercase letter.';
-        if (!/[a-z]/.test(pwd)) return 'Password must contain at least one lowercase letter.';
-        if (!/[0-9]/.test(pwd)) return 'Password must contain at least one number.';
-        if (!/[^A-Za-z0-9]/.test(pwd)) return 'Password must contain at least one special character.';
-        return '';
-    };
+  const strengthColor = (idx) => {
+    if (passwordStrength <= 2) return "bg-red-500";
+    if (passwordStrength <= 4) return "bg-amber-500";
+    return "bg-emerald-500";
+  };
 
-    // Function to check password strength (0-6 levels)
-    const checkPasswordStrength = (pwd) => {
-        let strength = 0;
-        // Level 1: Length >= 6
-        if (pwd.length >= 6) strength++;
-        // Level 2: Mix of upper and lower case
-        if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) strength++;
-        // Level 3: Contains numbers
-        if (/[0-9]/.test(pwd)) strength++;
-        // Level 4: Contains special characters
-        if (/[^A-Za-z0-9]/.test(pwd)) strength++;
-        // Level 5: Length >= 10 (enhanced length)
-        if (pwd.length >= 10) strength++;
-        // Level 6: Mix of all types and length >= 12 (very strong)
-        if (pwd.length >= 12 && /[A-Z]/.test(pwd) && /[a-z]/.test(pwd) && /[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) strength++;
-        
-        return Math.min(strength, 6); // Cap at 6 levels
-    };
+  return (
+    <div className="flex min-h-[calc(100vh-80px)] items-center justify-center p-4">
+      {/* Background Decorative Blurs */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-[20%] right-[10%] h-[30%] w-[30%] rounded-full bg-primary/10 blur-[120px]" />
+        <div className="absolute bottom-[20%] left-[10%] h-[30%] w-[30%] rounded-full bg-blue-500/10 blur-[120px]" />
+      </div>
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-lg"
+      >
+        <Card className="border-border/50 bg-background/60 backdrop-blur-xl shadow-2xl">
+          <CardHeader className="space-y-1 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <UserPlus className="h-6 w-6" />
+            </div>
+            <CardTitle className="text-2xl font-bold tracking-tight">Create an account</CardTitle>
+            <CardDescription>
+              Join Discussly to start sharing and connecting
+            </CardDescription>
+          </CardHeader>
 
-        if (name === 'username') {
-            setErrors((prev) => ({ ...prev, username: validateUsername(value) }));
-        } else if (name === 'email') {
-            setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
-        } else if (name === 'password') {
-            setErrors((prev) => ({ ...prev, password: validatePassword(value) }));
-            setPasswordStrength(checkPasswordStrength(value));
-        }
-    };
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="username"
+                      name="username"
+                      placeholder="johndoe"
+                      className="pl-10"
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="john@example.com"
+                      className="pl-10"
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="pl-10 pr-10"
+                    onChange={handleChange}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
 
-        const newErrors = {};
-        const usernameErr = validateUsername(formData.username);
-        const emailErr = validateEmail(formData.email);
-        const passwordErr = validatePassword(formData.password);
-
-        if (usernameErr) newErrors.username = usernameErr;
-        if (emailErr) newErrors.email = emailErr;
-        if (passwordErr) newErrors.password = passwordErr;
-        setErrors(newErrors);
-
-        if (Object.keys(newErrors).length > 0) {
-            toast.error("Please correct the form errors before submitting.");
-            return;
-        }
-
-        try {
-            await dispatch(registerUser(formData)).unwrap();
-            toast.success('🎉 Registration successful!');
-
-            const loginRes = await dispatch(
-                loginUser({ usernameOrEmail: formData.email, password: formData.password })
-            ).unwrap();
-
-            toast.success('Logged in automatically!');
-            navigate('/');
-        } catch (err) {
-            const errorMessage = err?.data?.message || err?.message || '❌ Registration failed';
-            console.error("Registration/Login failed:", err);
-            toast.error(errorMessage);
-        }
-    };
-
-    const isFormValid = !errors.username && !errors.email && !errors.password &&
-                        formData.username && formData.email && formData.password;
-
-    return (
-        <div className="register-container">
-            <button
-                className="theme-toggle-button"
-                onClick={toggleTheme}
-                aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-            >
-                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-
-            <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="register-box"
-            >
-                <h2 className="register-title">
-                    <UserPlus size={28} /> Create Account
-                </h2>
-
-                <form onSubmit={handleSubmit} className="register-form">
-                    <div className={`input-group ${errors.username ? 'has-error' : formData.username ? 'has-success' : ''}`}>
-                        <label htmlFor="username">Username</label>
-                        <div className="input-icon">
-                            <input
-                                type="text"
-                                id="username"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                placeholder="johndoe"
-                                autoComplete="username"
-                                required
-                            />
-                            <User size={18} />
-                        </div>
-                        {errors.username && <p className="error-text">{errors.username}</p>}
-                    </div>
-
-                    <div className={`input-group ${errors.email ? 'has-error' : formData.email ? 'has-success' : ''}`}>
-                        <label htmlFor="email">Email</label>
-                        <div className="input-icon">
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                placeholder="you@example.com"
-                                autoComplete="email"
-                                required
-                            />
-                            <Mail size={18} />
-                        </div>
-                        {errors.email && <p className="error-text">{errors.email}</p>}
-                    </div>
-
-                    <div className={`input-group ${errors.password ? 'has-error' : formData.password ? 'has-success' : ''}`}>
-                        <label htmlFor="password">Password</label>
-                        <div className="input-icon">
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                placeholder="••••••••"
-                                autoComplete="new-password"
-                                required
-                            />
-                            {showPassword ? (
-                                <EyeOff size={18} onClick={() => setShowPassword(false)} style={{ cursor: 'pointer' }} aria-label="Hide password" />
-                            ) : (
-                                <Eye size={18} onClick={() => setShowPassword(true)} style={{ cursor: 'pointer' }} aria-label="Show password" />
-                            )}
-                        </div>
-                        {errors.password && <p className="error-text">{errors.password}</p>}
-                        {/* Password Strength Indicator with 6 bars */}
-                        {formData.password.length > 0 && (
-                            <div className="password-strength">
-                                {Array.from({ length: 6 }).map((_, index) => (
-                                    <div
-                                        key={index}
-                                        className={`strength-bar level-${index + 1}`}
-                                        style={{ opacity: passwordStrength > index ? 1 : 0.2 }}
-                                    ></div>
-                                ))}
-                            </div>
+                {/* Multi-tier Strength Indicator */}
+                <div className="space-y-2 pt-1">
+                  <div className="flex gap-1.5">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "h-1.5 flex-1 rounded-full transition-all duration-500",
+                          passwordStrength > i ? strengthColor(i) : "bg-muted"
                         )}
-                    </div>
+                      />
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
+                    <span>Security Level</span>
+                    <span className={cn(
+                        passwordStrength > 4 ? "text-emerald-500" : passwordStrength > 2 ? "text-amber-500" : "text-red-500"
+                    )}>
+                      {passwordStrength <= 2 ? "Weak" : passwordStrength <= 4 ? "Medium" : "Strong"}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-                    <motion.button
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
-                        type="submit"
-                        className={`register-btn ${isLoading ? 'register-btn-loading' : ''}`}
-                        disabled={isLoading || !isFormValid}
-                    >
-                        {isLoading ? 'Registering...' : 'Register'}
-                    </motion.button>
-                </form>
+              <div className="rounded-lg bg-muted/30 p-3 border border-border/50">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="h-5 w-5 text-primary mt-0.5" />
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    By clicking register, you agree to our <b>Terms of Service</b> and <b>Privacy Policy</b>. We use encrypted storage for your protection.
+                  </p>
+                </div>
+              </div>
 
-                <p className="register-footer">
-                    Already have an account?{' '}
-                    <Link to="/login" className="login-link">Login</Link>
-                </p>
-            </motion.div>
-        </div>
-    );
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  "Create Account"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+
+          <CardFooter className="flex justify-center border-t bg-muted/20 py-4">
+            <p className="text-sm text-muted-foreground">
+              Already have an account?{" "}
+              <Link to="/login" className="font-semibold text-primary hover:underline underline-offset-4">
+                Login here
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </motion.div>
+    </div>
+  );
 };
 
 export default RegisterPage;

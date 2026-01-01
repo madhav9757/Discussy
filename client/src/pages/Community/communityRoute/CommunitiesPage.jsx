@@ -1,407 +1,287 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGetCommunitiesQuery } from '../../../app/api/communitiesApi';
-import Loader from '../../../components/loader/loader';
-import CommunityCard from '../../../components/communitycard/CommunityCard';
-import './CommunitiesPage.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Search, Flame, Plus, Globe, 
+  Users, SlidersHorizontal, ArrowUpDown
+} from 'lucide-react';
 
-// Import icons
-import { FaSearch, FaFilter, FaSortAmountDown, FaFire, FaTimes, FaPlus, FaGlobe, FaArrowLeft, FaArrowRight, FaUsers, FaHashtag, FaComments } from 'react-icons/fa';
+import { useGetCommunitiesQuery } from '@/app/api/communitiesApi';
+import CommunityCard from '@/components/communitycard/CommunityCard';
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1, 
+    transition: { staggerChildren: 0.05 } 
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.3 }
+  }
+};
 
 const CommunitiesPage = () => {
-    const navigate = useNavigate();
-    const { data: communities = [], isLoading, isError } = useGetCommunitiesQuery();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('');
-    const [sortOrder, setSortOrder] = useState('membersDesc');
-    const [showAdvancedFiltersSidebar, setShowAdvancedFiltersSidebar] = useState(false);
-    const [minMembers, setMinMembers] = useState('');
-    const [maxMembers, setMaxMembers] = useState('');
-    const [activityLevel, setActivityLevel] = useState('');
-    const [showTrendingOnly, setShowTrendingOnly] = useState(false);
-    const [showSearchModal, setShowSearchModal] = useState(false); // New state for search modal
+  const navigate = useNavigate();
+  const { data: communities = [], isLoading } = useGetCommunitiesQuery();
 
-    const carouselRef = useRef(null);
-    const searchInputRef = useRef(null); // Ref for search input in modal
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [sortOrder, setSortOrder] = useState('membersDesc');
+  const [minMembers, setMinMembers] = useState('');
 
-    // State to track window width for responsive button placement
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearch(searchTerm.toLowerCase()), 300);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
-    useEffect(() => {
-        const handleResize = () => setWindowWidth(window.innerWidth);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+  const uniqueCategories = useMemo(() => 
+    [...new Set(communities.map(c => c.category))].filter(Boolean)
+  , [communities]);
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearch(searchTerm.toLowerCase());
-        }, 300);
-        return () => clearTimeout(handler);
-    }, [searchTerm]);
+  const trendingCommunities = useMemo(() => 
+    [...communities].sort((a, b) => b.members.length - a.members.length).slice(0, 5)
+  , [communities]);
 
-    // Close advanced filters/search modal when Escape key is pressed
-    useEffect(() => {
-        const handleKeyDown = (event) => {
-            if (event.key === 'Escape') {
-                if (showAdvancedFiltersSidebar) setShowAdvancedFiltersSidebar(false);
-                if (showSearchModal) setShowSearchModal(false);
-            }
-        };
-        document.addEventListener('keydown', handleKeyDown);
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [showAdvancedFiltersSidebar, showSearchModal]);
+  const filteredCommunities = useMemo(() => {
+    let filtered = communities.filter(c => {
+      const matchesSearch = c.name.toLowerCase().includes(debouncedSearch) || 
+                            c.description?.toLowerCase().includes(debouncedSearch);
+      const matchesCategory = categoryFilter === 'all' || c.category === categoryFilter;
+      const matchesMinMembers = !minMembers || (c.members?.length || 0) >= parseInt(minMembers);
 
-    // Focus on search input when modal opens
-    useEffect(() => {
-        if (showSearchModal && searchInputRef.current) {
-            searchInputRef.current.focus();
-        }
-    }, [showSearchModal]);
-
-    if (isLoading) return <Loader />;
-    if (isError) return <p className="error-message">Failed to load communities.</p>;
-
-    // Get unique categories for the filter dropdown
-    const uniqueCategories = [...new Set(communities.map(c => c.category))].filter(Boolean);
-
-    // Calculate trending communities (top 3 by members) - simplified for now
-    const trendingCommunities = [...communities]
-        .sort((a, b) => b.members.length - a.members.length)
-        .slice(0, 3);
-    const trendingIds = trendingCommunities.map((c) => c._id);
-
-    let filteredAndSortedCommunities = [...communities];
-
-    // Apply search filter
-    if (debouncedSearch) {
-        filteredAndSortedCommunities = filteredAndSortedCommunities.filter((community) =>
-            community.name.toLowerCase().includes(debouncedSearch) ||
-            community.description.toLowerCase().includes(debouncedSearch)
-        );
-    }
-
-    // Apply category filter
-    if (categoryFilter) {
-        filteredAndSortedCommunities = filteredAndSortedCommunities.filter(
-            (community) => community.category === categoryFilter
-        );
-    }
-
-    // Apply advanced filters
-    if (minMembers) {
-        filteredAndSortedCommunities = filteredAndSortedCommunities.filter(
-            (community) => community.members.length >= parseInt(minMembers)
-        );
-    }
-    if (maxMembers) {
-        filteredAndSortedCommunities = filteredAndSortedCommunities.filter(
-            (community) => community.members.length <= parseInt(maxMembers)
-        );
-    }
-    if (activityLevel) {
-        filteredAndSortedCommunities = filteredAndSortedCommunities.filter(community => {
-            const memberCount = community.members.length;
-            if (activityLevel === 'high') return memberCount > 100;
-            if (activityLevel === 'medium') return memberCount > 50 && memberCount <= 100;
-            if (activityLevel === 'low') return memberCount <= 50;
-            return true;
-        });
-    }
-
-    // Apply sorting
-    filteredAndSortedCommunities.sort((a, b) => {
-        switch (sortOrder) {
-            case 'membersDesc':
-                return b.members.length - a.members.length;
-            case 'membersAsc':
-                return a.members.length - b.members.length;
-            case 'nameAsc':
-                return a.name.localeCompare(b.name);
-            case 'nameDesc':
-                return b.name.localeCompare(a.name);
-            case 'createdAtDesc':
-                return new Date(b.createdAt) - new Date(a.createdAt);
-            case 'createdAtAsc':
-                return new Date(a.createdAt) - new Date(b.createdAt);
-            default:
-                return 0;
-        }
+      return matchesSearch && matchesCategory && matchesMinMembers;
     });
 
-    // Filter for trending if toggle is active
-    const displayedCommunities = showTrendingOnly
-        ? filteredAndSortedCommunities.filter(community => trendingIds.includes(community._id))
-        : filteredAndSortedCommunities;
+    return filtered.sort((a, b) => {
+      if (sortOrder === 'membersDesc') return (b.members?.length || 0) - (a.members?.length || 0);
+      if (sortOrder === 'createdAtDesc') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return a.name.localeCompare(b.name);
+    });
+  }, [communities, debouncedSearch, categoryFilter, minMembers, sortOrder]);
 
-    // Carousel navigation functions
-    const scrollCarousel = (direction) => {
-        if (carouselRef.current) {
-            const scrollAmount = direction === 'left' ? -250 : 250;
-            carouselRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-        }
-    };
+  if (isLoading) return <CommunitiesSkeleton />;
 
-    const handleClearFilters = () => {
-        setSearchTerm('');
-        setCategoryFilter('');
-        setSortOrder('membersDesc');
-        setMinMembers('');
-        setMaxMembers('');
-        setActivityLevel('');
-        setShowTrendingOnly(false);
-    };
-
-    const handleSearchSelect = (communityId) => {
-        setShowSearchModal(false);
-        navigate(`/community/${communityId}`);
-    };
-
-
-    return (
-        <div className="communities-page-container">
-            <h1>
-                <FaGlobe /> Discover Communities
-            </h1>
-
-            {/* NEW SCROLLABLE FILTER ACTION BAR */}
-            <div className="filter-action-bar">
-                {/* Create Community Button */}
-                <button
-                    className="create-community-btn-compact" /* New class for compact button */
-                    onClick={() => navigate('/create-community')}
-                    aria-label="Create New Community"
-                >
-                    <FaPlus /> <span className="button-text">Create</span>
-                </button>
-
-                {/* Search Icon Button */}
-                <button
-                    className="icon-btn search-icon-btn"
-                    onClick={() => setShowSearchModal(true)}
-                    aria-label="Open search"
-                >
-                    <FaSearch /> <span className="button-text-only-mobile">Search</span>
-                </button>
-
-                {/* Sort Order Select */}
-                <select
-                    value={sortOrder}
-                    onChange={(e) => setSortOrder(e.target.value)}
-                    className="compact-select"
-                    aria-label="Sort communities by"
-                >
-                    <option value="membersDesc">Most Members</option>
-                    <option value="membersAsc">Fewest Members</option>
-                    <option value="nameAsc">Name (A-Z)</option>
-                    <option value="nameDesc">Name (Z-A)</option>
-                    <option value="createdAtDesc">Newest</option>
-                    <option value="createdAtAsc">Oldest</option>
-                </select>
-
-                {/* Category Filter Select */}
-                <select
-                    value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="compact-select"
-                    aria-label="Filter communities by category"
-                >
-                    <option value="">All Categories</option>
-                    {uniqueCategories.map((category) => (
-                        <option key={category} value={category}>{category}</option>
-                    ))}
-                </select>
-
-                {/* Filter Toggle Button */}
-                <button
-                    className={`icon-btn filter-toggle-btn ${showAdvancedFiltersSidebar ? 'active' : ''}`}
-                    onClick={() => setShowAdvancedFiltersSidebar(!showAdvancedFiltersSidebar)}
-                    aria-label={showAdvancedFiltersSidebar ? "Hide Advanced Filters" : "Show Advanced Filters"}
-                >
-                    <FaFilter /> <span className="button-text-only-mobile">Filters</span>
-                </button>
-            </div>
-
-
-            {/* Advanced Filters Sidebar/Modal */}
-            <div className={`advanced-filters-sidebar-overlay ${showAdvancedFiltersSidebar ? 'open' : ''}`}
-                 onClick={() => setShowAdvancedFiltersSidebar(false)}></div>
-
-            <div className={`advanced-filters-sidebar ${showAdvancedFiltersSidebar ? 'open' : ''}`}>
-                <div className="sidebar-header">
-                    <h3>Advanced Filters</h3>
-                    <button className="close-btn" onClick={() => setShowAdvancedFiltersSidebar(false)}>
-                        <FaTimes />
-                    </button>
-                </div>
-
-                <div className="filter-group">
-                    <label htmlFor="minMembers"><FaUsers /> Min Members</label>
-                    <input
-                        id="minMembers"
-                        type="number"
-                        placeholder="e.g. 100"
-                        value={minMembers}
-                        onChange={(e) => setMinMembers(e.target.value)}
-                        className="filter-input"
-                        min="0"
-                    />
-                </div>
-                <div className="filter-group">
-                    <label htmlFor="maxMembers"><FaUsers /> Max Members</label>
-                    <input
-                        id="maxMembers"
-                        type="number"
-                        placeholder="e.g. 1000"
-                        value={maxMembers}
-                        onChange={(e) => setMaxMembers(e.target.value)}
-                        className="filter-input"
-                        min="0"
-                    />
-                </div>
-                <div className="filter-group">
-                    <label htmlFor="activityLevel"><FaComments /> Activity Level</label>
-                    <select
-                        id="activityLevel"
-                        value={activityLevel}
-                        onChange={(e) => setActivityLevel(e.target.value)}
-                        className="filter-select"
-                    >
-                        <option value="">Any</option>
-                        <option value="high">High (&gt;100 members)</option>
-                        <option value="medium">Medium (51-100 members)</option>
-                        <option value="low">Low (&le;50 members)</option>
-                    </select>
-                </div>
-                <div className="filter-group">
-                    <button
-                        className={`filter-toggle-btn trending-toggle-btn ${showTrendingOnly ? 'active' : ''}`}
-                        onClick={() => setShowTrendingOnly(!showTrendingOnly)}
-                    >
-                        <FaFire /> {showTrendingOnly ? 'Showing Trending' : 'Show Only Trending'}
-                    </button>
-                </div>
-
-                <div className="filter-actions">
-                    <button className="apply-filters-btn" onClick={() => setShowAdvancedFiltersSidebar(false)}>Apply Filters</button>
-                    <button className="clear-filters-btn" onClick={handleClearFilters}>Clear All</button>
-                </div>
-            </div>
-
-            {/* Search Modal */}
-            <div className={`search-modal-overlay ${showSearchModal ? 'open' : ''}`}
-                 onClick={() => setShowSearchModal(false)}>
-                <div className="search-modal" onClick={(e) => e.stopPropagation()}>
-                    <div className="search-modal-header">
-                        <h3>Search Communities</h3>
-                        <button className="close-btn" onClick={() => setShowSearchModal(false)}>
-                            <FaTimes />
-                        </button>
-                    </div>
-                    <div className="search-modal-input-wrapper">
-                        <FaSearch color="var(--color-text-secondary)" />
-                        <input
-                            ref={searchInputRef}
-                            type="text"
-                            placeholder="Type to search communities..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-modal-input"
-                            aria-label="Search community"
-                        />
-                        {searchTerm && (
-                            <button
-                                className="clear-search-btn"
-                                onClick={() => setSearchTerm('')}
-                                aria-label="Clear search"
-                            >
-                                <FaTimes />
-                            </button>
-                        )}
-                    </div>
-                    {searchTerm && (
-                        <ul className="search-results-list">
-                            {filteredAndSortedCommunities.length > 0 ? (
-                                filteredAndSortedCommunities.map((community) => (
-                                    <li key={community._id} onClick={() => handleSearchSelect(community._id)}>
-                                        <span className="result-icon">{community.icon || '😀'}</span>
-                                        <div className="result-details">
-                                            <span className="result-name">{community.name}</span>
-                                            <span className="result-members"><FaUsers /> {community.members.length} members</span>
-                                        </div>
-                                    </li>
-                                ))
-                            ) : (
-                                <li>No results found.</li>
-                            )}
-                        </ul>
-                    )}
-                </div>
-            </div>
-
-
-            {/* Trending Communities Carousel */}
-            {trendingCommunities.length > 0 && (
-                <div className="trending-communities-carousel">
-                    <h3><FaFire /> Trending Communities</h3>
-                    <div className="carousel-container" ref={carouselRef}>
-                        {trendingCommunities.map((community) => (
-                            <div
-                                key={community._id}
-                                className="trending-card"
-                                onClick={() => navigate(`/community/${community._id}`)}
-                            >
-                                <span className="card-icon">{community.icon || '⭐'}</span>
-                                <span className="card-name">{community.name}</span>
-                                <span className="card-metric"><FaUsers /> {community.members.length} members</span>
-                            </div>
-                        ))}
-                    </div>
-                    {/* Carousel navigation arrows */}
-                    <button className="carousel-nav-arrow left" onClick={() => scrollCarousel('left')} aria-label="Scroll left">
-                        <FaArrowLeft />
-                    </button>
-                    <button className="carousel-nav-arrow right" onClick={() => scrollCarousel('right')} aria-label="Scroll right">
-                        <FaArrowRight />
-                    </button>
-                </div>
-            )}
-
-            {/* Community Cards Grid/List */}
-            <div className="communities-grid-scroll-wrapper">
-                <div className="communities-grid">
-                    {displayedCommunities.length === 0 ? (
-                        <p className="no-communities-found">
-                            <FaSearch className="icon" />
-                            No communities found matching your criteria.
-                            <br />
-                            <span onClick={() => handleClearFilters()}>Try adjusting your filters</span> or
-                            <span onClick={() => navigate('/create-community')}> be the first to create one!</span>
-                        </p>
-                    ) : (
-                        displayedCommunities.map((community) => (
-                            <div key={community._id} className="community-wrapper">
-                                {trendingIds.includes(community._id) && (
-                                    <span className="trending-badge animate-pulse">🔥 Trending</span>
-                                )}
-                                <CommunityCard
-                                    community={{
-                                        ...community,
-                                        icon: community.icon || '😀',
-                                        description: community.description || 'A vibrant community about this topic.'
-                                    }}
-                                    onClick={() => navigate(`/community/${community._id}`)}
-                                />
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
+  return (
+    <div className="container max-w-6xl py-8 lg:py-12 space-y-12">
+      {/* Header Section */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-primary">
+            <Globe className="h-5 w-5 fill-primary/10" />
+            <span className="text-sm font-semibold uppercase tracking-wider">Ecosystem</span>
+          </div>
+          <h1 className="text-4xl font-bold tracking-tight">Communities</h1>
+          <p className="text-muted-foreground">Join specialized hubs to refine your feed.</p>
         </div>
-    );
+        <Button onClick={() => navigate('/create-community')} className="rounded-md">
+          <Plus className="mr-2 h-4 w-4" /> Create Community
+        </Button>
+      </header>
+
+      {/* Control Bar */}
+      <div className="flex flex-col md:flex-row gap-3">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+          <Input 
+            placeholder="Search hubs..." 
+            className="pl-10 h-11 bg-muted/40 border-border/50 focus-visible:ring-primary/20 transition-all"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Select value={sortOrder} onValueChange={setSortOrder}>
+            <SelectTrigger className="w-[160px] h-11 bg-muted/20 border-border/50">
+              <ArrowUpDown className="h-3.5 w-3.5 mr-2 opacity-50" />
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="membersDesc">Top Members</SelectItem>
+              <SelectItem value="createdAtDesc">Newest</SelectItem>
+              <SelectItem value="nameAsc">Alphabetical</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="h-11 px-4 gap-2 border-border/50 hover:bg-muted/50">
+                <SlidersHorizontal className="h-4 w-4 opacity-70" />
+                Filters
+                {(categoryFilter !== 'all' || minMembers) && (
+                  <Badge className="ml-1 px-1 min-w-[1.2rem] h-5 rounded-full flex items-center justify-center">1</Badge>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="flex flex-col">
+              <SheetHeader className="text-left">
+                <SheetTitle>Filter Communities</SheetTitle>
+              </SheetHeader>
+              <div className="flex-1 space-y-8 py-8">
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">Category</h4>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {uniqueCategories.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold">Minimum Members</h4>
+                  <Input 
+                    type="number" 
+                    value={minMembers} 
+                    onChange={(e) => setMinMembers(e.target.value)} 
+                    placeholder="0" 
+                    className="focus-visible:ring-primary/20"
+                  />
+                </div>
+              </div>
+              <SheetFooter className="flex-col gap-2 border-t pt-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full text-destructive hover:bg-destructive/5 hover:text-destructive border-destructive/20" 
+                  onClick={() => {
+                    setCategoryFilter('all');
+                    setMinMembers('');
+                  }}
+                >
+                  Clear All
+                </Button>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+
+      {/* Trending Horizontal Scroll */}
+      {!searchTerm && !minMembers && categoryFilter === 'all' && (
+        <section className="space-y-6">
+          <div className="flex items-center gap-2 text-lg font-semibold">
+            <Flame className="h-5 w-5 text-orange-500 fill-orange-500/10" />
+            Trending Right Now
+          </div>
+          <ScrollArea className="w-full whitespace-nowrap">
+            <div className="flex gap-4 pb-4">
+              {trendingCommunities.map((c, idx) => (
+                <Card 
+                  key={c._id} 
+                  className="w-[260px] border-border/40 hover:border-primary/20 hover:shadow-sm transition-all cursor-pointer group"
+                  onClick={() => navigate(`/community/${c._id}`)}
+                >
+                  <CardContent className="p-5 flex flex-col gap-3">
+                    <div className="flex justify-between items-start">
+                      <div className="h-10 w-10 rounded-lg bg-primary/5 flex items-center justify-center text-xl grayscale group-hover:grayscale-0 transition-all">
+                        {c.icon || '🎯'}
+                      </div>
+                      <Badge variant="outline" className="text-[10px] font-bold border-muted-foreground/20">#{idx + 1}</Badge>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-base group-hover:text-primary truncate transition-colors">r/{c.name}</h3>
+                      <div className="flex items-center gap-3 mt-1.5">
+                        <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                          <Users className="h-3 w-3" /> {c.members?.length || 0}
+                        </span>
+                        <Separator orientation="vertical" className="h-3" />
+                        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-tighter">
+                          {c.category || 'General'}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </section>
+      )}
+
+      {/* Main Grid */}
+      <section className="space-y-8">
+        <div className="flex items-center justify-between border-b pb-4">
+          <h2 className="text-xl font-semibold">Hub Directory</h2>
+          <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
+            {filteredCommunities.length} results
+          </span>
+        </div>
+
+        {filteredCommunities.length > 0 ? (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {filteredCommunities.map((c) => (
+              <motion.div key={c._id} variants={itemVariants}>
+                <CommunityCard community={c} />
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-24 text-center border rounded-xl border-dashed bg-muted/10">
+            <div className="p-4 bg-background border rounded-full mb-4">
+              <Search className="h-8 w-8 text-muted-foreground/30" />
+            </div>
+            <h3 className="text-lg font-semibold">No communities matched</h3>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto mt-1">
+              Adjust your search or filters to find what you're looking for.
+            </p>
+            <Button variant="outline" size="sm" onClick={() => setSearchTerm('')} className="mt-6">
+              Clear Search
+            </Button>
+          </div>
+        )}
+      </section>
+    </div>
+  );
 };
+
+const CommunitiesSkeleton = () => (
+  <div className="container max-w-6xl py-12 space-y-12">
+    <div className="space-y-4">
+      <Skeleton className="h-10 w-64" />
+      <Skeleton className="h-4 w-full max-w-sm" />
+    </div>
+    <div className="flex gap-4">
+      <Skeleton className="h-12 flex-1" />
+      <Skeleton className="h-12 w-32" />
+      <Skeleton className="h-12 w-32" />
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[1, 2, 3, 4, 5, 6].map(i => (
+        <Skeleton key={i} className="h-48 rounded-xl" />
+      ))}
+    </div>
+  </div>
+);
 
 export default CommunitiesPage;
