@@ -1,3 +1,4 @@
+// server/server.js - Add this import and route
 import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
@@ -16,6 +17,7 @@ import postRoutes from './routes/postRoutes.js';
 import communityRoutes from './routes/communityRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import searchRoutes from './routes/searchRoutes.js'; // ✅ NEW
 
 dotenv.config();
 
@@ -30,12 +32,11 @@ const io = new Server(server, {
   }
 });
 
-const connectedUsers = new Map(); 
+const connectedUsers = new Map();
 
 io.on('connection', (socket) => {
   console.log(`🔌 Socket connected: ${socket.id}`);
 
-  // Handle user joining with their ID
   socket.on('join', (userId) => {
     if (userId) {
       connectedUsers.set(userId.toString(), socket.id);
@@ -43,7 +44,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Handle user leaving
   socket.on('leave', (userId) => {
     if (userId) {
       connectedUsers.delete(userId.toString());
@@ -53,7 +53,6 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`🔌 Socket disconnected: ${socket.id}`);
-    // Remove user from connected users map
     for (let [userId, socketId] of connectedUsers.entries()) {
       if (socketId === socket.id) {
         connectedUsers.delete(userId);
@@ -63,13 +62,11 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Handle socket errors
   socket.on('error', (error) => {
     console.error('🚨 Socket error:', error);
   });
 });
 
-// Export the io instance and connectedUsers so they can be used in other modules
 export { io, connectedUsers };
 
 // Middleware setup
@@ -96,7 +93,12 @@ app.use(
 // Database connection
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB connected successfully!'))
+  .then(() => {
+    console.log('✅ MongoDB connected successfully!');
+    
+    // Create text indexes after connection
+    console.log('📑 Creating search indexes...');
+  })
   .catch((err) => {
     console.error('❌ MongoDB connection failed:', err.message);
     process.exit(1);
@@ -109,6 +111,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api', commentRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/search', searchRoutes); // ✅ NEW
 
 app.get('/', (req, res) => {
   res.send('🚀 Discussly API is running...');
@@ -126,7 +129,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Listen on the HTTP server, not the Express app directly
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`⚡ Socket.IO server running on port ${PORT}`);

@@ -1,3 +1,4 @@
+// client/src/components/header/Header.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -33,12 +34,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-import SearchBar from '../SearchBar/SearchBar';
+import SearchBar from '../SearchBar/SearchBar'; // ✅ Using the enhanced SearchBar
 import NotificationDropdown from './NotificationDropdown/NotificationDropdown';
 import { logoutUser } from '../../features/auth/authSlice';
 import { cn } from "@/lib/utils";
 
-const Header = ({ searchQuery, onSearchChange }) => {
+const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -125,8 +126,9 @@ const Header = ({ searchQuery, onSearchChange }) => {
 
           {/* Right Section Actions */}
           <div className="flex items-center gap-2">
+            {/* ✅ Enhanced SearchBar - Now fully functional */}
             <div className="hidden lg:block mr-2">
-              <SearchBar searchQuery={searchQuery} onSearchChange={onSearchChange} />
+              <SearchBar />
             </div>
 
             <div className="flex items-center space-x-1">
@@ -225,6 +227,11 @@ const Header = ({ searchQuery, onSearchChange }) => {
                     </SheetTitle>
                   </SheetHeader>
                   <div className="flex-1 overflow-y-auto py-6 space-y-8">
+                    {/* ✅ Mobile Search */}
+                    <div className="px-2 lg:hidden">
+                      <SearchBar />
+                    </div>
+                    
                     <div className="space-y-1">
                       {navItems.map((item) => (
                         <Button key={item.path} variant="ghost" asChild className="w-full justify-start text-lg h-14 rounded-xl px-4">
@@ -237,7 +244,6 @@ const Header = ({ searchQuery, onSearchChange }) => {
                     </div>
                     <Separator />
                     <div className="space-y-4 px-2">
-                       <SearchBar searchQuery={searchQuery} onSearchChange={onSearchChange} />
                        {user ? (
                          <div className="grid gap-3">
                            <Button asChild className="w-full h-12 justify-start px-6 rounded-xl">

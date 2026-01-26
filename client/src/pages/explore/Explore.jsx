@@ -1,178 +1,222 @@
 import React from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Flame, Users, Sparkles, Trophy, Search, TrendingUp, Info } from "lucide-react"
+import { motion } from "framer-motion"
+import { 
+  Flame, Sparkles, Trophy, Search, TrendingUp, 
+  Info, MoreHorizontal, Hash, ArrowUpRight, Filter,
+  AlertCircle, LogIn
+} from "lucide-react"
 
-import { useGetPostsQuery } from "@/app/api/postsApi"
-import { useGetCommunitiesQuery } from "@/app/api/communitiesApi"
-
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
+// Shadcn UI Components
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
+import { Kbd } from "@/components/ui/kbd"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
+// API & Custom Components
+import { useGetPostsQuery } from "@/app/api/postsApi"
+import { useGetCommunitiesQuery } from "@/app/api/communitiesApi"
 import PostCard from "@/components/postCard/PostCard"
 import CommunityCard from "@/components/communitycard/CommunityCard"
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { 
-    opacity: 1, 
-    transition: { staggerChildren: 0.05 } 
-  }
-}
+const ExplorePage = () => {
+  const { data: posts = [], isLoading: loadingPosts, error: postError } = useGetPostsQuery()
+  const { data: communities = [], isLoading: loadingComms } = useGetCommunitiesQuery()
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 8 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.3, ease: "easeOut" }
-  }
-}
-
-const Explore = () => {
-  const { data: posts = [], isLoading: loadingPosts } = useGetPostsQuery()
-  const { data: communities = [], isLoading: loadingCommunities } = useGetCommunitiesQuery()
+  // Handle 401 Unauthorized or other API errors
+  const isAuthError = postError && 'status' in postError && postError.status === 401
 
   return (
-    <div className="container max-w-6xl py-8 lg:py-12">
-      {/* Header Section */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-primary">
-            <Sparkles className="h-5 w-5 fill-primary/10" />
-            <span className="text-sm font-semibold uppercase tracking-wider">Discovery</span>
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
+      {/* --- Top Navigation --- */}
+      <header className="border-b px-6 py-3 flex items-center justify-between bg-card/50 backdrop-blur-md z-10">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+             <div className="bg-primary p-1.5 rounded-lg">
+                <Sparkles className="h-5 w-5 text-primary-foreground" />
+             </div>
+             <h1 className="text-lg font-bold tracking-tight hidden sm:block">Discussly</h1>
           </div>
-          <h1 className="text-4xl font-bold tracking-tight">Explore</h1>
-          <p className="text-muted-foreground">Trending conversations and rising communities.</p>
+          
+          <Separator orientation="vertical" className="h-6" />
+          
+          <Breadcrumb className="hidden md:block">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Explore</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
-        
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
-          <Input 
-            placeholder="Search Discussly..." 
-            className="pl-10 h-11 bg-muted/40 border-border/50 focus-visible:ring-primary/20 focus-visible:bg-background transition-all" 
-          />
+
+        <div className="flex items-center gap-3">
+          <div className="relative group hidden lg:block">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              className="w-[350px] pl-10 h-10 bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-primary/50 transition-all" 
+              placeholder="Search conversations..."
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <Kbd className="pointer-events-none select-none">⌘ K</Kbd>
+            </div>
+          </div>
+          <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Main Feed */}
-        <main className="lg:col-span-8">
-          <Tabs defaultValue="trending" className="w-full">
-            <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b rounded-none mb-6 gap-8">
-              <TabsTrigger 
-                value="trending" 
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 text-sm font-medium transition-all"
-              >
-                <TrendingUp className="h-4 w-4 mr-2" /> Trending
-              </TabsTrigger>
-              <TabsTrigger 
-                value="newest" 
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 text-sm font-medium transition-all"
-              >
-                <Flame className="h-4 w-4 mr-2" /> Newest
-              </TabsTrigger>
-            </TabsList>
+      {/* --- Main Workspace Layout --- */}
+      <ResizablePanelGroup direction="horizontal" className="flex-1">
+        
+        {/* Left: Navigation Panel */}
+        <ResizablePanel defaultSize={18} minSize={15} className="hidden md:block border-r bg-muted/5">
+          <ScrollArea className="h-full p-4">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 px-2">Navigation</h2>
+                <nav className="space-y-1">
+                  <Button variant="secondary" className="w-full justify-start h-10 px-3"><TrendingUp className="h-4 w-4 mr-3 text-primary" /> Popular</Button>
+                  <Button variant="ghost" className="w-full justify-start h-10 px-3 opacity-70"><Flame className="h-4 w-4 mr-3" /> All Content</Button>
+                  <Button variant="ghost" className="w-full justify-start h-10 px-3 opacity-70"><Trophy className="h-4 w-4 mr-3" /> Leaderboard</Button>
+                </nav>
+              </div>
+              <Separator />
+              <Card className="bg-primary/5 border-primary/10 border-dashed">
+                <CardHeader className="p-4">
+                  <CardTitle className="text-xs">Create Community</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <p className="text-[11px] text-muted-foreground mb-3">Found your own niche and invite others.</p>
+                  <Button size="sm" className="w-full h-8 text-xs font-bold">Get Started</Button>
+                </CardContent>
+              </Card>
+            </div>
+          </ScrollArea>
+        </ResizablePanel>
 
-            <AnimatePresence mode="wait">
-              <TabsContent value="trending" className="mt-0 focus-visible:outline-none">
-                {loadingPosts ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <Skeleton key={i} className="h-48 w-full rounded-xl" />
+        <ResizableHandle withHandle />
+
+        {/* Center: Content Feed */}
+        <ResizablePanel defaultSize={57}>
+          <div className="h-full flex flex-col">
+            <Tabs defaultValue="trending" className="flex-1 flex flex-col">
+              <div className="px-6 pt-4 border-b bg-background flex items-center justify-between">
+                <TabsList className="bg-transparent h-12 gap-6 p-0">
+                  <TabsTrigger value="trending" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-1 h-full font-bold">Trending</TabsTrigger>
+                  <TabsTrigger value="newest" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-1 h-full font-bold">Recent</TabsTrigger>
+                </TabsList>
+                <Badge variant="outline" className="h-6 font-mono font-normal">v.2.0.4</Badge>
+              </div>
+
+              <ScrollArea className="flex-1">
+                <div className="max-w-2xl mx-auto p-6">
+                  {isAuthError ? (
+                    <Alert variant="destructive" className="mt-10">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Authentication Required</AlertTitle>
+                      <AlertDescription className="flex flex-col gap-3">
+                        You must be logged in to view trending content.
+                        <Button variant="outline" size="sm" className="w-fit border-destructive/50 text-destructive hover:bg-destructive/10">
+                          <LogIn className="h-3 w-3 mr-2" /> Sign In
+                        </Button>
+                      </AlertDescription>
+                    </Alert>
+                  ) : loadingPosts ? (
+                    <div className="space-y-6 mt-4">
+                      {[1, 2, 3].map((i) => <Skeleton key={i} className="h-60 w-full rounded-2xl" />)}
+                    </div>
+                  ) : (
+                    <TabsContent value="trending" className="m-0 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                      {posts.map((post) => (
+                        <PostCard key={post._id} post={post} />
+                      ))}
+                    </TabsContent>
+                  )}
+                </div>
+              </ScrollArea>
+            </Tabs>
+          </div>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+
+        {/* Right: Discovery & Info */}
+        <ResizablePanel defaultSize={25} minSize={20} className="hidden xl:block">
+          <ScrollArea className="h-full p-6 bg-muted/5">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rising Hubs</h3>
+                  <Button variant="link" className="text-[11px] h-auto p-0">Explore All</Button>
+                </div>
+                {loadingComms ? (
+                   [1, 2, 3].map((i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)
+                ) : (
+                  <div className="space-y-2">
+                    {communities.slice(0, 5).map((c) => (
+                      <div key={c._id} className="flex items-center justify-between p-2 rounded-xl hover:bg-card transition-colors border border-transparent hover:border-border">
+                        <CommunityCard community={c} variant="minimal" />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem className="text-xs font-medium">Follow Community</DropdownMenuItem>
+                            <DropdownMenuItem className="text-xs font-medium">View Stats</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     ))}
                   </div>
-                ) : (
-                  <motion.div 
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="flex flex-col gap-4"
-                  >
-                    {posts.map((post) => (
-                      <motion.div key={post._id} variants={itemVariants}>
-                        <PostCard post={post} />
-                      </motion.div>
-                    ))}
-                  </motion.div>
                 )}
-              </TabsContent>
-            </AnimatePresence>
-          </Tabs>
-        </main>
-
-        {/* Sidebar Discovery */}
-        <aside className="lg:col-span-4 space-y-8">
-          <Card className="shadow-none border-border/60">
-            <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <div className="space-y-1">
-                <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-orange-500 fill-orange-500/10" />
-                  Top Communities
-                </CardTitle>
-                <CardDescription className="text-xs">Based on weekly activity</CardDescription>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {loadingCommunities ? (
-                [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-12 w-full rounded-md" />)
-              ) : communities.length > 0 ? (
-                <div className="space-y-1">
-                  {communities.slice(0, 5).map((community, index) => (
-                    <motion.div 
-                      key={community._id}
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <CommunityCard community={community} variant="minimal" />
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <p className="text-sm text-muted-foreground">No communities yet.</p>
-                </div>
-              )}
-              
-              <Separator className="my-4 opacity-50" />
-              
-              <Button variant="ghost" className="w-full text-xs font-semibold h-9 hover:bg-primary/5 hover:text-primary transition-colors">
-                Browse All Communities
-              </Button>
-            </CardContent>
-          </Card>
 
-          {/* Contextual Info Card */}
-          <Card className="bg-primary/[0.03] border-primary/10 shadow-none overflow-hidden group">
-            <CardHeader className="pb-2">
-              <div className="p-2 w-fit rounded-lg bg-primary/10 mb-2">
-                <Info className="h-4 w-4 text-primary" />
-              </div>
-              <CardTitle className="text-sm font-bold">Pro Tip</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                Join specific hubs to tailor your personal home feed and engage with experts in niche fields.
-              </p>
-            </CardContent>
-            <div className="h-1 w-full bg-primary/10 mt-2">
-              <motion.div 
-                className="h-full bg-primary/40"
-                initial={{ width: 0 }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
+              <Card className="bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent border-primary/5 shadow-none overflow-hidden">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <Info className="h-4 w-4 text-primary" />
+                    <CardTitle className="text-xs font-bold">Did you know?</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Personalized feeds are calculated based on your hub engagement and "Rising" trends in your region.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
-          </Card>
-        </aside>
-      </div>
+          </ScrollArea>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   )
 }
 
-export default Explore
+export default ExplorePage

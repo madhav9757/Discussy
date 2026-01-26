@@ -1,3 +1,4 @@
+// client/src/router.jsx
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
@@ -16,19 +17,10 @@ import UpdateProfile from './features/auth/profile/updateProfile/UpdateProfile.j
 import NotificationsPage from './pages/notifications/NotificationsPage.jsx';
 import CommunitiesPage from './pages/Community/communityRoute/CommunitiesPage.jsx';
 import CreateCommunityPage from './features/communities/creatCommunity/CreateCommunityPage.jsx';
+import SearchResultsPage from './pages/search/SearchResultsPage.jsx'; // ✅ NEW
 
-// Import the new ProtectedRoute component
-import ProtectedRoute from './components/ProtectedRoute'; // Adjust path as needed
-
-// Import the new NotFoundPage component
-import NotFoundPage from './pages/PageNotFound/NotFoundPage.jsx'; // Adjust path as needed
-
-// Optional: Example of lazy loading for performance (uncomment and use if desired)
-// const LoginPage = React.lazy(() => import('./features/auth/LoginPage/LoginPage'));
-// const RegisterPage = React.lazy(() => import('./features/auth/RegisterPage/RegisterPage'));
-// const Home = React.lazy(() => import('./pages/home/Home'));
-// ... and so on for other components
-// If using lazy loading, remember to wrap your <Routes> with <Suspense fallback={<div>Loading...</div>}> in App.jsx
+import ProtectedRoute from './components/ProtectedRoute';
+import NotFoundPage from './pages/PageNotFound/NotFoundPage.jsx';
 
 const AppRouter = () => {
   return (
@@ -39,16 +31,16 @@ const AppRouter = () => {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/explore" element={<Explore />} />
       <Route path="/about" element={<AboutPage />} />
+      <Route path="/search" element={<SearchResultsPage />} /> {/* ✅ NEW */}
       <Route path="/community" element={<CommunitiesPage />} />
       <Route path="/create-community" element={<CreateCommunityPage />} />
-      <Route path="/user/:id" element={<ProfilePage />} /> {/* Public view of profiles */}
+      <Route path="/user/:id" element={<ProfilePage />} />
       <Route path="/community/:id" element={<CommunityPage />} />
       <Route path="/posts/:id" element={<PostDetails />} />
 
       {/* Protected Routes - Accessible only to authenticated users */}
-      {/* All routes nested within this <Route> will require authentication */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/profile" element={<ProfilePage />} /> {/* User's own profile */}
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/edit" element={<UpdateProfile />} />
         <Route path="/new-post" element={<CreatePost />} />
         <Route path="/community/:id/create-post" element={<CreatePost />} />

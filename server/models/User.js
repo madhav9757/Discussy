@@ -1,56 +1,62 @@
+// server/models/User.js
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    trim: true,
   },
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    trim: true,
+    lowercase: true,
   },
   passwordHash: {
     type: String,
-    required: true
+    required: true,
   },
   image: {
     type: String,
-    default: '' // URL to profile image (optional)
+    default: '',
   },
   bio: {
     type: String,
-    default: '' // Short user description
+    default: '',
+    maxlength: 500,
   },
   isPrivate: {
     type: Boolean,
-    default: false // If true, restricts viewing of profile content
+    default: false,
   },
-  followers: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  ],
-  following: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  ],
-  joinedCommunities: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Community'
-    }
-  ],
+  followers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
+  following: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
+  joinedCommunities: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Community',
+  }],
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 }, {
-  timestamps: true
+  timestamps: true,
 });
+
+// Text index for search
+userSchema.index({ username: 'text', bio: 'text' });
+
+// Regular indexes
+userSchema.index({ username: 1 });
+userSchema.index({ email: 1 });
 
 export default mongoose.model('User', userSchema);
