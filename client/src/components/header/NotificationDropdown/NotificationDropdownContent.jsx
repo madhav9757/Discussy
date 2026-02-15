@@ -1,20 +1,21 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { 
-  MessageCircle, 
-  Heart, 
-  Info, 
-  UserPlus, 
-  FileText, 
-  CheckCheck, 
-  BellRing 
-} from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  MessageCircle,
+  Heart,
+  Info,
+  UserPlus,
+  FileText,
+  CheckCheck,
+  BellRing,
+  Circle,
+} from "lucide-react";
 import {
   useGetNotificationsQuery,
   useMarkAllNotificationsAsReadMutation,
-  useMarkNotificationAsReadMutation
-} from '../../../app/api/notificationsApi.js';
+  useMarkNotificationAsReadMutation,
+} from "../../../app/api/notificationsApi.js";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,7 +25,8 @@ import { cn } from "@/lib/utils";
 
 const NotificationDropdownContent = ({ onClose }) => {
   const { data: notifications = [], isLoading } = useGetNotificationsQuery();
-  const [markAllRead, { isLoading: isMarkingAllRead }] = useMarkAllNotificationsAsReadMutation();
+  const [markAllRead, { isLoading: isMarkingAllRead }] =
+    useMarkAllNotificationsAsReadMutation();
   const [markAsRead] = useMarkNotificationAsReadMutation();
 
   const handleMarkAllRead = async (e) => {
@@ -33,7 +35,7 @@ const NotificationDropdownContent = ({ onClose }) => {
     try {
       await markAllRead().unwrap();
     } catch (err) {
-      console.error('❌ Failed to mark notifications as read', err);
+      console.error("❌ Failed to mark notifications as read", err);
     }
   };
 
@@ -50,44 +52,46 @@ const NotificationDropdownContent = ({ onClose }) => {
 
   const getNotificationConfig = (type) => {
     const configs = {
-      comment: { icon: MessageCircle, color: "text-blue-500", bg: "bg-blue-500/10" },
-      like: { icon: Heart, color: "text-rose-500", bg: "bg-rose-500/10" },
-      follow: { icon: UserPlus, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-      post: { icon: FileText, color: "text-purple-500", bg: "bg-purple-500/10" },
-      system: { icon: Info, color: "text-slate-500", bg: "bg-slate-500/10" },
+      comment: { icon: MessageCircle },
+      like: { icon: Heart },
+      follow: { icon: UserPlus },
+      post: { icon: FileText },
+      system: { icon: Info },
     };
     return configs[type] || configs.system;
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
-  const DISPLAY_LIMIT = 15;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const DISPLAY_LIMIT = 10;
   const notificationsToDisplay = [...notifications]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, DISPLAY_LIMIT);
 
   return (
-    <div className="flex flex-col max-h-[500px] w-full">
+    <div className="flex flex-col max-h-[500px] w-full bg-card">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-sm">Notifications</h3>
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
+        <div className="flex items-center gap-3">
+          <h3 className="font-black text-[10px] uppercase tracking-[0.2em] text-foreground">
+            Notifications
+          </h3>
           {unreadCount > 0 && (
-            <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold">
+            <Badge
+              variant="secondary"
+              className="px-2 py-0 h-4 text-[9px] font-black uppercase tracking-widest bg-foreground text-background"
+            >
               {unreadCount} NEW
             </Badge>
           )}
         </div>
         {unreadCount > 0 && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <button
             onClick={handleMarkAllRead}
             disabled={isMarkingAllRead}
-            className="h-8 text-xs text-muted-foreground hover:text-primary"
+            className="text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
           >
-            <CheckCheck className="mr-1.5 h-3.5 w-3.5" />
             Mark all read
-          </Button>
+          </button>
         )}
       </div>
 
@@ -98,65 +102,55 @@ const NotificationDropdownContent = ({ onClose }) => {
             notificationsToDisplay.map((notif, index) => {
               const config = getNotificationConfig(notif.type);
               return (
-                <motion.div
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.03 }}
+                <Link
                   key={notif._id}
+                  to={notif.link || "#"}
+                  onClick={() => handleItemClick(notif)}
+                  className={cn(
+                    "flex items-start gap-4 p-5 transition-all relative border-b border-border/20 last:border-0",
+                    !notif.isRead
+                      ? "bg-muted/30"
+                      : "hover:bg-muted/10 opacity-70 hover:opacity-100",
+                  )}
                 >
-                  <Link
-                    to={notif.link || '#'}
-                    onClick={() => handleItemClick(notif)}
-                    className={cn(
-                      "flex items-start gap-3 p-4 transition-colors hover:bg-muted/50 border-b border-border/50 last:border-0",
-                      !notif.isRead && "bg-primary/[0.02]"
-                    )}
-                  >
-                    <div className="relative">
-                      <Avatar className="h-10 w-10 border shadow-sm">
-                        <AvatarImage 
-                          src={notif.relatedUser?.username
-                            ? `https://api.dicebear.com/7.x/pixel-art/svg?seed=${notif.relatedUser.username}`
-                            : `https://api.dicebear.com/7.x/pixel-art/svg?seed=${notif.type}`
-                          } 
-                        />
-                        <AvatarFallback><BellRing className="h-4 w-4" /></AvatarFallback>
-                      </Avatar>
-                      <div className={cn(
-                        "absolute -bottom-1 -right-1 rounded-full p-1 border shadow-sm",
-                        config.bg
-                      )}>
-                        <config.icon className={cn("h-2.5 w-2.5", config.color)} />
-                      </div>
+                  <div className="relative shrink-0">
+                    <Avatar className="h-10 w-10 border rounded-md">
+                      <AvatarImage src={notif.relatedUser?.image} />
+                      <AvatarFallback className="bg-muted">
+                        <BellRing className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-1 -right-1 rounded bg-background border p-1">
+                      <config.icon className="h-2.5 w-2.5 text-foreground" />
                     </div>
+                  </div>
 
-                    <div className="flex-1 space-y-1 overflow-hidden">
-                      <p className={cn(
-                        "text-sm leading-snug break-words",
-                        !notif.isRead ? "font-semibold text-foreground" : "text-muted-foreground"
-                      )}>
-                        {notif.message}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground/80 flex items-center gap-1">
-                        {formatTimeAgo(notif.createdAt)}
-                      </p>
-                    </div>
+                  <div className="flex-1 space-y-1.5 overflow-hidden">
+                    <p
+                      className={cn(
+                        "text-xs leading-relaxed wrap-break-word",
+                        !notif.isRead
+                          ? "font-bold text-foreground"
+                          : "text-muted-foreground font-medium",
+                      )}
+                    >
+                      {notif.message}
+                    </p>
+                    <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest opacity-60">
+                      {formatTimeAgo(notif.createdAt)}
+                    </p>
+                  </div>
 
-                    {!notif.isRead && (
-                      <div className="mt-2 h-2 w-2 rounded-full bg-primary shrink-0 shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-                    )}
-                  </Link>
-                </motion.div>
+                  {!notif.isRead && (
+                    <div className="mt-2 h-1.5 w-1.5 rounded-full bg-foreground shrink-0" />
+                  )}
+                </Link>
               );
             })
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                <BellRing className="h-6 w-6 text-muted-foreground/50" />
-              </div>
-              <p className="text-sm font-medium">All caught up!</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                New notifications will appear here.
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                All caught up
               </p>
             </div>
           )}
@@ -164,10 +158,14 @@ const NotificationDropdownContent = ({ onClose }) => {
       </ScrollArea>
 
       {/* Footer */}
-      <div className="p-2 border-t bg-muted/10">
-        <Button variant="ghost" asChild className="w-full h-9 text-xs font-medium">
+      <div className="p-3 border-t border-border/40">
+        <Button
+          variant="outline"
+          asChild
+          className="w-full h-10 text-[9px] font-black uppercase tracking-[0.2em] border-2"
+        >
           <Link to="/notifications" onClick={onClose}>
-            View all notifications
+            View all activity
           </Link>
         </Button>
       </div>
@@ -180,12 +178,12 @@ function formatTimeAgo(timestamp) {
   const date = new Date(timestamp);
   const seconds = Math.floor((now - date) / 1000);
 
-  if (seconds < 60) return 'Just now';
+  if (seconds < 60) return "Just now";
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
   if (seconds < 84600) return `${Math.floor(seconds / 3600)}h ago`;
   if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
 
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 export default NotificationDropdownContent;

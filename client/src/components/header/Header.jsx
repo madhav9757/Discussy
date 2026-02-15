@@ -1,42 +1,45 @@
-// client/src/components/header/Header.jsx
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useSelector, useDispatch } from "react-redux";
 import {
-  MessageCircle,
+  MessageSquare,
   Plus,
-  UserCircle,
+  User,
   LogOut,
-  Home,
   Compass,
   Info,
   Sun,
   Moon,
   Settings,
   Shield,
-  Network,
+  LayoutGrid,
   Menu,
-  Sparkles
-} from 'lucide-react';
+  ChevronDown,
+} from "lucide-react";
 
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-import SearchBar from '../SearchBar/SearchBar'; // ✅ Using the enhanced SearchBar
-import NotificationDropdown from './NotificationDropdown/NotificationDropdown';
-import { logoutUser } from '../../features/auth/authSlice';
+import SearchBar from "../SearchBar/SearchBar";
+import NotificationDropdown from "./NotificationDropdown/NotificationDropdown";
+import { logoutUser } from "../../features/auth/authSlice";
 import { cn } from "@/lib/utils";
 
 const Header = () => {
@@ -46,234 +49,278 @@ const Header = () => {
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const saved = localStorage.getItem("darkMode");
+    return saved
+      ? JSON.parse(saved)
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
 
-  const user = useSelector(state => state.auth.userInfo);
+  const user = useSelector((state) => state.auth.userInfo);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 0);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDarkMode);
-    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+    document.documentElement.classList.toggle("dark", isDarkMode);
+    localStorage.setItem("darkMode", JSON.stringify(isDarkMode));
   }, [isDarkMode]);
 
   const handleLogout = () => {
     dispatch(logoutUser());
-    navigate('/login');
+    navigate("/login");
   };
 
   const navItems = [
-    { label: 'Home', path: '/', icon: Home, color: 'text-blue-500' },
-    { label: 'Explore', path: '/explore', icon: Compass, color: 'text-purple-500' },
-    { label: 'Communities', path: '/community', icon: Network, color: 'text-emerald-500' },
-    { label: 'About', path: '/about', icon: Info, color: 'text-slate-500' },
+    { label: "Explore", path: "/explore", icon: Compass },
+    { label: "Hubs", path: "/community", icon: LayoutGrid },
+    { label: "About", path: "/about", icon: Info },
   ];
 
   return (
-    <TooltipProvider>
-      <header className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300 border-b",
-        isScrolled 
-          ? "bg-background/80 backdrop-blur-xl border-border/50 shadow-sm py-2" 
-          : "bg-background border-transparent py-4"
-      )}>
-        <div className="container flex h-14 items-center justify-between px-4 max-w-7xl mx-auto">
-          
-          {/* Logo Section */}
-          <div className="flex items-center gap-6 lg:gap-10">
-            <Link to="/" className="flex items-center space-x-2.5 group">
-              <div className="bg-primary p-2 rounded-xl shadow-lg shadow-primary/20 transition-transform group-hover:scale-110 group-active:scale-95">
-                <MessageCircle className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="font-extrabold text-xl tracking-tighter hidden sm:inline-block bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-                Discussly
-              </span>
-            </Link>
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full transition-all duration-300 border-b border-border/40",
+        isScrolled
+          ? "bg-background/80 backdrop-blur-md py-2"
+          : "bg-background py-3",
+      )}
+    >
+      <div className="container flex items-center justify-between px-6 max-w-7xl mx-auto">
+        <div className="flex items-center gap-10">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="bg-foreground text-background p-1.5 rounded-md">
+              <MessageSquare className="h-4 w-4" />
+            </div>
+            <span className="font-bold text-base tracking-tighter uppercase">
+              Discussly
+            </span>
+          </Link>
 
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center space-x-1">
-              {navItems.map((item) => {
-                const isActive = location.pathname === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={cn(
-                      "relative px-4 py-2 text-sm font-medium transition-all hover:text-primary rounded-lg flex items-center gap-2 group",
-                      isActive ? "text-primary" : "text-muted-foreground"
-                    )}
-                  >
-                    <item.icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", item.color)} />
-                    {item.label}
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeNav"
-                        className="absolute inset-0 bg-primary/5 border border-primary/10 rounded-lg -z-10"
-                        transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
-                      />
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "px-4 py-2 text-[11px] font-bold uppercase tracking-[0.15em] transition-all rounded-md relative",
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                  )}
+                >
+                  {item.label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute bottom-1 left-4 right-4 h-0.5 bg-foreground rounded-full"
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="hidden lg:block w-64">
+            <SearchBar />
           </div>
 
-          {/* Right Section Actions */}
           <div className="flex items-center gap-2">
-            {/* ✅ Enhanced SearchBar - Now fully functional */}
-            <div className="hidden lg:block mr-2">
-              <SearchBar />
-            </div>
+            <NotificationDropdown />
 
-            <div className="flex items-center space-x-1">
-              <NotificationDropdown />
-              
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => setIsDarkMode(!isDarkMode)} className="rounded-full w-9 h-9">
-                    {isDarkMode ? (
-                      <Sun className="h-[1.2rem] w-[1.2rem] text-yellow-500 rotate-0 scale-100 transition-all" />
-                    ) : (
-                      <Moon className="h-[1.2rem] w-[1.2rem] text-indigo-500 rotate-0 scale-100 transition-all" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Toggle Theme</TooltipContent>
-              </Tooltip>
-
-              <Separator orientation="vertical" className="h-6 mx-2 hidden sm:block" />
-
-              {!user ? (
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" asChild className="hidden sm:flex font-semibold">
-                    <Link to="/login">Login</Link>
-                  </Button>
-                  <Button size="sm" asChild className="font-semibold shadow-md shadow-primary/10">
-                    <Link to="/register">Sign Up</Link>
-                  </Button>
-                </div>
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="h-9 w-9 flex items-center justify-center rounded-md hover:bg-muted transition-colors text-muted-foreground"
+            >
+              {isDarkMode ? (
+                <Sun className="h-4 w-4" />
               ) : (
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <Button asChild size="sm" className="hidden sm:flex items-center gap-2 rounded-full px-4 font-semibold shadow-lg shadow-primary/15">
-                    <Link to="/new-post">
-                      <Plus className="h-4 w-4 stroke-[3px]" />
-                      <span>Post</span>
-                    </Link>
-                  </Button>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 border border-border/50 hover:border-primary/50 transition-all">
-                        <Avatar className="h-full w-full">
-                          <AvatarImage src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.username}`} />
-                          <AvatarFallback className="bg-primary/5">{user.username.slice(0,2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-60 mt-2" align="end" forceMount>
-                      <DropdownMenuLabel className="font-normal p-4">
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-bold leading-none">{user.username}</p>
-                          <p className="text-xs leading-none text-muted-foreground mt-1 truncate">{user.email}</p>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild className="py-2.5 cursor-pointer">
-                        <Link to="/profile">
-                          <UserCircle className="mr-3 h-4 w-4 text-blue-500" /> My Profile
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className="py-2.5 cursor-pointer">
-                        <Link to="/settings">
-                          <Settings className="mr-3 h-4 w-4 text-slate-500" /> Settings
-                        </Link>
-                      </DropdownMenuItem>
-                      {user.role === 'admin' && (
-                        <DropdownMenuItem asChild className="py-2.5 cursor-pointer">
-                          <Link to="/admin">
-                            <Shield className="mr-3 h-4 w-4 text-rose-500" /> Admin Panel
-                          </Link>
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleLogout} className="py-2.5 text-destructive focus:bg-destructive/10 cursor-pointer font-bold">
-                        <LogOut className="mr-3 h-4 w-4" /> Logout
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <Moon className="h-4 w-4" />
               )}
+            </button>
 
-              {/* Mobile Menu */}
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="md:hidden ml-1">
-                    <Menu className="h-6 w-6" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-full sm:w-[350px] flex flex-col">
-                  <SheetHeader className="pb-6 border-b text-left">
-                    <SheetTitle className="flex items-center gap-3">
-                      <div className="bg-primary p-1.5 rounded-lg">
-                        <MessageCircle className="h-5 w-5 text-primary-foreground" />
+            <Separator
+              orientation="vertical"
+              className="h-4 mx-1 hidden sm:block opacity-40"
+            />
+
+            {!user ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="text-[10px] font-bold uppercase tracking-widest px-4 h-9"
+                >
+                  <Link to="/login">Sign In</Link>
+                </Button>
+                <Button
+                  size="sm"
+                  asChild
+                  className="text-[10px] font-bold uppercase tracking-widest px-5 h-9 rounded-md"
+                >
+                  <Link to="/register">Join Us</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <Button
+                  asChild
+                  size="sm"
+                  className="hidden sm:flex items-center gap-2 px-5 h-9 rounded-md text-[10px] font-bold uppercase tracking-widest"
+                >
+                  <Link to="/new-post">
+                    <Plus className="h-3.5 w-3.5" />
+                    Create
+                  </Link>
+                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none group">
+                      <Avatar className="h-8 w-8 rounded-md border border-border/60">
+                        <AvatarImage src={user.image} />
+                        <AvatarFallback className="text-[10px] bg-muted font-black">
+                          {user.username.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <ChevronDown className="h-3 w-3 text-muted-foreground group-data-[state=open]:rotate-180 transition-transform" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-56 mt-2 border-2 shadow-none rounded-md p-2"
+                    align="end"
+                  >
+                    <DropdownMenuLabel className="px-3 py-3 border-b mb-1">
+                      <div className="flex flex-col gap-0.5">
+                        <p className="text-xs font-black uppercase tracking-tight overflow-hidden text-ellipsis">
+                          u/{user.username}
+                        </p>
+                        <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-60 overflow-hidden text-ellipsis italic">
+                          {user.email}
+                        </p>
                       </div>
-                      <span className="font-bold tracking-tight text-xl">Discussly</span>
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="flex-1 overflow-y-auto py-6 space-y-8">
-                    {/* ✅ Mobile Search */}
-                    <div className="px-2 lg:hidden">
-                      <SearchBar />
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem
+                      asChild
+                      className="rounded-md h-10 px-3 cursor-pointer text-[10px] font-bold uppercase tracking-widest"
+                    >
+                      <Link to="/profile">
+                        <User className="mr-3 h-3.5 w-3.5" /> My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      asChild
+                      className="rounded-md h-10 px-3 cursor-pointer text-[10px] font-bold uppercase tracking-widest"
+                    >
+                      <Link to="/settings">
+                        <Settings className="mr-3 h-3.5 w-3.5" /> Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    {user.role === "admin" && (
+                      <DropdownMenuItem
+                        asChild
+                        className="rounded-md h-10 px-3 cursor-pointer text-[10px] font-bold uppercase tracking-widest"
+                      >
+                        <Link to="/admin">
+                          <Shield className="mr-3 h-3.5 w-3.5" /> Admin Panel
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator className="my-1" />
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="rounded-md h-10 px-3 cursor-pointer text-[10px] font-black uppercase tracking-widest text-destructive hover:bg-destructive/10!"
+                    >
+                      <LogOut className="mr-3 h-3.5 w-3.5" /> Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <button className="md:hidden h-9 w-9 flex items-center justify-center rounded-md hover:bg-muted transition-colors text-muted-foreground">
+                  <Menu className="h-5 w-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] p-8 border-l-2">
+                <SheetHeader className="text-left pb-6 border-b-2 border-foreground/5">
+                  <SheetTitle className="flex items-center gap-2">
+                    <div className="bg-foreground text-background p-1 rounded-sm">
+                      <MessageSquare className="h-4 w-4" />
                     </div>
-                    
-                    <div className="space-y-1">
-                      {navItems.map((item) => (
-                        <Button key={item.path} variant="ghost" asChild className="w-full justify-start text-lg h-14 rounded-xl px-4">
-                          <Link to={item.path}>
-                            <item.icon className={cn("mr-4 h-5 w-5", item.color)} />
-                            {item.label}
+                    <span className="font-black uppercase tracking-tighter text-lg">
+                      Discussly
+                    </span>
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-8 py-8">
+                  <SearchBar />
+                  <nav className="flex flex-col gap-2">
+                    {navItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className="flex items-center gap-4 px-4 py-3 text-xs font-bold uppercase tracking-widest rounded-md hover:bg-muted transition-colors"
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
+                      </Link>
+                    ))}
+                  </nav>
+                  <Separator className="opacity-40" />
+                  <div className="flex flex-col gap-3">
+                    {user ? (
+                      <>
+                        <Button
+                          asChild
+                          className="w-full justify-start gap-4 h-12 rounded-md font-bold uppercase tracking-[0.2em] text-[10px]"
+                        >
+                          <Link to="/new-post">
+                            <Plus className="h-4 w-4" /> Create Post
                           </Link>
                         </Button>
-                      ))}
-                    </div>
-                    <Separator />
-                    <div className="space-y-4 px-2">
-                       {user ? (
-                         <div className="grid gap-3">
-                           <Button asChild className="w-full h-12 justify-start px-6 rounded-xl">
-                             <Link to="/new-post">
-                               <Plus className="mr-3 h-5 w-5" /> Create Post
-                             </Link>
-                           </Button>
-                           <Button variant="outline" onClick={handleLogout} className="w-full h-12 justify-start px-6 rounded-xl border-destructive/20 text-destructive hover:bg-destructive/5">
-                             <LogOut className="mr-3 h-5 w-5" /> Logout
-                           </Button>
-                         </div>
-                       ) : (
-                        <div className="flex flex-col gap-3">
-                           <Button asChild className="w-full h-12 rounded-xl">
-                             <Link to="/register">Create Account</Link>
-                           </Button>
-                           <Button variant="outline" asChild className="w-full h-12 rounded-xl">
-                             <Link to="/login">Sign In</Link>
-                           </Button>
-                        </div>
-                       )}
-                    </div>
+                        <Button
+                          variant="outline"
+                          onClick={handleLogout}
+                          className="w-full justify-start gap-4 h-12 rounded-md font-bold uppercase tracking-[0.2em] text-[10px] border-2 text-destructive border-destructive/20 hover:bg-destructive/5"
+                        >
+                          <LogOut className="h-4 w-4" /> Logout
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          asChild
+                          className="w-full h-12 rounded-md font-bold uppercase tracking-[0.2em] text-[10px]"
+                        >
+                          <Link to="/register">Create Account</Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          asChild
+                          className="w-full h-12 rounded-md font-bold uppercase tracking-[0.2em] text-[10px] border-2"
+                        >
+                          <Link to="/login">Sign In</Link>
+                        </Button>
+                      </>
+                    )}
                   </div>
-                </SheetContent>
-              </Sheet>
-            </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-      </header>
-    </TooltipProvider>
+      </div>
+    </header>
   );
 };
 

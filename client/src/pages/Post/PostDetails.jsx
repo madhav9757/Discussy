@@ -8,8 +8,8 @@ import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import {
   ArrowLeft,
-  ThumbsUp,
-  ThumbsDown,
+  ArrowBigUp,
+  ArrowBigDown,
   MessageSquare,
   Trash2,
   Pencil,
@@ -17,7 +17,6 @@ import {
   Copy,
   Check,
   Share2,
-  ExternalLink
 } from "lucide-react";
 
 import {
@@ -30,7 +29,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import CommentInput from "@/components/comment/commentInput/CommentInput";
 import CommentItem from "@/components/comment/CommentItem/CommentItem";
@@ -57,10 +55,9 @@ const PostDetailsPage = () => {
 
   if (isLoading || !post) return <PostSkeleton />;
 
-  const currentVote =
-    post.upvotes.includes(user?._id)
-      ? "up"
-      : post.downvotes.includes(user?._id)
+  const currentVote = post.upvotes.includes(user?._id)
+    ? "up"
+    : post.downvotes.includes(user?._id)
       ? "down"
       : null;
 
@@ -86,248 +83,260 @@ const PostDetailsPage = () => {
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     setCopied(text);
-    toast.success("Copied to clipboard");
+    toast.success("Copied");
     setTimeout(() => setCopied(null), 2000);
   };
 
   return (
-    <TooltipProvider>
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="container max-w-6xl py-8 px-4"
+    <div className="container max-w-5xl py-6 px-4">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="mb-4 h-8 text-xs text-muted-foreground hover:text-foreground p-0 transition-colors"
+        onClick={() => navigate(-1)}
       >
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-6 hover:bg-primary/5 text-muted-foreground transition-colors"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to feed
-        </Button>
+        <ArrowLeft className="mr-2 h-3 w-3" />
+        Back
+      </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main Content Area */}
-          <div className="lg:col-span-8 space-y-8">
-            <Card className="border-border/60 overflow-hidden shadow-sm">
-              <CardHeader className="p-6 pb-4 space-y-4">
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-none">
-                    {post.category}
-                  </Badge>
-                  <Separator orientation="vertical" className="h-4" />
-                  <Link to={`/community/${post.community._id}`} className="text-sm font-medium hover:text-primary transition-colors">
-                    r/{post.community.name}
-                  </Link>
-                </div>
-                
-                <h1 className="text-3xl font-bold tracking-tight leading-tight">
-                  {post.title}
-                </h1>
-              </CardHeader>
-
-              <CardContent className="px-6 prose prose-slate dark:prose-invert max-w-none pb-8">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
-                  components={{
-                    pre: ({ children }) => <div className="relative group">{children}</div>,
-                    code({ inline, children, className }) {
-                      const value = String(children).replace(/\n$/, "");
-                      if (inline) return <code className="bg-muted px-1.5 py-0.5 rounded text-sm">{children}</code>;
-                      return (
-                        <div className="my-4 rounded-lg overflow-hidden border bg-zinc-950">
-                          <div className="flex items-center justify-between px-4 py-2 bg-zinc-900 border-b border-zinc-800">
-                            <span className="text-xs text-zinc-400 font-mono">code snippet</span>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-6 w-6 text-zinc-400 hover:text-white"
-                              onClick={() => copyToClipboard(value)}
-                            >
-                              {copied === value ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                            </Button>
-                          </div>
-                          <pre className="p-4 overflow-x-auto text-sm leading-relaxed">
-                            <code className={className}>{children}</code>
-                          </pre>
-                        </div>
-                      );
-                    },
-                  }}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8 space-y-6">
+          <Card className="border-border shadow-none rounded-md">
+            <CardHeader className="p-5 pb-3 space-y-3">
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="secondary"
+                  className="px-2 py-0 text-[10px] bg-muted/50 text-muted-foreground border-transparent"
                 >
-                  {post.content}
-                </ReactMarkdown>
-              </CardContent>
-
-              <Separator className="bg-border/40" />
-
-              <CardFooter className="p-4 bg-muted/20 flex items-center justify-between">
-                <div className="flex items-center gap-1 bg-background rounded-full p-1 border shadow-sm">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`h-9 w-9 rounded-full transition-all ${currentVote === "up" ? "text-emerald-500 bg-emerald-500/10" : "hover:text-emerald-500"}`}
-                        onClick={() => handleVote("upvote")}
-                      >
-                        <ThumbsUp className={`h-4.5 w-4.5 ${currentVote === "up" ? "fill-current" : ""}`} />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Appreciate</TooltipContent>
-                  </Tooltip>
-
-                  <span className="text-sm font-bold px-2 tabular-nums">
-                    {(post.upvotes.length || 0) - (post.downvotes.length || 0)}
-                  </span>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`h-9 w-9 rounded-full transition-all ${currentVote === "down" ? "text-rose-500 bg-rose-500/10" : "hover:text-rose-500"}`}
-                        onClick={() => handleVote("downvote")}
-                      >
-                        <ThumbsDown className={`h-4.5 w-4.5 ${currentVote === "down" ? "fill-current" : ""}`} />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Dislike</TooltipContent>
-                  </Tooltip>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={() => copyToClipboard(window.location.href)}>
-                    <Share2 className="h-4 w-4" />
-                    Share
-                  </Button>
-                  
-                  {(user?._id === post.author._id || user?._id === post.community.createdBy) && (
-                    <>
-                      <Button variant="ghost" size="sm" className="gap-2 text-amber-600 hover:bg-amber-50" onClick={() => navigate(`/edit-post/${post._id}`)}>
-                        <Pencil className="h-4 w-4" />
-                        Edit
-                      </Button>
-                      <Button variant="ghost" size="sm" className="gap-2 text-destructive hover:bg-destructive/5" onClick={handleDelete}>
-                        <Trash2 className="h-4 w-4" />
-                        Delete
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </CardFooter>
-            </Card>
-
-            {/* Comments Section */}
-            <div className="space-y-6" id="comments">
-              <div className="flex items-center gap-3">
-                <MessageSquare className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-bold">Discussion ({comments.length})</h3>
+                  {post.category}
+                </Badge>
+                <span className="text-xs text-muted-foreground">•</span>
+                <Link
+                  to={`/community/${post.community._id}`}
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  d/{post.community.name}
+                </Link>
               </div>
 
-              {user ? (
-                <div className="bg-card border rounded-xl p-4">
-                   <CommentInput postId={id} />
-                </div>
-              ) : (
-                <Card className="bg-muted/30 border-dashed">
-                  <CardContent className="p-6 text-center">
-                    <p className="text-sm text-muted-foreground mb-4">Log in to join the conversation</p>
-                    <Button variant="outline" size="sm" onClick={() => navigate("/login")}>Sign In</Button>
-                  </CardContent>
-                </Card>
-              )}
+              <h1 className="text-2xl font-bold tracking-tight">
+                {post.title}
+              </h1>
+            </CardHeader>
 
-              <div className="space-y-4">
-                {comments.length > 0 ? (
-                  comments.map((c) => <CommentItem key={c._id} comment={c} />)
-                ) : (
-                  <p className="text-center py-12 text-muted-foreground italic">No comments yet. Be the first to speak up!</p>
+            <CardContent className="px-5 pb-6 prose prose-slate dark:prose-invert max-w-none prose-sm">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeHighlight]}
+                components={{
+                  pre: ({ children }) => (
+                    <div className="relative group">{children}</div>
+                  ),
+                  code({ inline, children, className }) {
+                    const value = String(children).replace(/\n$/, "");
+                    if (inline)
+                      return (
+                        <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                          {children}
+                        </code>
+                      );
+                    return (
+                      <div className="my-3 rounded border bg-muted/30">
+                        <div className="flex items-center justify-between px-3 py-1.5 border-b border-border bg-muted/50">
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            CODE
+                          </span>
+                          <button
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            onClick={() => copyToClipboard(value)}
+                          >
+                            {copied === value ? (
+                              <Check className="h-3 w-3" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </button>
+                        </div>
+                        <pre className="p-3 overflow-x-auto text-xs leading-relaxed">
+                          <code className={className}>{children}</code>
+                        </pre>
+                      </div>
+                    );
+                  },
+                }}
+              >
+                {post.content}
+              </ReactMarkdown>
+            </CardContent>
+
+            <CardFooter className="p-3 px-5 border-t flex items-center justify-between">
+              <div className="flex items-center gap-1 border rounded-md">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-8 w-8 transition-all ${currentVote === "up" ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground"}`}
+                  onClick={() => handleVote("upvote")}
+                >
+                  <ArrowBigUp
+                    className={`h-4.5 w-4.5 ${currentVote === "up" ? "fill-current" : ""}`}
+                  />
+                </Button>
+
+                <span className="text-xs font-bold px-1 tabular-nums">
+                  {(post.upvotes.length || 0) - (post.downvotes.length || 0)}
+                </span>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-8 w-8 transition-all ${currentVote === "down" ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground"}`}
+                  onClick={() => handleVote("downvote")}
+                >
+                  <ArrowBigDown
+                    className={`h-4.5 w-4.5 ${currentVote === "down" ? "fill-current" : ""}`}
+                  />
+                </Button>
+              </div>
+
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-2 text-xs text-muted-foreground hover:text-foreground"
+                  onClick={() => copyToClipboard(window.location.href)}
+                >
+                  <Share2 className="h-3.5 w-3.5" />
+                  Share
+                </Button>
+
+                {(user?._id === post.author._id ||
+                  user?._id === post.community.createdBy) && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 gap-2 text-xs text-muted-foreground hover:text-foreground"
+                      onClick={() => navigate(`/edit-post/${post._id}`)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 gap-2 text-xs text-destructive/80 hover:text-destructive hover:bg-destructive/5"
+                      onClick={handleDelete}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete
+                    </Button>
+                  </>
                 )}
               </div>
+            </CardFooter>
+          </Card>
+
+          <div className="space-y-4 pt-4" id="comments">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                Comments ({comments.length})
+              </h3>
+            </div>
+
+            {user ? (
+              <div className="bg-muted/10 border rounded-md p-3">
+                <CommentInput postId={id} />
+              </div>
+            ) : (
+              <div className="p-6 text-center border border-dashed rounded-md bg-muted/5">
+                <p className="text-xs text-muted-foreground mb-3">
+                  Login to participate in the discussion
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs font-semibold"
+                  onClick={() => navigate("/login")}
+                >
+                  Sign In
+                </Button>
+              </div>
+            )}
+
+            <div className="space-y-4 pt-2">
+              {comments.length > 0 ? (
+                comments.map((c) => <CommentItem key={c._id} comment={c} />)
+              ) : (
+                <p className="text-center py-10 text-xs text-muted-foreground/60 italic font-medium">
+                  No comments yet
+                </p>
+              )}
             </div>
           </div>
-
-          {/* Sidebar Area */}
-          <aside className="lg:col-span-4 space-y-6">
-            <Card className="border-border/60 shadow-sm sticky top-24">
-              <CardHeader className="pb-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Original Poster</h4>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
-                    <AvatarImage src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${post.author.username}`} />
-                    <AvatarFallback><UserIcon /></AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <Link to={`/user/${post.author._id}`} className="font-bold hover:text-primary transition-colors block truncate">
-                      u/{post.author.username}
-                    </Link>
-                    <p className="text-xs text-muted-foreground">
-                      Joined {new Date(post.author.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-
-                {post.author.bio && (
-                  <p className="text-sm leading-relaxed text-muted-foreground italic">
-                    "{post.author.bio}"
-                  </p>
-                )}
-
-                <div className="grid grid-cols-2 gap-4 p-3 bg-muted/30 rounded-lg text-center">
-                  <div>
-                    <p className="text-lg font-bold">{post.author.postsCount || 0}</p>
-                    <p className="text-[10px] uppercase font-semibold text-muted-foreground">Posts</p>
-                  </div>
-                  <div className="border-l border-border/50">
-                    <p className="text-lg font-bold">{post.author.commentsCount || 0}</p>
-                    <p className="text-[10px] uppercase font-semibold text-muted-foreground">Comments</p>
-                  </div>
-                </div>
-
-                <Button variant="outline" className="w-full gap-2 group" asChild>
-                  <Link to={`/user/${post.author._id}`}>
-                    <UserIcon className="h-4 w-4 transition-transform group-hover:scale-110" />
-                    View Full Profile
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-primary/[0.02] border-primary/10">
-              <CardContent className="p-4 flex items-start gap-3">
-                <div className="mt-1 p-1.5 rounded-md bg-primary/10">
-                  <ExternalLink className="h-3 w-3 text-primary" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-bold uppercase tracking-tighter text-primary">Community Guidelines</p>
-                  <p className="text-xs text-muted-foreground leading-snug">
-                    Remember to be civil and follow community rules for r/{post.community.name}.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </aside>
         </div>
-      </motion.div>
-    </TooltipProvider>
+
+        <aside className="lg:col-span-4 space-y-6">
+          <Card className="border-border shadow-none rounded-md sticky top-20">
+            <CardHeader className="p-5 pb-3">
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                Author
+              </h4>
+            </CardHeader>
+            <CardContent className="p-5 pt-0 space-y-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 border rounded">
+                  <AvatarImage
+                    src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${post.author.username}`}
+                  />
+                  <AvatarFallback>
+                    <UserIcon className="h-4 w-4" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <Link
+                    to={`/user/${post.author._id}`}
+                    className="text-sm font-bold hover:text-foreground transition-colors block truncate"
+                  >
+                    u/{post.author.username}
+                  </Link>
+                  <p className="text-[10px] text-muted-foreground uppercase font-semibold">
+                    Member since {new Date(post.author.createdAt).getFullYear()}
+                  </p>
+                </div>
+              </div>
+
+              {post.author.bio && (
+                <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
+                  {post.author.bio}
+                </p>
+              )}
+
+              <Button
+                variant="outline"
+                className="w-full h-8 text-xs font-semibold"
+                asChild
+              >
+                <Link to={`/user/${post.author._id}`}>View Profile</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </aside>
+      </div>
+    </div>
   );
 };
 
 const PostSkeleton = () => (
-  <div className="container max-w-6xl py-12 px-4 space-y-8 animate-pulse">
-    <div className="h-8 w-32 bg-muted rounded" />
+  <div className="container max-w-5xl py-10 px-4 space-y-6 animate-pulse">
+    <div className="h-6 w-24 bg-muted rounded" />
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <div className="lg:col-span-8 space-y-6">
-        <div className="h-[400px] w-full bg-muted rounded-xl" />
-        <div className="h-24 w-full bg-muted rounded-xl" />
+        <div className="h-[300px] w-full bg-muted rounded" />
+        <div className="h-20 w-full bg-muted rounded" />
       </div>
       <div className="lg:col-span-4">
-        <div className="h-64 w-full bg-muted rounded-xl" />
+        <div className="h-48 w-full bg-muted rounded" />
       </div>
     </div>
   </div>
