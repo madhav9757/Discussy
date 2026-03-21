@@ -16,10 +16,9 @@ const extendedApi = discusslyApi.injectEndpoints({
                 url: `${USER_API_URL}/${userId}/follow`,
                 method: 'POST',
             }),
-            // Invalidate the current user's profile ('User') and the followed user's specific profile ('User:userId')
             invalidatesTags: (result, error, userId) => [
-                'User', // For the current user (their following list changes)
-                { type: 'User', id: userId } // For the user being followed (their followers list changes)
+                'User', 
+                { type: 'User', id: userId }
             ],
         }),
 
@@ -30,26 +29,30 @@ const extendedApi = discusslyApi.injectEndpoints({
                 method: 'POST',
             }),
             invalidatesTags: (result, error, userId) => [
-                'User', // For the current user
-                { type: 'User', id: userId } // For the user being unfollowed
+                'User', 
+                { type: 'User', id: userId }
             ],
         }),
 
         updateProfile: builder.mutation({
             query: (updatedProfileData) => ({
-                url: `${USER_API_URL}/profile`, // Assuming it's YOUR profile update
+                url: `${USER_API_URL}/profile`,
                 method: 'PUT',
                 body: updatedProfileData,
             }),
-            // Invalidate the current user's profile after an update
-            invalidatesTags: ['User'],
+            invalidatesTags: (result) => [
+                'User',
+                { type: 'User', id: result?._id }
+            ],
         }),
 
         // 👤 Get any user by ID
         getUserById: builder.query({
             query: (userId) => `${USER_API_URL}/${userId}`,
-            // Provide a specific tag for this user's profile to allow granular invalidation
-            providesTags: (result, error, id) => [{ type: 'User', id }],
+            providesTags: (result, error, id) => [
+                'User',
+                { type: 'User', id }
+            ],
         }),
     }),
     overrideExisting: false,

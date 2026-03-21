@@ -1,323 +1,261 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
+import { useTheme } from "next-themes";
+import { logout } from "../../features/auth/authSlice";
+import { Button } from "../ui/button";
 import {
-  MessageSquare,
-  Plus,
-  User,
-  LogOut,
+  Search,
+  Home,
   Compass,
-  Info,
-  Sun,
+  Users,
+  Bell,
+  LogOut,
   Moon,
-  Settings,
-  Shield,
-  LayoutGrid,
-  Menu,
-  ChevronDown,
+  Sun,
+  Plus,
+  PenSquare,
+  Hash,
 } from "lucide-react";
-
+import { CreatePostModal } from "../modals/CreatePostModal";
+import { CreateCommunityModal } from "../modals/CreateCommunityModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
-
-import SearchBar from "../SearchBar/SearchBar";
-import NotificationDropdown from "./NotificationDropdown/NotificationDropdown";
-import { logoutUser } from "../../features/auth/authSlice";
-import { cn } from "@/lib/utils";
+} from "../ui/dropdown-menu";
 
 const Header = () => {
+  const { userInfo } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useDispatch();
+  const { theme, setTheme } = useTheme();
 
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem("darkMode");
-    return saved
-      ? JSON.parse(saved)
-      : window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
+  const isActive = (path) =>
+    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
-  const user = useSelector((state) => state.auth.userInfo);
+  const navLinkClass = (path) =>
+    `flex items-center gap-2 text-sm font-semibold px-4 py-1.5 rounded-xl transition-all hover:shadow-sm ${
+      isActive(path)
+        ? "bg-background text-primary shadow-sm"
+        : "text-muted-foreground hover:bg-background hover:text-primary"
+    }`;
 
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 0);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDarkMode);
-    localStorage.setItem("darkMode", JSON.stringify(isDarkMode));
-  }, [isDarkMode]);
+  // State controls for our modals opened from Dropdown
+  const [postModalOpen, setPostModalOpen] = useState(false);
+  const [communityModalOpen, setCommunityModalOpen] = useState(false);
 
   const handleLogout = () => {
-    dispatch(logoutUser());
+    dispatch(logout());
     navigate("/login");
   };
 
-  const navItems = [
-    { label: "Explore", path: "/explore", icon: Compass },
-    { label: "Hubs", path: "/community", icon: LayoutGrid },
-    { label: "About", path: "/about", icon: Info },
-  ];
-
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300 border-b border-border/40",
-        isScrolled
-          ? "bg-background/80 backdrop-blur-md py-2"
-          : "bg-background py-3",
-      )}
-    >
-      <div className="container flex items-center justify-between px-6 max-w-7xl mx-auto">
-        <div className="flex items-center gap-10">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="bg-foreground text-background p-1.5 rounded-md">
-              <MessageSquare className="h-4 w-4" />
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
+      <div className="container flex h-16 items-center justify-between mx-auto px-4 max-w-7xl gap-4">
+        {/* Left: Logo */}
+        <div className="flex items-center gap-8 shrink-0">
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 group transition-all duration-300"
+          >
+            <div className="w-9 h-9 rounded-2xl bg-linear-to-tr from-primary to-primary/80 text-primary-foreground flex items-center justify-center font-black text-xl shadow-lg shadow-primary/20 group-hover:rotate-6 group-hover:scale-110 transition-all">
+              D
             </div>
-            <span className="font-bold text-base tracking-tighter uppercase">
+            <span className="font-black text-xl tracking-tight hidden lg:block bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Discussly
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={cn(
-                    "px-4 py-2 text-[11px] font-bold uppercase tracking-[0.15em] transition-all rounded-md relative",
-                    isActive
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                  )}
-                >
-                  {item.label}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute bottom-1 left-4 right-4 h-0.5 bg-foreground rounded-full"
-                    />
-                  )}
-                </Link>
-              );
-            })}
+          {/* Nav Links - Desktop only */}
+          <nav className="hidden xl:flex items-center gap-1 bg-muted/30 p-1 rounded-2xl border border-border/40">
+            <Link to="/" className={navLinkClass("/")}>
+              <Home size={17} /> Home
+            </Link>
+            <Link to="/explore" className={navLinkClass("/explore")}>
+              <Compass size={17} /> Explore
+            </Link>
+            <Link to="/communities" className={navLinkClass("/communities")}>
+              <Users size={17} /> Communities
+            </Link>
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden lg:block w-64">
-            <SearchBar />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <NotificationDropdown />
-
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="h-9 w-9 flex items-center justify-center rounded-md hover:bg-muted transition-colors text-muted-foreground"
-            >
-              {isDarkMode ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
-            </button>
-
-            <Separator
-              orientation="vertical"
-              className="h-4 mx-1 hidden sm:block opacity-40"
+        {/* Center: Search Bar */}
+        <div className="flex-1 max-w-xl hidden md:block">
+          <div className="relative group" onClick={() => navigate("/search")}>
+            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
+              <Search className="h-4 w-4" />
+            </div>
+            <input
+              type="text"
+              readOnly
+              className="w-full pl-11 h-11 text-[13px] rounded-2xl border-none bg-muted/50 hover:bg-muted/80 focus:ring-1 focus:ring-primary/30 transition-all cursor-pointer placeholder:text-muted-foreground/60 font-medium"
+              placeholder="Search Discussly..."
             />
+            <div className="absolute inset-y-0 right-3 flex items-center gap-1">
+              <span className="text-[10px] font-bold bg-background/50 border border-border/40 px-1.5 py-0.5 rounded-md text-muted-foreground/40 leading-none">
+                /
+              </span>
+            </div>
+          </div>
+        </div>
 
-            {!user ? (
-              <div className="flex items-center gap-2">
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2 lg:gap-4 shrink-0">
+          {userInfo ? (
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="flex items-center gap-1 md:bg-muted/30 md:p-1 md:rounded-2xl md:border md:border-border/40">
                 <Button
                   variant="ghost"
-                  size="sm"
-                  asChild
-                  className="text-[10px] font-bold uppercase tracking-widest px-4 h-9"
+                  size="icon"
+                  onClick={() => navigate("/notifications")}
+                  className="h-9 w-9 rounded-xl hover:bg-background hover:text-primary transition-all relative"
                 >
-                  <Link to="/login">Sign In</Link>
-                </Button>
-                <Button
-                  size="sm"
-                  asChild
-                  className="text-[10px] font-bold uppercase tracking-widest px-5 h-9 rounded-md"
-                >
-                  <Link to="/register">Join Us</Link>
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-4">
-                <Button
-                  asChild
-                  size="sm"
-                  className="hidden sm:flex items-center gap-2 px-5 h-9 rounded-md text-[10px] font-bold uppercase tracking-widest"
-                >
-                  <Link to="/new-post">
-                    <Plus className="h-3.5 w-3.5" />
-                    Create
-                  </Link>
+                  <Bell className="h-[18px] w-[18px]" />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-background"></span>
                 </Button>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none group">
-                      <Avatar className="h-8 w-8 rounded-md border border-border/60">
-                        <AvatarImage src={user.image} />
-                        <AvatarFallback className="text-[10px] bg-muted font-black">
-                          {user.username.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <ChevronDown className="h-3 w-3 text-muted-foreground group-data-[state=open]:rotate-180 transition-transform" />
-                    </button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-xl hover:bg-background hover:text-primary transition-all"
+                    >
+                      <Plus className="h-[18px] w-[18px]" />
+                    </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
-                    className="w-56 mt-2 border-2 shadow-none rounded-md p-2"
                     align="end"
+                    className="w-52 rounded-2xl p-2 border-border/60 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
                   >
-                    <DropdownMenuLabel className="px-3 py-3 border-b mb-1">
-                      <div className="flex flex-col gap-0.5">
-                        <p className="text-xs font-black uppercase tracking-tight overflow-hidden text-ellipsis">
-                          u/{user.username}
-                        </p>
-                        <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-60 overflow-hidden text-ellipsis italic">
-                          {user.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
                     <DropdownMenuItem
-                      asChild
-                      className="rounded-md h-10 px-3 cursor-pointer text-[10px] font-bold uppercase tracking-widest"
+                      className="rounded-xl p-3 cursor-pointer"
+                      onSelect={(e) => e.preventDefault()}
                     >
-                      <Link to="/profile">
-                        <User className="mr-3 h-3.5 w-3.5" /> My Profile
-                      </Link>
+                      <CreatePostModal>
+                        <div className="flex items-center w-full font-semibold">
+                          <PenSquare className="w-4 h-4 mr-3 text-primary/70" />{" "}
+                          <span>New Post</span>
+                        </div>
+                      </CreatePostModal>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      asChild
-                      className="rounded-md h-10 px-3 cursor-pointer text-[10px] font-bold uppercase tracking-widest"
+                      className="rounded-xl p-3 cursor-pointer"
+                      onSelect={(e) => e.preventDefault()}
                     >
-                      <Link to="/settings">
-                        <Settings className="mr-3 h-3.5 w-3.5" /> Settings
-                      </Link>
-                    </DropdownMenuItem>
-                    {user.role === "admin" && (
-                      <DropdownMenuItem
-                        asChild
-                        className="rounded-md h-10 px-3 cursor-pointer text-[10px] font-bold uppercase tracking-widest"
-                      >
-                        <Link to="/admin">
-                          <Shield className="mr-3 h-3.5 w-3.5" /> Admin Panel
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator className="my-1" />
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      className="rounded-md h-10 px-3 cursor-pointer text-[10px] font-black uppercase tracking-widest text-destructive hover:bg-destructive/10!"
-                    >
-                      <LogOut className="mr-3 h-3.5 w-3.5" /> Logout
+                      <CreateCommunityModal>
+                        <div className="flex items-center w-full font-semibold">
+                          <Hash className="w-4 h-4 mr-3 text-primary/70" />{" "}
+                          <span>New Community</span>
+                        </div>
+                      </CreateCommunityModal>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
-            )}
 
-            <Sheet>
-              <SheetTrigger asChild>
-                <button className="md:hidden h-9 w-9 flex items-center justify-center rounded-md hover:bg-muted transition-colors text-muted-foreground">
-                  <Menu className="h-5 w-5" />
-                </button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] p-8 border-l-2">
-                <SheetHeader className="text-left pb-6 border-b-2 border-foreground/5">
-                  <SheetTitle className="flex items-center gap-2">
-                    <div className="bg-foreground text-background p-1 rounded-sm">
-                      <MessageSquare className="h-4 w-4" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="h-9 w-9 rounded-xl hover:bg-background hover:text-primary transition-all hidden sm:flex"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-[18px] w-[18px]" />
+                  ) : (
+                    <Moon className="h-[18px] w-[18px]" />
+                  )}
+                </Button>
+              </div>
+
+              <div className="h-8 w-px bg-border/40 mx-1 hidden lg:block"></div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="group flex items-center gap-2.5 p-1 pr-3 rounded-2xl border border-border/40 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-all hover:border-primary/20">
+                    <div className="h-8 w-8 rounded-xl bg-background border border-border/50 overflow-hidden shadow-sm group-hover:shadow-primary/10">
+                      <img
+                        src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userInfo.username}`}
+                        alt="Profile"
+                        className="w-full h-full p-1"
+                      />
                     </div>
-                    <span className="font-black uppercase tracking-tighter text-lg">
-                      Discussly
-                    </span>
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-8 py-8">
-                  <SearchBar />
-                  <nav className="flex flex-col gap-2">
-                    {navItems.map((item) => (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        className="flex items-center gap-4 px-4 py-3 text-xs font-bold uppercase tracking-widest rounded-md hover:bg-muted transition-colors"
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {item.label}
-                      </Link>
-                    ))}
-                  </nav>
-                  <Separator className="opacity-40" />
-                  <div className="flex flex-col gap-3">
-                    {user ? (
-                      <>
-                        <Button
-                          asChild
-                          className="w-full justify-start gap-4 h-12 rounded-md font-bold uppercase tracking-[0.2em] text-[10px]"
-                        >
-                          <Link to="/new-post">
-                            <Plus className="h-4 w-4" /> Create Post
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={handleLogout}
-                          className="w-full justify-start gap-4 h-12 rounded-md font-bold uppercase tracking-[0.2em] text-[10px] border-2 text-destructive border-destructive/20 hover:bg-destructive/5"
-                        >
-                          <LogOut className="h-4 w-4" /> Logout
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          asChild
-                          className="w-full h-12 rounded-md font-bold uppercase tracking-[0.2em] text-[10px]"
-                        >
-                          <Link to="/register">Create Account</Link>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          asChild
-                          className="w-full h-12 rounded-md font-bold uppercase tracking-[0.2em] text-[10px] border-2"
-                        >
-                          <Link to="/login">Sign In</Link>
-                        </Button>
-                      </>
-                    )}
+                    <div className="hidden lg:block text-left">
+                      <p className="text-xs font-bold leading-none">
+                        {userInfo.username}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 font-medium leading-none capitalize">
+                        {userInfo.username?.length % 2 === 0
+                          ? "Contributor"
+                          : "Author"}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 rounded-2xl p-2 border-border/60 shadow-2xl pb-2"
+                >
+                  <div className="px-3 py-3 border-b border-border/40 mb-2">
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">
+                      Account
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-muted border border-border/40 overflow-hidden">
+                        <img
+                          src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userInfo.username}`}
+                          alt="Profile"
+                          className="w-full h-full p-1"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold truncate">
+                          @{userInfo.username}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {userInfo.email}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <DropdownMenuItem
+                    className="rounded-xl p-3 cursor-pointer mb-1 group"
+                    onClick={() => navigate(`/profile/${userInfo._id}`)}
+                  >
+                    <Users className="w-4 h-4 mr-3 text-muted-foreground group-hover:text-primary transition-colors" />{" "}
+                    <span className="font-semibold">My Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="rounded-xl p-3 cursor-pointer group"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="w-4 h-4 mr-3 text-destructive group-hover:animate-pulse" />{" "}
+                    <span className="font-semibold text-destructive">
+                      Sign Out
+                    </span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link
+                to="/login"
+                className="text-sm font-bold hover:text-primary px-2 transition-colors"
+              >
+                Log in
+              </Link>
+              <Button
+                asChild
+                className="h-10 px-6 font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+              >
+                <Link to="/register">Join Platform</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </header>

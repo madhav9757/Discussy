@@ -122,10 +122,10 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="ui-theme">
-      <div className="min-h-screen w-screen bg-background font-sans antialiased flex flex-col selection:bg-foreground selection:text-background overflow-x-hidden">
+      <div className="min-h-screen w-screen bg-background font-sans antialiased flex flex-col overflow-x-hidden">
         <Header />
 
-        <main className="flex-1 w-full p-6 md:p-10">
+        <main className="flex-1 w-full p-4 md:p-8 lg:p-10">
           <AppRouter />
         </main>
 
@@ -134,7 +134,7 @@ function App() {
           richColors
           position="bottom-right"
           toastOptions={{
-            className: "border-2 shadow-none rounded-md",
+            className: "border border-border/50 shadow-xl rounded-2xl",
           }}
         />
       </div>

@@ -51,7 +51,9 @@ postSchema.index({ author: 1, createdAt: -1 });
 
 // Virtual for calculating score
 postSchema.virtual('score').get(function() {
-  return this.upvotes.length - this.downvotes.length;
+  const upCount = this.upvotes ? this.upvotes.length : 0;
+  const downCount = this.downvotes ? this.downvotes.length : 0;
+  return upCount - downCount;
 });
 
 // Ensure virtuals are included when converting to JSON

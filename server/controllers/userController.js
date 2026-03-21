@@ -106,7 +106,7 @@ export const getProfile = asyncHandler(async (req, res) => {
   const createdCommunities = await Community.find({ createdBy: req.user.id }).select('name _id');
 
   const posts = await Post.find({ author: req.user.id })
-    .select('title _id community createdAt')
+    .select('title _id community createdAt upvotes downvotes')
     .populate('community', 'name _id');
 
   res.status(200).json({
@@ -270,7 +270,7 @@ export const getUserById = asyncHandler(async (req, res) => {
   const createdCommunities = await Community.find({ createdBy: id }).select('name _id');
 
   const posts = await Post.find({ author: id })
-    .select('title _id community createdAt')
+    .select('title _id community createdAt upvotes downvotes')
     .populate('community', 'name _id');
 
   res.status(200).json({

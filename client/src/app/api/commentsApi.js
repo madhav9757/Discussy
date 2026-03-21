@@ -3,6 +3,7 @@ import { COMMENT_API_URL, POST_API_URL } from '../constant.js';
 
 const extendedApi = discusslyApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Get all comments for a post (with nested tree)
     getCommentsByPostId: builder.query({
       query: (postId) => `${POST_API_URL}/${postId}/comments`,
       providesTags: (result, error, postId) =>
@@ -14,6 +15,14 @@ const extendedApi = discusslyApi.injectEndpoints({
           : [{ type: 'Comments', id: postId }],
     }),
 
+    // Get all comments made by a user (for profile page)
+    getCommentsByUser: builder.query({
+      query: (userId) => `${COMMENT_API_URL}/user/${userId}`,
+      providesTags: (result, error, userId) => [
+        { type: 'Comments', id: `user-${userId}` },
+      ],
+    }),
+
     createComment: builder.mutation({
       query: ({ postId, content, parentId = null }) => ({
         url: `${POST_API_URL}/${postId}/comments`,
@@ -22,6 +31,8 @@ const extendedApi = discusslyApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, { postId }) => [
         { type: 'Comments', id: postId },
+        { type: 'Post', id: postId },
+        'Post',
       ],
     }),
 
@@ -45,6 +56,8 @@ const extendedApi = discusslyApi.injectEndpoints({
       invalidatesTags: (result, error, { commentId, postId }) => [
         { type: 'Comments', id: commentId },
         { type: 'Comments', id: postId },
+        { type: 'Post', id: postId },
+        'Post',
       ],
     }),
 
@@ -65,8 +78,10 @@ const extendedApi = discusslyApi.injectEndpoints({
 
 export const {
   useGetCommentsByPostIdQuery,
+  useGetCommentsByUserQuery,
   useCreateCommentMutation,
   useUpdateCommentMutation,
   useDeleteCommentMutation,
   useToggleCommentVoteMutation,
 } = extendedApi;
+

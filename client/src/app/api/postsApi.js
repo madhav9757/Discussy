@@ -9,6 +9,12 @@ const extendedPostsApi = discusslyApi.injectEndpoints({
       providesTags: ['Post'],
     }),
 
+    // Get posts by user
+    getPostsByUser: builder.query({
+      query: (userId) => `${POST_API_URL}?user=${userId}`,
+      providesTags: (result, error, id) => [{ type: 'Post', id }, 'Post'],
+    }),
+
     // Get post by ID
     getPostById: builder.query({
       query: (id) => `${POST_API_URL}/${id}`,
@@ -61,6 +67,7 @@ const extendedPostsApi = discusslyApi.injectEndpoints({
 
 export const {
   useGetPostsQuery,
+  useGetPostsByUserQuery,
   useGetPostByIdQuery,
   useCreatePostMutation,
   useUpdatePostMutation,

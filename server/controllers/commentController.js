@@ -4,6 +4,32 @@ import buildCommentTree from '../utils/buildCommentTree.js';
 import { createNotification } from './notificationController.js';
 
 /**
+ * @desc Get all comments made by a specific user (across all posts)
+ * @route GET /api/comments/user/:userId
+ * @access Public
+ */
+export const getCommentsByUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const comments = await Comment.find({ createdBy: userId })
+            .sort({ createdAt: -1 })
+            .populate('createdBy', 'username _id')
+            .populate({
+                path: 'postId',
+                select: 'title _id community',
+                populate: { path: 'community', select: 'name _id' },
+            })
+            .lean();
+
+        res.status(200).json(comments);
+    } catch (error) {
+        console.error('Error fetching comments by user:', error);
+        res.status(500).json({ message: 'Server error fetching comments.' });
+    }
+};
+
+/**
  * @desc Get all comments for a specific post
  * @route GET /api/posts/:postId/comments
  * @access Public
@@ -82,8 +108,11 @@ export const createComment = async (req, res) => {
 
         await newComment.save();
 
+        // ✅ Push comment ID into post.comments array for real-time count
+        await Post.findByIdAndUpdate(postId, { $push: { comments: newComment._id } });
+
         // ✅ Populate author and parent author
-        await newComment.populate('createdBy', 'username');
+        await newComment.populate('createdBy', 'username _id');
 
         if (newComment.parentId) {
             await newComment.populate({
@@ -198,6 +227,9 @@ export const deleteComment = async (req, res) => {
         }
 
         await comment.deleteOne();
+
+        // ✅ Remove comment ID from Post.comments for accurate count
+        await Post.findByIdAndUpdate(comment.postId, { $pull: { comments: comment._id } });
 
         console.log(`🗑️ Comment ${commentId} deleted by ${req.user.username}`);
         res.status(200).json({ message: 'Comment deleted successfully.' });

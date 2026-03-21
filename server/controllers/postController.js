@@ -1,4 +1,5 @@
 import Post from '../models/Post.js';
+import Comment from '../models/Comment.js';
 import Community from '../models/Community.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { createNotification } from './notificationController.js';
@@ -6,12 +7,33 @@ import { createNotification } from './notificationController.js';
 // @desc Get all posts
 // @route GET /api/posts
 export const getAllPosts = asyncHandler(async (req, res) => {
-  const posts = await Post.find()
+  const query = req.query.user ? { author: req.query.user } : {};
+  const posts = await Post.find(query)
     .sort({ createdAt: -1 })
     .populate({ path: 'community', select: 'name _id createdBy' })
-    .populate({ path: 'author', select: 'username _id' });
+    .populate({ path: 'author', select: 'username _id' })
+    .lean(); // lean() so we can add fields
 
-  res.status(200).json(posts);
+  // Get real comment counts from Comment collection (works for old and new posts)
+  const postIds = posts.map((p) => p._id);
+  const commentCounts = await Comment.aggregate([
+    { $match: { postId: { $in: postIds } } },
+    { $group: { _id: '$postId', count: { $sum: 1 } } },
+  ]);
+
+  // Build a map for O(1) lookup
+  const countMap = {};
+  commentCounts.forEach(({ _id, count }) => {
+    countMap[_id.toString()] = count;
+  });
+
+  // Attach commentCount to each post
+  const postsWithCount = posts.map((p) => ({
+    ...p,
+    commentCount: countMap[p._id.toString()] || 0,
+  }));
+
+  res.status(200).json(postsWithCount);
 });
 
 // @desc Create a post
