@@ -122,21 +122,23 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="ui-theme">
-      <div className="min-h-screen w-screen bg-background font-sans antialiased flex flex-col overflow-x-hidden">
-        <Header />
+      <div className="h-screen w-screen bg-muted/30 dark:bg-muted/5 flex items-center justify-center overflow-hidden">
+        <div className="h-full w-full bg-background border-x border-border/40 shadow-[0_0_50px_-12px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden relative">
+          <Header />
 
-        <main className="flex-1 w-full p-3 md:p-6 lg:p-8">
-          <AppRouter />
-        </main>
+          <main className="flex-1 overflow-hidden w-full relative selection:bg-primary/10">
+            <AppRouter />
+          </main>
 
-        <Toaster
-          closeButton
-          richColors
-          position="bottom-right"
-          toastOptions={{
-            className: "border border-border/50 shadow-xl rounded-2xl",
-          }}
-        />
+          <Toaster
+            closeButton
+            richColors
+            position="bottom-right"
+            toastOptions={{
+              className: "border border-border/50 shadow-xl rounded-2xl",
+            }}
+          />
+        </div>
       </div>
     </ThemeProvider>
   );

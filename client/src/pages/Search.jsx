@@ -92,7 +92,7 @@ const Search = () => {
                   {data.results.communities?.map((community) => (
                     <div
                       key={community._id}
-                      onClick={() => navigate(`/communities/${community._id}`)}
+                      onClick={() => navigate(`/communities/${community.name}`)}
                       className="p-3 hover:bg-muted/10 cursor-pointer flex items-center gap-3 transition-colors group"
                     >
                       <div className="w-8 h-8 rounded-lg bg-primary/5 text-primary/60 flex items-center justify-center shrink-0 border border-primary/10">
@@ -108,7 +108,7 @@ const Search = () => {
                   {data.results.users?.map((user) => (
                     <div
                       key={user._id}
-                      onClick={() => navigate(`/profile/${user._id}`)}
+                      onClick={() => navigate(`/profile/${user.username}`)}
                       className="p-3 hover:bg-muted/10 cursor-pointer flex items-center gap-3 transition-colors group"
                     >
                       <div className="w-8 h-8 rounded-full bg-muted border border-border/20 overflow-hidden shrink-0 flex items-center justify-center p-0.5 group-hover:scale-105 transition-transform">

@@ -13,6 +13,8 @@ const Register = lazy(() => import('./pages/Register'));
 const Profile = lazy(() => import('./pages/Profile'));
 const CommunityProfile = lazy(() => import('./pages/CommunityProfile'));
 
+const PostPage = lazy(() => import("./pages/PostPage"));
+
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-[50vh]">
     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
@@ -34,8 +36,9 @@ const AppRouter = () => {
           <Route path="/communities" element={<Communities />} />
           <Route path="/search" element={<Search />} />
           <Route path="/notifications" element={<Notifications />} />
-          <Route path="/profile/:id" element={<Profile />} />
-          <Route path="/communities/:id" element={<CommunityProfile />} />
+          <Route path="/profile/:idOrUsername" element={<Profile />} />
+          <Route path="/communities/:idOrName" element={<CommunityProfile />} />
+          <Route path="/posts/:idOrSlug" element={<PostPage />} />
         </Route>
       </Routes>
     </Suspense>

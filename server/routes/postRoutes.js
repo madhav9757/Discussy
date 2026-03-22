@@ -8,7 +8,7 @@ router.get('/', getAllPosts);
 router.post('/', protect, createPost); 
 router.put('/:id', protect, updatePost);
 router.delete('/:id', protect, deletePost);
-router.get('/:id', getPostById);
+router.get('/:idOrSlug', getPostById);
 router.patch('/:id/vote', protect, toggleVote);
 
 export default router;

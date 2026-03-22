@@ -83,7 +83,7 @@ const ProfileSkeleton = () => (
 
 /* ══════════════════════════════════════════════════ */
 const Profile = () => {
-  const { id } = useParams();
+  const { idOrUsername } = useParams();
   const navigate = useNavigate();
   const { userInfo } = useSelector((s) => s.auth);
   const [activeTab, setActiveTab] = useState("posts");
@@ -93,20 +93,20 @@ const Profile = () => {
     data: user,
     isLoading: userLoading,
     isError,
-  } = useGetUserByIdQuery(id, { skip: !id });
-  const { data: posts, isLoading: postsLoading } = useGetPostsByUserQuery(id, {
-    skip: !id,
+  } = useGetUserByIdQuery(idOrUsername, { skip: !idOrUsername });
+  const { data: posts, isLoading: postsLoading } = useGetPostsByUserQuery(idOrUsername, {
+    skip: !idOrUsername,
   });
   const { data: userComments, isLoading: commentsLoading } =
-    useGetCommentsByUserQuery(id, {
-      skip: !id || activeTab !== "comments",
+    useGetCommentsByUserQuery(idOrUsername, {
+      skip: !idOrUsername || activeTab !== "comments",
     });
 
   const [followUser, { isLoading: isFollowing }] = useFollowUserMutation();
   const [unfollowUser, { isLoading: isUnfollowing }] =
     useUnfollowUserMutation();
 
-  const isOwnProfile = userInfo?._id === id;
+  const isOwnProfile = userInfo?._id === user?._id || userInfo?.username === idOrUsername;
   const isFollowingUser = user?.followers?.some(
     (f) => (f._id || f) === userInfo?._id,
   );
@@ -119,10 +119,10 @@ const Profile = () => {
     }
     try {
       if (isFollowingUser) {
-        await unfollowUser(id).unwrap();
+        await unfollowUser(user._id).unwrap();
         toast.success(`Unfollowed ${user.username}`);
       } else {
-        await followUser(id).unwrap();
+        await followUser(user._id).unwrap();
         toast.success(`Now following ${user.username}`);
       }
     } catch (err) {
@@ -165,10 +165,12 @@ const Profile = () => {
   ];
 
   return (
-    <TooltipProvider>
-      <div className="max-w-5xl mx-auto space-y-6 pb-16">
-        {/* ── Banner + Avatar row ── */}
-        <div className="relative rounded-2xl overflow-hidden border border-border/50 bg-card shadow-sm">
+    <div className="h-full w-full overflow-hidden flex flex-col">
+      <div className="flex-1 overflow-y-auto custom-scrollbar px-8 md:px-12 py-8 pb-20">
+        <TooltipProvider>
+          <div className="max-w-[1600px] mx-auto space-y-8">
+            {/* ── Banner + Avatar row ── */}
+            <div className="relative rounded-2xl overflow-hidden border border-border/50 bg-card shadow-sm">
           {/* Banner */}
           <div className="h-36 sm:h-44 bg-linear-to-br from-primary/20 via-primary/10 to-muted/40 relative">
             <div
@@ -456,7 +458,7 @@ const Profile = () => {
                 {user.joinedCommunities.map((community) => (
                   <div
                     key={community._id}
-                    onClick={() => navigate(`/communities/${community._id}`)}
+                    onClick={() => navigate(`/communities/${community.name}`)}
                     className="group flex items-center gap-3 p-4 bg-card border border-border/50 rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer"
                   >
                     <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -509,7 +511,7 @@ const Profile = () => {
                     {list.map((u) => (
                       <div
                         key={u._id}
-                        onClick={() => navigate(`/profile/${u._id}`)}
+                        onClick={() => navigate(`/profile/${u.username}`)}
                         className="group flex items-center gap-3 p-4 bg-card border border-border/50 rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer"
                       >
                         <div className="w-10 h-10 rounded-xl bg-muted border border-border/40 overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
@@ -560,7 +562,9 @@ const Profile = () => {
         onClose={() => setIsEditOpen(false)}
         user={user}
       />
-    </TooltipProvider>
+        </TooltipProvider>
+      </div>
+    </div>
   );
 };
 

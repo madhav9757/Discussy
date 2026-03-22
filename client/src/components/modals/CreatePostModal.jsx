@@ -37,7 +37,7 @@ export function CreatePostModal({ children }) {
       await createPost({ 
         title, 
         content, 
-        communityId: communityId || null 
+        community: communityId || null 
       }).unwrap();
       
       toast.success("Post created successfully!");
@@ -116,10 +116,10 @@ export function CreatePostModal({ children }) {
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="rounded-full px-8 font-medium h-10 shadow-sm transition-all"
+              className="rounded-xl px-8 font-bold h-11 shadow-md shadow-primary/20 bg-primary text-primary-foreground hover:opacity-90 transition-all"
             >
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              {isLoading ? "Posting..." : "Post"}
+              {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              {isLoading ? "Posting..." : "Create Post"}
             </Button>
           </div>
         </form>

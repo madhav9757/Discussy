@@ -125,21 +125,25 @@ export const logout = (req, res) => {
 };
 
 export const followUser = asyncHandler(async (req, res) => {
-  const { id: targetUserId } = req.params;
+  const { id } = req.params;
+  const idOrUsername = decodeURIComponent(id);
   const currentUserId = req.user.id;
 
-  if (currentUserId === targetUserId) {
-    res.status(400);
-    throw new Error("You can't follow yourself");
-  }
-
-  const userToFollow = await User.findById(targetUserId);
+  // Find user to follow
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrUsername);
+  const query = isObjectId 
+    ? { _id: idOrUsername } 
+    : { username: { $regex: new RegExp(`^${idOrUsername}$`, 'i') } };
+  
+  const userToFollow = await User.findOne(query);
   const currentUser = await User.findById(currentUserId);
 
   if (!userToFollow || !currentUser) {
     res.status(404);
     throw new Error("User not found");
   }
+  
+  const targetUserId = userToFollow._id.toString();
 
   if (userToFollow.followers.includes(currentUserId)) {
     res.status(400);
@@ -167,16 +171,25 @@ export const followUser = asyncHandler(async (req, res) => {
 
 // Unfollow a user
 export const unfollowUser = asyncHandler(async (req, res) => {
-  const { id: targetUserId } = req.params;
+  const { id } = req.params;
+  const idOrUsername = decodeURIComponent(id);
   const currentUserId = req.user.id;
 
-  const userToUnfollow = await User.findById(targetUserId);
+  // Find user to unfollow
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrUsername);
+  const query = isObjectId 
+    ? { _id: idOrUsername } 
+    : { username: { $regex: new RegExp(`^${idOrUsername}$`, 'i') } };
+  
+  const userToUnfollow = await User.findOne(query);
   const currentUser = await User.findById(currentUserId);
 
   if (!userToUnfollow || !currentUser) {
     res.status(404);
     throw new Error("User not found");
   }
+
+  const targetUserId = userToUnfollow._id.toString();
 
   userToUnfollow.followers = userToUnfollow.followers.filter(
     (uid) => uid.toString() !== currentUserId
@@ -250,13 +263,21 @@ export const updateProfile = asyncHandler(async (req, res) => {
 });
 
 
-// @desc    Get user profile by ID (public view)
-// @route   GET /api/users/:id
+// @desc    Get user profile by username or ID
+// @route   GET /api/users/:idOrUsername
 // @access  Public
 export const getUserById = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const idOrUsername = decodeURIComponent(id);
+  
+  // Regex to check for a valid MongoDB ObjectId (24 hex characters)
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrUsername);
+  
+  const query = isObjectId 
+    ? { _id: idOrUsername } 
+    : { username: { $regex: new RegExp(`^${idOrUsername}$`, 'i') } };
 
-  const user = await User.findById(id)
+  const user = await User.findOne(query)
     .select('-passwordHash')
     .populate('joinedCommunities', 'name _id')
     .populate('followers', 'username _id')
@@ -267,10 +288,12 @@ export const getUserById = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 
-  const createdCommunities = await Community.find({ createdBy: id }).select('name _id');
+  const userId = user._id;
 
-  const posts = await Post.find({ author: id })
-    .select('title _id community createdAt upvotes downvotes')
+  const createdCommunities = await Community.find({ createdBy: userId }).select('name _id');
+
+  const posts = await Post.find({ author: userId })
+    .select('title _id community createdAt upvotes downvotes content')
     .populate('community', 'name _id');
 
   res.status(200).json({
@@ -278,4 +301,4 @@ export const getUserById = asyncHandler(async (req, res) => {
     createdCommunities,
     posts,
   });
-});
+});

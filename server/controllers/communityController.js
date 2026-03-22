@@ -37,8 +37,14 @@ export const createCommunity = asyncHandler(async (req, res) => {
 
 export const getCommunityById = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const idOrName = decodeURIComponent(id);
 
-    const community = await Community.findById(id)
+    // Regex to check for a valid MongoDB ObjectId (24 hex characters)
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrName);
+
+    const query = isObjectId ? { _id: idOrName } : { name: idOrName.toLowerCase() };
+
+    const community = await Community.findOne(query)
         .populate('createdBy', 'username email')
         .populate('members', 'username email');
 
@@ -47,7 +53,7 @@ export const getCommunityById = asyncHandler(async (req, res) => {
         throw new Error('Community not found');
     }
 
-    const posts = await Post.find({ community: id })
+    const posts = await Post.find({ community: community._id })
         .populate({ path: 'community', select: 'name _id createdBy' })
         .populate('author', 'username')
         .sort({ createdAt: -1 });
@@ -58,8 +64,11 @@ export const getCommunityById = asyncHandler(async (req, res) => {
 
 export const joinCommunity = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const idOrName = decodeURIComponent(id);
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrName);
+    const query = isObjectId ? { _id: idOrName } : { name: idOrName.toLowerCase() };
 
-    const community = await Community.findById(id);
+    const community = await Community.findOne(query);
     if (!community) {
         res.status(404);
         throw new Error('Community not found');
@@ -84,8 +93,11 @@ export const joinCommunity = asyncHandler(async (req, res) => {
 
 export const leaveCommunity = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const idOrName = decodeURIComponent(id);
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrName);
+    const query = isObjectId ? { _id: idOrName } : { name: idOrName.toLowerCase() };
 
-    const community = await Community.findById(id);
+    const community = await Community.findOne(query);
     const user = await User.findById(req.user._id);
     if (!community) {
         res.status(404);
@@ -109,8 +121,11 @@ export const leaveCommunity = asyncHandler(async (req, res) => {
 
 export const deleteCommunity = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const idOrName = decodeURIComponent(id);
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrName);
+    const query = isObjectId ? { _id: idOrName } : { name: idOrName.toLowerCase() };
 
-    const community = await Community.findById(id);
+    const community = await Community.findOne(query);
     if (!community) {
         res.status(404);
         throw new Error('Community not found');

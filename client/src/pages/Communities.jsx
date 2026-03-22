@@ -332,7 +332,7 @@ const Communities = () => {
                 <CommunityGridCard
                   key={community._id}
                   community={community}
-                  onClick={() => navigate(`/communities/${community._id}`)}
+                  onClick={() => navigate(`/communities/${community.name}`)}
                 />
               ))}
             </div>
@@ -345,7 +345,7 @@ const Communities = () => {
                 <CommunityListRow
                   key={community._id}
                   community={community}
-                  onClick={() => navigate(`/communities/${community._id}`)}
+                  onClick={() => navigate(`/communities/${community.name}`)}
                 />
               ))}
             </div>
@@ -420,7 +420,7 @@ const Communities = () => {
                 {topCommunities.map((c, i) => (
                   <button
                     key={c._id}
-                    onClick={() => navigate(`/communities/${c._id}`)}
+                    onClick={() => navigate(`/communities/${c.name}`)}
                     className="group w-full flex items-center gap-2.5 px-2 py-2.5 rounded-xl hover:bg-accent transition-all"
                   >
                     <span className="text-[11px] font-black text-muted-foreground/30 w-3 shrink-0">

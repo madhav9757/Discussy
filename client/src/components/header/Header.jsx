@@ -43,15 +43,6 @@ const NAV_ITEMS = [
 ];
 
 /* ─── helpers ────────────────────────────────────────── */
-function useScrolled(threshold = 8) {
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const h = () => setScrolled(window.scrollY > threshold);
-    window.addEventListener("scroll", h, { passive: true });
-    return () => window.removeEventListener("scroll", h);
-  }, [threshold]);
-  return scrolled;
-}
 
 function useActive() {
   const { pathname } = useLocation();
@@ -65,7 +56,6 @@ export default function Header() {
   const navigate = useNavigate();
   const [logoutServer] = useLogoutMutation();
   const { theme, setTheme } = useTheme();
-  const scrolled = useScrolled();
   const isActive = useActive();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -89,13 +79,13 @@ export default function Header() {
       <Link
         to={to}
         className={cn(
-          "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold transition-all duration-150",
+          "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-150",
           active
-            ? "bg-foreground text-background shadow-sm"
-            : "text-muted-foreground hover:text-foreground hover:bg-accent",
+            ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 scale-105"
+            : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
         )}
       >
-        <Icon size={13} strokeWidth={2.4} />
+        <Icon size={14} strokeWidth={2.4} />
         {label}
       </Link>
     );
@@ -122,15 +112,8 @@ export default function Header() {
   };
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300",
-        scrolled
-          ? "border-b border-border/60 bg-background/90 backdrop-blur-xl shadow-sm"
-          : "border-b border-border/30 bg-background/70 backdrop-blur-md",
-      )}
-    >
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4">
+    <header className="shrink-0 border-b border-border/40 bg-background/80 backdrop-blur-xl z-50">
+      <div className="flex h-20 items-center justify-between gap-4 px-6 md:px-8">
         {/* ════════════════ LEFT ════════════════ */}
         <div className="flex items-center gap-4 shrink-0">
           {/* Hamburger — hidden on xl+ */}
@@ -156,14 +139,13 @@ export default function Header() {
                 <Link
                   to="/"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2.5"
+                  className="flex items-center"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-foreground text-background flex items-center justify-center font-black text-[15px] tracking-tight select-none">
-                    D
-                  </div>
-                  <span className="font-black text-[17px] tracking-tight text-foreground">
-                    Discussly
-                  </span>
+                  <img
+                    src="/logo.png"
+                    alt="Discussly"
+                    className="h-10 w-auto object-contain"
+                  />
                 </Link>
               </div>
 
@@ -255,13 +237,12 @@ export default function Header() {
           </Sheet>
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-foreground text-background flex items-center justify-center font-black text-[15px] tracking-tight select-none shadow-sm group-hover:scale-105 group-hover:-rotate-3 transition-transform duration-200">
-              D
-            </div>
-            <span className="hidden lg:block font-black text-[17px] tracking-tight text-foreground">
-              Discussly
-            </span>
+          <Link to="/" className="flex items-center group">
+            <img
+              src="/logo.png"
+              alt="Discussly"
+              className="h-16 md:h-18 w-auto object-contain transition-all duration-300 group-hover:scale-[1.04]"
+            />
           </Link>
 
           {/* Desktop nav — xl+ only */}
@@ -303,8 +284,8 @@ export default function Header() {
                 onClick={() => navigate("/notifications")}
                 className="relative h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
               >
-                <Bell size={16} strokeWidth={2} />
-                <span className="absolute top-[9px] right-[9px] w-[6px] h-[6px] rounded-full bg-orange-500 border-[1.5px] border-background animate-pulse" />
+                <Bell size={18} strokeWidth={2.5} />
+                <span className="absolute top-[8px] right-[8px] w-2 h-2 rounded-full bg-secondary border-2 border-background animate-pulse" />
               </Button>
 
               {/* Create + (desktop) */}
@@ -313,9 +294,9 @@ export default function Header() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="hidden sm:flex h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+                    className="hidden sm:flex h-9 w-9 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
                   >
-                    <Plus size={17} strokeWidth={2.5} />
+                    <Plus size={19} strokeWidth={2.5} />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -423,7 +404,7 @@ export default function Header() {
 
                   <DropdownMenuItem
                     className="rounded-lg px-3 py-2 text-[12.5px] font-semibold cursor-pointer gap-2.5 focus:bg-accent"
-                    onClick={() => navigate(`/profile/${userInfo._id}`)}
+                    onClick={() => navigate(`/profile/${userInfo.username}`)}
                   >
                     <Users
                       size={13}

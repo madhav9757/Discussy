@@ -9,10 +9,10 @@ const extendedApi = discusslyApi.injectEndpoints({
       providesTags: ['Community'],
     }),
 
-    // 🔍 Get a specific community
+    // 🔍 Get a specific community by ID or Name
     getCommunityById: builder.query({
-      query: (id) => `${COMMUNITY_API_URL}/${id}`,
-      providesTags: (result, error, id) => [{ type: 'Community', id }],
+      query: (idOrName) => `${COMMUNITY_API_URL}/${idOrName}`,
+      providesTags: (result, error, idOrName) => [{ type: 'Community', id: idOrName }],
     }),
 
     // ✅ Create new community - UPDATED to include description and category

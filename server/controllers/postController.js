@@ -1,8 +1,18 @@
-import Post from '../models/Post.js';
-import Comment from '../models/Comment.js';
-import Community from '../models/Community.js';
-import asyncHandler from '../utils/asyncHandler.js';
-import { createNotification } from './notificationController.js';
+import Post from "../models/Post.js";
+import Comment from "../models/Comment.js";
+import Community from "../models/Community.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { createNotification } from "./notificationController.js";
+
+// Utility to generate a clean URL slug from a title
+const generateSlug = (title) => {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "") // Remove special chars
+    .replace(/[\s_-]+/g, "-") // Replace spaces/underscores with -
+    .replace(/^-+|-+$/g, ""); // Remove leading/trailing dashes
+};
 
 // @desc Get all posts
 // @route GET /api/posts
@@ -10,24 +20,21 @@ export const getAllPosts = asyncHandler(async (req, res) => {
   const query = req.query.user ? { author: req.query.user } : {};
   const posts = await Post.find(query)
     .sort({ createdAt: -1 })
-    .populate({ path: 'community', select: 'name _id createdBy' })
-    .populate({ path: 'author', select: 'username _id' })
-    .lean(); // lean() so we can add fields
+    .populate({ path: "community", select: "name _id createdBy" })
+    .populate({ path: "author", select: "username _id" })
+    .lean();
 
-  // Get real comment counts from Comment collection (works for old and new posts)
   const postIds = posts.map((p) => p._id);
   const commentCounts = await Comment.aggregate([
     { $match: { postId: { $in: postIds } } },
-    { $group: { _id: '$postId', count: { $sum: 1 } } },
+    { $group: { _id: "$postId", count: { $sum: 1 } } },
   ]);
 
-  // Build a map for O(1) lookup
   const countMap = {};
   commentCounts.forEach(({ _id, count }) => {
     countMap[_id.toString()] = count;
   });
 
-  // Attach commentCount to each post
   const postsWithCount = posts.map((p) => ({
     ...p,
     commentCount: countMap[p._id.toString()] || 0,
@@ -43,54 +50,79 @@ export const createPost = asyncHandler(async (req, res) => {
 
   if (!title || !community) {
     res.status(400);
-    throw new Error('Title and community are required');
+    throw new Error("Title and community are required");
+  }
+
+  // Initial slug from title
+  let baseSlug = generateSlug(title);
+  if (!baseSlug) baseSlug = "post";
+  let slug = baseSlug;
+  let counter = 1;
+
+  // Ensure slug uniqueness
+  while (await Post.findOne({ slug })) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
   }
 
   const post = await Post.create({
     title,
     content,
     community,
+    slug,
     author: req.user._id,
   });
 
   const populatedPost = await Post.findById(post._id)
-    .populate({ path: 'community', select: 'name _id createdBy' })
-    .populate({ path: 'author', select: 'username _id' });
+    .populate({ path: "community", select: "name _id createdBy" })
+    .populate({ path: "author", select: "username _id" });
 
-  // Get community details for notification
-  const communityDetails = await Community.findById(community).populate('members', 'username _id');
-  
-  // Notify community members (except the author)
+  const communityDetails = await Community.findById(community).populate(
+    "members",
+    "username _id",
+  );
+
   if (communityDetails && communityDetails.members) {
     const notificationPromises = communityDetails.members
-      .filter(member => member._id.toString() !== req.user._id.toString())
-      .map(member => 
+      .filter((member) => member._id.toString() !== req.user._id.toString())
+      .map((member) =>
         createNotification({
           userId: member._id,
-          type: 'post',
+          type: "post",
           message: `${req.user.username} posted in r/${communityDetails.name}: "${title}"`,
-          link: `/posts/${post._id}`,
-          relatedUser: req.user._id
-        })
+          link: `/posts/${slug}`, // Link to SLUG
+          relatedUser: req.user._id,
+        }),
       );
-    
+
     await Promise.all(notificationPromises);
-    console.log(`📝 Post created by ${req.user.username} in r/${communityDetails.name}, notified ${notificationPromises.length} members`);
   }
 
   res.status(201).json(populatedPost);
 });
 
+// @desc Get a single post by ID or Slug
+// @route GET /api/posts/:idOrSlug
 export const getPostById = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { idOrSlug } = req.params;
 
-  const post = await Post.findById(id)
-    .populate('author', 'username email') // populate author fields
-    .populate('community', 'name');       // populate community name
+  let post;
+  // Try ID first if it looks like one, otherwise try Slug
+  if (idOrSlug.match(/^[0-9a-fA-F]{24}$/)) {
+    post = await Post.findById(idOrSlug)
+      .populate("author", "username email")
+      .populate("community", "name");
+  }
+
+  if (!post) {
+    post = await Post.findOne({ slug: idOrSlug })
+      .populate("author", "username email")
+      .populate("community", "name");
+  }
 
   if (!post) {
     res.status(404);
-    throw new Error('Post not found');
+    throw new Error("Post not found");
   }
 
   res.status(200).json(post);
@@ -189,10 +221,10 @@ export const toggleVote = asyncHandler(async (req, res) => {
     if (post.author._id.toString() !== userId.toString()) {
       await createNotification({
         userId: post.author._id,
-        type: 'like',
+        type: "like",
         message: `${req.user.username} liked your post: "${post.title}"`,
-        link: `/posts/${id}`,
-        relatedUser: userId
+        link: `/posts/${post.slug || post._id}`,
+        relatedUser: userId,
       });
     }
   } else if (type === 'downvote' && !hasDownvoted) {

@@ -37,12 +37,17 @@ const postSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  slug: {
+    type: String,
+    unique: true,
+  },
 }, {
   timestamps: true,
 });
 
 // Text indexes for full-text search
 postSchema.index({ title: 'text', content: 'text' });
+postSchema.index({ slug: 1 }); // Index for slug-based lookups
 
 // Compound indexes for common queries
 postSchema.index({ createdAt: -1 });

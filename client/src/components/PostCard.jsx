@@ -45,18 +45,24 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
   const [localUpvotes, setLocalUpvotes] = useState(comment.upvotes || []);
   const [localDownvotes, setLocalDownvotes] = useState(comment.downvotes || []);
 
-  const [createComment, { isLoading: submittingReply }] = useCreateCommentMutation();
-  const [deleteComment, { isLoading: deletingComment }] = useDeleteCommentMutation();
+  const [createComment, { isLoading: submittingReply }] =
+    useCreateCommentMutation();
+  const [deleteComment, { isLoading: deletingComment }] =
+    useDeleteCommentMutation();
   const [toggleCommentVote] = useToggleCommentVoteMutation();
 
-  const isAuthor = userInfo?._id === (comment.createdBy?._id || comment.createdBy);
+  const isAuthor =
+    userInfo?._id === (comment.createdBy?._id || comment.createdBy);
   const hasUpvoted = localUpvotes.includes(userInfo?._id);
   const hasDownvoted = localDownvotes.includes(userInfo?._id);
   const voteScore = localUpvotes.length - localDownvotes.length;
   const hasReplies = comment.replies?.length > 0;
 
   const handleVote = async (type) => {
-    if (!userInfo) { toast.error("Please login to vote"); return; }
+    if (!userInfo) {
+      toast.error("Please login to vote");
+      return;
+    }
 
     // Optimistic update — mutate local state immediately
     const uid = userInfo._id;
@@ -77,7 +83,11 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
     }
 
     try {
-      await toggleCommentVote({ commentId: comment._id, postId, type }).unwrap();
+      await toggleCommentVote({
+        commentId: comment._id,
+        postId,
+        type,
+      }).unwrap();
     } catch {
       // Revert on failure
       setLocalUpvotes(comment.upvotes || []);
@@ -90,7 +100,11 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
     e.preventDefault();
     if (!replyText.trim()) return;
     try {
-      await createComment({ postId, content: replyText, parentId: comment._id }).unwrap();
+      await createComment({
+        postId,
+        content: replyText,
+        parentId: comment._id,
+      }).unwrap();
       setReplyText("");
       setReplyOpen(false);
       toast.success("Reply posted!");
@@ -121,17 +135,13 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
 
       <div className="flex gap-2.5 group py-1.5">
         <div className="shrink-0 w-6 h-6 rounded-full bg-muted/30 border border-border/20 overflow-hidden mt-0.5 shadow-xs flex items-center justify-center p-0.5">
-          <img
-            src={avatarUrl}
-            alt=""
-            className="w-full h-full"
-          />
+          <img src={avatarUrl} alt="" className="w-full h-full" />
         </div>
 
         <div className="flex-1 min-w-0 space-y-0.5">
           <div className="flex items-center gap-2 flex-wrap">
             <Link
-              to={`/profile/${comment.createdBy?._id}`}
+              to={`/profile/${comment.createdBy?.username}`}
               className="text-[10px] font-bold text-foreground/70 hover:text-primary transition-colors tracking-tight"
             >
               u/{comment.createdBy?.username}
@@ -161,15 +171,18 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
                     : "text-muted-foreground/30 hover:text-orange-500"
                 }`}
               >
-                <ArrowBigUp size={14} fill={hasUpvoted ? "currentColor" : "none"} />
+                <ArrowBigUp
+                  size={14}
+                  fill={hasUpvoted ? "currentColor" : "none"}
+                />
               </button>
               <span
                 className={`text-[10px] font-bold min-w-[12px] text-center ${
                   hasUpvoted
                     ? "text-orange-500"
                     : hasDownvoted
-                    ? "text-indigo-500"
-                    : "text-foreground/50"
+                      ? "text-indigo-500"
+                      : "text-foreground/50"
                 }`}
               >
                 {voteScore}
@@ -183,7 +196,10 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
                     : "text-muted-foreground/30 hover:text-indigo-500"
                 }`}
               >
-                <ArrowBigDown size={14} fill={hasDownvoted ? "currentColor" : "none"} />
+                <ArrowBigDown
+                  size={14}
+                  fill={hasDownvoted ? "currentColor" : "none"}
+                />
               </button>
             </div>
 
@@ -376,21 +392,25 @@ const PostCard = ({ post }) => {
           <button
             onClick={() => handleVote("upvote")}
             title="Upvote post"
-            className={`flex items-center justify-center h-7 w-7 rounded-lg transition-colors hover:bg-orange-500/5 ${
+            className={`flex items-center justify-center h-7 w-7 rounded-lg transition-colors hover:bg-primary/5 ${
               hasUpvoted
-                ? "text-orange-500"
-                : "text-muted-foreground/30 hover:text-orange-500"
+                ? "text-primary"
+                : "text-muted-foreground/30 hover:text-primary"
             }`}
           >
-            <ArrowBigUp size={20} fill={hasUpvoted ? "currentColor" : "none"} strokeWidth={2.5} />
+            <ArrowBigUp
+              size={20}
+              fill={hasUpvoted ? "currentColor" : "none"}
+              strokeWidth={2.5}
+            />
           </button>
           <span
-            className={`text-[12px] font-bold leading-none py-0.5 ${
+            className={`text-[12px] font-black leading-none py-0.5 ${
               hasUpvoted
-                ? "text-orange-500"
+                ? "text-primary"
                 : hasDownvoted
-                ? "text-indigo-500"
-                : "text-foreground/60"
+                  ? "text-secondary"
+                  : "text-foreground/60"
             }`}
           >
             {voteScore}
@@ -398,10 +418,10 @@ const PostCard = ({ post }) => {
           <button
             onClick={() => handleVote("downvote")}
             title="Downvote post"
-            className={`flex items-center justify-center h-7 w-7 rounded-lg transition-colors hover:bg-indigo-500/5 ${
+            className={`flex items-center justify-center h-7 w-7 rounded-lg transition-colors hover:bg-secondary/5 ${
               hasDownvoted
-                ? "text-indigo-500"
-                : "text-muted-foreground/30 hover:text-indigo-500"
+                ? "text-secondary"
+                : "text-muted-foreground/30 hover:text-secondary"
             }`}
           >
             <ArrowBigDown
@@ -416,26 +436,28 @@ const PostCard = ({ post }) => {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <Link to={`/profile/${post.author?._id}`} className="shrink-0">
+              <Link
+                to={`/profile/${post.author?.username}`}
+                className="shrink-0"
+              >
                 <div className="w-7 h-7 rounded-full bg-muted border border-border/30 overflow-hidden shadow-xs hover:scale-105 transition-transform p-0.5">
-                  <img
-                    src={avatarUrl}
-                    alt=""
-                    className="w-full h-full"
-                  />
+                  <img src={avatarUrl} alt="" className="w-full h-full" />
                 </div>
               </Link>
               <div className="flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground font-medium uppercase tracking-tight">
                 {post.community && (
                   <>
-                    <span className="text-foreground/80 font-bold hover:text-primary cursor-pointer transition-colors">
+                    <Link
+                      to={`/communities/${post.community.name}`}
+                      className="text-foreground/80 font-bold hover:text-primary cursor-pointer transition-colors"
+                    >
                       c/{post.community.name}
-                    </span>
+                    </Link>
                     <span className="text-muted-foreground/20">•</span>
                   </>
                 )}
                 <Link
-                  to={`/profile/${post.author?._id}`}
+                  to={`/profile/${post.author?.username}`}
                   className="hover:text-primary transition-colors font-bold opacity-70"
                 >
                   u/{post.author?.username || "anon"}
@@ -444,7 +466,7 @@ const PostCard = ({ post }) => {
                 <span className="opacity-60">
                   {new Date(post.createdAt || Date.now()).toLocaleDateString(
                     undefined,
-                    { month: "short", day: "numeric" }
+                    { month: "short", day: "numeric" },
                   )}
                 </span>
               </div>
