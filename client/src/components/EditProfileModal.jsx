@@ -60,33 +60,33 @@ const EditProfileModal = ({ isOpen, onClose, user }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[480px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
-        <div className="bg-linear-to-br from-primary/10 via-background to-background p-6 pb-4">
+      <DialogContent className="sm:max-w-[440px] rounded-2xl p-0 overflow-hidden border-border/30 shadow-2xl bg-card">
+        <div className="bg-muted/10 p-5 pb-3">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold tracking-tight flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                <User size={20} />
+            <DialogTitle className="text-lg font-bold tracking-tight flex items-center gap-2 text-foreground/90">
+              <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary/60 border border-primary/10">
+                <User size={16} strokeWidth={2.5} />
               </div>
-              Edit Profile
+              Identity Update
             </DialogTitle>
-            <p className="text-sm text-muted-foreground mt-1.5 ml-12">
-              Update your presence on Discussly
+            <p className="text-[11px] text-muted-foreground/50 mt-1 font-bold uppercase tracking-widest">
+              Modify your digital presence
             </p>
           </DialogHeader>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 bg-background">
-          <div className="space-y-4">
-            <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="px-5 py-4 space-y-5">
+          <div className="space-y-3.5">
+            <div className="space-y-1.5">
               <Label
                 htmlFor="username"
-                className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1"
+                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1"
               >
                 Username
               </Label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground/50 group-focus-within:text-primary transition-colors">
-                  <User size={18} />
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground/20 group-focus-within:text-primary/50 transition-colors">
+                  <User size={14} />
                 </div>
                 <Input
                   id="username"
@@ -94,22 +94,22 @@ const EditProfileModal = ({ isOpen, onClose, user }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, username: e.target.value })
                   }
-                  placeholder="Your unique handle"
-                  className="pl-10 h-12 rounded-2xl border-border/60 bg-muted/30 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-all"
+                  placeholder="The handle you go by"
+                  className="pl-9 h-10 rounded-xl border-border/30 bg-muted/20 focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40 transition-all font-medium text-sm"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label
                 htmlFor="email"
-                className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1"
+                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1"
               >
                 Email Address
               </Label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground/50 group-focus-within:text-primary transition-colors">
-                  <Mail size={18} />
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground/20 group-focus-within:text-primary/50 transition-colors">
+                  <Mail size={14} />
                 </div>
                 <Input
                   id="email"
@@ -119,21 +119,21 @@ const EditProfileModal = ({ isOpen, onClose, user }) => {
                     setFormData({ ...formData, email: e.target.value })
                   }
                   placeholder="your@email.com"
-                  className="pl-10 h-12 rounded-2xl border-border/60 bg-muted/30 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-all"
+                  className="pl-9 h-10 rounded-xl border-border/30 bg-muted/20 focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40 transition-all font-medium text-sm"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label
                 htmlFor="bio"
-                className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1"
+                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1"
               >
-                Bio
+                Biography
               </Label>
               <div className="relative group">
-                <div className="absolute top-3 left-3 pointer-events-none text-muted-foreground/50 group-focus-within:text-primary transition-colors">
-                  <FileText size={18} />
+                <div className="absolute top-2.5 left-3 pointer-events-none text-muted-foreground/20 group-focus-within:text-primary/50 transition-colors">
+                  <FileText size={14} />
                 </div>
                 <Textarea
                   id="bio"
@@ -141,71 +141,71 @@ const EditProfileModal = ({ isOpen, onClose, user }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, bio: e.target.value })
                   }
-                  placeholder="Tell the world about yourself..."
-                  className="pl-10 min-h-[120px] rounded-2xl border-border/60 bg-muted/30 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-all resize-none py-3"
+                  placeholder="What's your story?"
+                  className="pl-9 min-h-[90px] rounded-xl border-border/30 bg-muted/20 focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40 transition-all resize-none py-2.5 font-medium text-sm"
                 />
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-1">
               <button
                 type="button"
                 onClick={() =>
                   setFormData({ ...formData, isPrivate: !formData.isPrivate })
                 }
-                className={`w-full p-4 rounded-2xl border transition-all flex items-center gap-4 text-left ${formData.isPrivate ? "bg-primary/5 border-primary/30" : "bg-muted/20 border-border/40 hover:border-border/60"}`}
+                className={`w-full p-3 rounded-xl border transition-all flex items-center gap-3 text-left ${formData.isPrivate ? "bg-primary/5 border-primary/20" : "bg-muted/10 border-border/20 hover:border-border/40"}`}
               >
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${formData.isPrivate ? "bg-primary text-primary-foreground" : "bg-muted-foreground/10 text-muted-foreground"}`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${formData.isPrivate ? "bg-primary text-primary-foreground" : "bg-muted-foreground/10 text-muted-foreground/40"}`}
                 >
                   {formData.isPrivate ? (
-                    <ShieldCheck size={20} />
+                    <ShieldCheck size={16} />
                   ) : (
-                    <ShieldAlert size={20} />
+                    <ShieldAlert size={16} />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-foreground/90 text-[15px]">
-                    {formData.isPrivate ? "Private Account" : "Public Account"}
+                  <p className="font-bold text-foreground/80 text-[13px] leading-tight">
+                    {formData.isPrivate ? "Stealth Mode" : "Public Discovery"}
                   </p>
-                  <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+                  <p className="text-[10px] text-muted-foreground/40 font-bold uppercase tracking-tight mt-0.5">
                     {formData.isPrivate
-                      ? "Only approved followers can see your profile."
-                      : "Anyone on Discussly can see your posts and activity."}
+                      ? "Only approved tribe members"
+                      : "Open to the entire collective"}
                   </p>
                 </div>
                 <div
-                  className={`w-10 h-5 rounded-full relative transition-colors ${formData.isPrivate ? "bg-primary" : "bg-muted-foreground/30"}`}
+                  className={`w-8 h-4 rounded-full relative transition-colors overflow-hidden ${formData.isPrivate ? "bg-primary" : "bg-muted-foreground/20"}`}
                 >
                   <div
-                    className={`absolute top-1 w-3 h-3 rounded-full bg-background transition-all ${formData.isPrivate ? "right-1" : "left-1"}`}
+                    className={`absolute top-0.5 w-3 h-3 rounded-full bg-background transition-all shadow-xs ${formData.isPrivate ? "right-0.5" : "left-0.5"}`}
                   />
                 </div>
               </button>
             </div>
           </div>
 
-          <DialogFooter className="pt-4 flex items-center gap-3">
+          <DialogFooter className="pt-2 flex flex-row items-center gap-2">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               onClick={onClose}
-              className="flex-1 h-12 rounded-2xl font-bold hover:bg-muted"
+              className="flex-1 h-10 rounded-xl font-bold text-xs uppercase tracking-widest border-border/30"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
-              className="flex-1 h-12 rounded-2xl font-bold transition-all shadow-md active:scale-95"
+              className="flex-1 h-10 rounded-xl font-bold text-xs uppercase tracking-widest shadow-xs transition-transform active:scale-95"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                  Syncing...
                 </>
               ) : (
-                "Save Changes"
+                "Finalize"
               )}
             </Button>
           </DialogFooter>

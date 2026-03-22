@@ -125,7 +125,7 @@ function App() {
       <div className="min-h-screen w-screen bg-background font-sans antialiased flex flex-col overflow-x-hidden">
         <Header />
 
-        <main className="flex-1 w-full p-4 md:p-8 lg:p-10">
+        <main className="flex-1 w-full p-3 md:p-6 lg:p-8">
           <AppRouter />
         </main>
 

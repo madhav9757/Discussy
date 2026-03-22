@@ -9,28 +9,56 @@ import Comment from './models/Comment.js';
 
 dotenv.config();
 
-const users = [
-  { username: 'admin_sys', email: 'sys@discuss.ly', password: 'password', bio: 'System Administrator Node' },
-  { username: 'cyber_punk', email: 'cpunk@discuss.ly', password: 'password', bio: 'Rogue AP Tracker / Code Optimizer' },
-  { username: 'net_runner', email: 'net@discuss.ly', password: 'password', bio: 'Scraping the deep data flows.' },
+const ADJECTIVES = ['Sleek', 'Quantum', 'Radical', 'Cyber', 'Salty', 'Hidden', 'Neon', 'Digital', 'Silent', 'Binary'];
+const NOUNS = ['Node', 'Void', 'Stream', 'Protocol', 'Surfer', 'Glitch', 'Nexus', 'Engine', 'Pulse', 'Vector'];
+
+const CATEGORIES = ['technology', 'software', 'gaming', 'lifestyle', 'fitness', 'finance', 'music', 'art', 'science', 'education'];
+
+const POST_TOPICS = [
+  'How to optimize React performance in 2026',
+  'The rise of independent AI-driven communities',
+  'Is glassmorphism making a comeback for real?',
+  'Why Rust is overtaking C++ in systems programming',
+  'Best mechanical keyboard switches for coding',
+  'Deep dive into zero-knowledge proofs',
+  'Exploring the latest advancements in SpaceX Starship',
+  'Why clean code is sometimes overrated',
+  'The future of decentralized social networks',
+  'Understanding the new CSS grid level 3 features',
+  'Coffee vs Tea: The ultimate coder fuel',
+  'How to maintain a work-life balance as a solo dev',
+  'Top 5 VS Code extensions you didnt know you needed',
+  'Building a custom OS from scratch: Part 1',
+  'Dark mode vs Light mode: The scientific consensus',
+  'Securing your home lab from port scanners',
+  'My journey into open-source contribution',
+  'The hidden costs of serverless architecture',
+  'Functional programming: Why it changed my life',
+  'Designing for accessibility in modern web apps'
 ];
 
-const communities = [
-  { name: 'general', description: 'Main broadcast channel for system operators.', category: 'technology' },
-  { name: 'development', description: 'Code architecture, refactoring, and logic matrices.', category: 'software' },
-  { name: 'hardware', description: 'Silicon node telemetry and overclock vectors.', category: 'hardware' },
-];
-
-const posts = [
-  { title: 'SYS_UPDATE_v1.0.4', content: 'The node has synchronized successfully. All pipelines are green.' },
-  { title: 'Optimizing Matrix Inversions', content: 'Has anyone discovered a better approach to O(n) rendering for vast 3D arrays? Im finding severe performance bottlenecks when traversing deeper trees.' },
-  { title: 'Silicon Temperature Variance', content: 'My primary chip is running at 94c during full compilation loads. Is this within the safe parameter bounds?' },
-  { title: 'Rogue Data Packets Detected', content: 'Watching my port monitors and noticing unusual traffic from unregistered APs. Shielding is up but stay alert.' },
+const COMMENT_PHRASES = [
+  "This is exactly what I was looking for!",
+  "Great point, but have you considered...",
+  "I completely disagree. In my experience...",
+  "Thanks for sharing, really helpful.",
+  "LOL context is everything though.",
+  "Can someone explain this in simpler terms?",
+  "Bookmarked. This is gold.",
+  "I tried this and it worked perfectly.",
+  "Wait, does this work on mobile too?",
+  "Interesting perspective, keep it up!",
+  "Big if true.",
+  "I had the same issue last week, fixed it by...",
+  "Does anyone have a link to the original source?",
+  "Underrated comment right here.",
+  "This escalated quickly."
 ];
 
 async function seedDB() {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/discussly';
+    await mongoose.connect(mongoUri);
     console.log('✅ MongoDB connected');
 
     // Clear DB
@@ -40,66 +68,121 @@ async function seedDB() {
     await Notification.deleteMany({});
     await Comment.deleteMany({});
     
-    console.log('🧹 Existing data purged');
+    console.log('🧹 Database purged. Regenerating nodes...');
 
-    // Create Users
+    // 1. Create 10 Users
     const createdUsers = [];
-    for (const u of users) {
-      const passwordHash = await bcrypt.hash(u.password, 10);
+    const passwordHash = await bcrypt.hash('password', 10);
+    
+    for (let i = 1; i <= 10; i++) {
+      const username = ADJECTIVES[i-1].toLowerCase() + '_' + NOUNS[Math.floor(Math.random()*NOUNS.length)].toLowerCase() + i;
       const user = await User.create({
-        username: u.username,
-        email: u.email,
+        username,
+        email: `${username}@discuss.ly`,
         passwordHash,
-        bio: u.bio,
+        bio: `Professional ${NOUNS[Math.floor(Math.random()*NOUNS.length)]} and enthusiast of all things ${CATEGORIES[Math.floor(Math.random()*CATEGORIES.length)]}.`,
       });
       createdUsers.push(user);
     }
-    console.log('👥 Users seeded');
+    console.log(`👥 ${createdUsers.length} Users seeded`);
 
-    // Create Communities
-    const adminId = createdUsers[0]._id;
+    // 2. Create 10 Communities
     const createdCommunities = [];
-    for (const c of communities) {
+    for (let i = 0; i < 10; i++) {
+      const category = CATEGORIES[i];
+      const name = category + '_hacks';
       const community = await Community.create({
-        ...c,
-        createdBy: adminId,
-        members: createdUsers.map(u => u._id),
+        name,
+        description: `Everything you need to know about ${category} and more. Joined by experts.`,
+        category,
+        createdBy: createdUsers[i % 10]._id,
+        members: createdUsers.slice(0, 5 + Math.floor(Math.random()*5)).map(u => u._id),
       });
       createdCommunities.push(community);
       
-      // Update users joinedCommunities
-      for (const u of createdUsers) {
-        u.joinedCommunities.push(community._id);
-        await u.save();
+      // Update members
+      for (const memberId of community.members) {
+        await User.findByIdAndUpdate(memberId, { $addToSet: { joinedCommunities: community._id } });
       }
     }
-    console.log('🌐 Subnets (Communities) seeded');
+    console.log(`🌐 ${createdCommunities.length} Communities (Hubs) seeded`);
 
-    // Create Posts
-    for (let i = 0; i < posts.length; i++) {
-      const author = createdUsers[i % createdUsers.length];
-      const community = createdCommunities[i % createdCommunities.length];
-      
-      await Post.create({
-        title: posts[i].title,
-        content: posts[i].content,
-        author: author._id,
-        community: community._id,
-        upvotes: [adminId], // initial upvote
-      });
+    // 3. Create 20 Posts
+    const createdPosts = [];
+    for (let i = 0; i < 20; i++) {
+        const author = createdUsers[Math.floor(Math.random() * createdUsers.length)];
+        const community = createdCommunities[Math.floor(Math.random() * createdCommunities.length)];
+        
+        // Random upvotes (2-8 per post)
+        const upvoteUsers = createdUsers.slice(0, 2 + Math.floor(Math.random() * 7)).map(u => u._id);
+        
+        const post = await Post.create({
+          title: POST_TOPICS[i],
+          content: `This is a detailed discussion about ${POST_TOPICS[i]}. I've been researching this for a while and found some interesting points. Let's discuss!`,
+          author: author._id,
+          community: community._id,
+          upvotes: upvoteUsers,
+        });
+        createdPosts.push(post);
     }
-    console.log('📝 POST logs (Posts) seeded');
+    console.log(`📝 ${createdPosts.length} Posts seeded`);
 
-    // Add a Notification for the first user
+    // 4. Create 100+ Comments (Nested)
+    let totalComments = 0;
+    for (const post of createdPosts) {
+      const numRootComments = 3 + Math.floor(Math.random() * 4); // 3-6 root comments
+      
+      for (let j = 0; j < numRootComments; j++) {
+        const rootUser = createdUsers[Math.floor(Math.random() * createdUsers.length)];
+        const rootComment = await Comment.create({
+          postId: post._id,
+          content: COMMENT_PHRASES[Math.floor(Math.random() * COMMENT_PHRASES.length)],
+          createdBy: rootUser._id,
+          upvotes: createdUsers.slice(0, Math.floor(Math.random() * 5)).map(u => u._id)
+        });
+        totalComments++;
+
+        // Add 1-2 replies to some root comments
+        if (Math.random() > 0.4) {
+          const numReplies = 1 + Math.floor(Math.random() * 2);
+          for (let k = 0; k < numReplies; k++) {
+            const replyUser = createdUsers[Math.floor(Math.random() * createdUsers.length)];
+            const reply = await Comment.create({
+              postId: post._id,
+              parentId: rootComment._id,
+              content: `Replying to root: ${COMMENT_PHRASES[Math.floor(Math.random() * COMMENT_PHRASES.length)]}`,
+              createdBy: replyUser._id,
+              upvotes: createdUsers.slice(0, Math.floor(Math.random() * 3)).map(u => u._id)
+            });
+            totalComments++;
+            
+            // Add a 3rd level reply to some level 2 replies
+            if (Math.random() > 0.7) {
+              const deepReplyUser = createdUsers[Math.floor(Math.random() * createdUsers.length)];
+              await Comment.create({
+                postId: post._id,
+                parentId: reply._id,
+                content: `Deep dive: ${COMMENT_PHRASES[Math.floor(Math.random() * COMMENT_PHRASES.length)]}`,
+                createdBy: deepReplyUser._id
+              });
+              totalComments++;
+            }
+          }
+        }
+      }
+    }
+    console.log(`💬 ~${totalComments} Comments (including nested) seeded`);
+
+    // 5. System Notification
     await Notification.create({
-      user: adminId,
+      user: createdUsers[0]._id,
       type: 'system',
-      message: 'System initialization complete. Database seeded with dummy nodes.',
+      message: 'Global synchronization complete. Data matrices populated.',
       link: '/explore'
     });
 
     console.log('SUCCESS: Seed process terminating gracefully.');
-    process.exit();
+    process.exit(0);
   } catch (error) {
     console.error('❌ SEED_ERR:', error);
     process.exit(1);

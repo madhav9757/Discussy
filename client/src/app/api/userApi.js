@@ -54,6 +54,32 @@ const extendedApi = discusslyApi.injectEndpoints({
                 { type: 'User', id }
             ],
         }),
+
+        // 🔑 Login
+        login: builder.mutation({
+            query: (credentials) => ({
+                url: `${USER_API_URL}/login`,
+                method: 'POST',
+                body: credentials,
+            }),
+        }),
+
+        // 📝 Register
+        register: builder.mutation({
+            query: (userData) => ({
+                url: `${USER_API_URL}/register`,
+                method: 'POST',
+                body: userData,
+            }),
+        }),
+
+        // 🚪 Logout
+        logout: builder.mutation({
+            query: () => ({
+                url: `${USER_API_URL}/logout`,
+                method: 'POST',
+            }),
+        }),
     }),
     overrideExisting: false,
 });
@@ -63,5 +89,8 @@ export const {
     useFollowUserMutation,
     useUnfollowUserMutation,
     useUpdateProfileMutation,
-    useGetUserByIdQuery
+    useGetUserByIdQuery,
+    useLoginMutation,
+    useRegisterMutation,
+    useLogoutMutation,
 } = extendedApi;

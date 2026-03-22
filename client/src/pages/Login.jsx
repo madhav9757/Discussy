@@ -1,96 +1,197 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
-import { setCredentials } from '../features/auth/authSlice';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { API_BASE_URL } from '../app/constant';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate, Link } from "react-router-dom";
+import { setCredentials } from "../features/auth/authSlice";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { useLoginMutation } from "../app/api/userApi";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import {
+  Loader2,
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  ArrowRight,
+  Sparkles,
+} from "lucide-react";
 
 const Login = () => {
-  const [usernameOrEmail, setUsernameOrEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [login, { isLoading }] = useLoginMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/users/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usernameOrEmail, password }),
-      });
-      
-      const data = await res.json();
-      
-      if (res.ok) {
-        dispatch(setCredentials({ user: data.user || data, token: data.token }));
-        toast.success('AUTH_SUCCESS', { className: "font-mono text-xs rounded-none border-border" });
-        navigate('/');
-      } else {
-        toast.error(`ERR: ${data.message || 'AUTH_FAIL'}`, { className: "font-mono text-xs border-red-500 rounded-none bg-red-500/10 text-red-500" });
-      }
+      const data = await login({ usernameOrEmail, password }).unwrap();
+      dispatch(setCredentials({ user: data.user || data, token: data.token }));
+      toast.success("Welcome back!");
+      navigate("/");
     } catch (err) {
-      toast.error('ERR: NETWORK_TIMEOUT', { className: "font-mono text-xs rounded-none" });
-    } finally {
-      setIsLoading(false);
+      toast.error(
+        err.data?.message || "Invalid credentials. Please try again.",
+      );
     }
   };
 
   return (
-    <div className="min-h-[75vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md border border-border/60 bg-card rounded-3xl shadow-sm overflow-hidden p-8">
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Welcome Back</h1>
-          <p className="text-sm text-muted-foreground mt-1">Sign in to your account to continue</p>
+    <div className="min-h-[88vh] flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-6">
+        {/* ── Brand mark ── */}
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="w-11 h-11 rounded-2xl bg-foreground text-background flex items-center justify-center font-black text-xl tracking-tight shadow-md select-none">
+            D
+          </div>
+          <div>
+            <h1 className="text-2xl font-black tracking-tight text-foreground">
+              Welcome back
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1 font-medium">
+              Sign in to continue to Discussly
+            </p>
+          </div>
         </div>
-        
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/90">Email or Username</label>
-            <Input
-              type="text"
-              required
-              placeholder="Enter your email or username"
-              value={usernameOrEmail}
-              onChange={(e) => setUsernameOrEmail(e.target.value)}
-              className="h-11 rounded-full border-border/60 bg-muted/20 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary px-4 transition-all"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-foreground/90">Password</label>
+
+        {/* ── Card ── */}
+        <div className="bg-card border border-border/50 rounded-2xl shadow-sm overflow-hidden">
+          {/* Subtle top accent */}
+          <div className="h-0.5 bg-linear-to-r from-transparent via-primary/50 to-transparent" />
+
+          <div className="p-6 sm:p-8">
+            <form onSubmit={handleLogin} className="space-y-5">
+              {/* Email / Username */}
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-semibold text-foreground/80">
+                  Email or Username
+                </label>
+                <div className="relative group">
+                  <Mail
+                    size={14}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-primary transition-colors pointer-events-none"
+                  />
+                  <Input
+                    type="text"
+                    required
+                    autoComplete="username"
+                    placeholder="you@example.com"
+                    value={usernameOrEmail}
+                    onChange={(e) => setUsernameOrEmail(e.target.value)}
+                    className={cn(
+                      "h-11 pl-9 pr-4 rounded-xl border-border/50 bg-muted/30",
+                      "text-[13.5px] font-medium placeholder:text-muted-foreground/40",
+                      "focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary/50",
+                      "hover:border-border transition-all",
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[13px] font-semibold text-foreground/80">
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    className="text-[12px] font-semibold text-primary/70 hover:text-primary transition-colors"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+                <div className="relative group">
+                  <Lock
+                    size={14}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-primary transition-colors pointer-events-none"
+                  />
+                  <Input
+                    type={showPass ? "text" : "password"}
+                    required
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={cn(
+                      "h-11 pl-9 pr-11 rounded-xl border-border/50 bg-muted/30",
+                      "text-[13.5px] font-medium placeholder:text-muted-foreground/40",
+                      "focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary/50",
+                      "hover:border-border transition-all",
+                    )}
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowPass((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                  >
+                    {showPass ? (
+                      <EyeOff size={15} strokeWidth={2} />
+                    ) : (
+                      <Eye size={15} strokeWidth={2} />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit */}
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-11 rounded-xl font-bold text-[14px] gap-2 shadow-sm mt-1 transition-all"
+              >
+                {isLoading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <>
+                    Sign In
+                    <ArrowRight size={14} strokeWidth={2.5} />
+                  </>
+                )}
+              </Button>
+            </form>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-5">
+              <Separator className="flex-1 bg-border/40" />
+              <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/40">
+                or
+              </span>
+              <Separator className="flex-1 bg-border/40" />
             </div>
-            <Input
-              type="password"
-              required
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="h-11 rounded-full border-border/60 bg-muted/20 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary px-4 transition-all"
-            />
-          </div>
-          
-          <div className="pt-4">
-            <Button 
-              type="submit" 
-              disabled={isLoading} 
-              className="w-full h-11 rounded-full font-medium text-[15px] shadow-sm transition-all"
-            >
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Log In'}
-            </Button>
-            <div className="mt-6 text-sm text-center text-muted-foreground">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-primary hover:underline font-medium transition-colors">
-                Sign up
-              </Link>
+
+            {/* Sign up CTA */}
+            <div className="text-center">
+              <p className="text-[13px] text-muted-foreground font-medium">
+                Don't have an account?{" "}
+                <Link
+                  to="/register"
+                  className="text-primary font-bold hover:underline underline-offset-2 transition-colors"
+                >
+                  Sign up free
+                </Link>
+              </p>
             </div>
           </div>
-        </form>
+        </div>
+
+        {/* ── Footer note ── */}
+        <p className="text-center text-[11px] text-muted-foreground/40 font-medium px-4">
+          By continuing you agree to our{" "}
+          <button className="hover:text-muted-foreground transition-colors underline underline-offset-2">
+            Terms
+          </button>{" "}
+          and{" "}
+          <button className="hover:text-muted-foreground transition-colors underline underline-offset-2">
+            Privacy Policy
+          </button>
+          .
+        </p>
       </div>
     </div>
   );

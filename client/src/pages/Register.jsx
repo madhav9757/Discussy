@@ -6,33 +6,21 @@ import { Loader2 } from 'lucide-react';
 import { API_BASE_URL } from '../app/constant';
 import { toast } from 'sonner';
 
+import { useRegisterMutation } from '../app/api/userApi';
+
 const Register = () => {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' });
-  const [isLoading, setIsLoading] = useState(false);
+  const [register, { isLoading }] = useRegisterMutation();
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/users/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      
-      const data = await res.json();
-      
-      if (res.ok) {
-        toast.success('USER_CREATED_SUCCESS', { className: "font-mono text-xs rounded-none" });
-        navigate('/login');
-      } else {
-        toast.error(`ERR: ${data.message || 'REGISTRATION_FAIL'}`, { className: "font-mono text-xs border-red-500 rounded-none bg-red-500/10 text-red-500" });
-      }
+      await register(formData).unwrap();
+      toast.success('USER_CREATED_SUCCESS', { className: "font-mono text-xs rounded-none" });
+      navigate('/login');
     } catch (err) {
-      toast.error('ERR: NETWORK_TIMEOUT', { className: "font-mono text-xs rounded-none" });
-    } finally {
-      setIsLoading(false);
+      toast.error(`ERR: ${err.data?.message || 'REGISTRATION_FAIL'}`, { className: "font-mono text-xs border-red-500 rounded-none bg-red-500/10 text-red-500" });
     }
   };
 

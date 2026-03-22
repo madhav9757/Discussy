@@ -118,17 +118,17 @@ const CommunityProfile = () => {
   const colorClass = bannerColors[community.name.charCodeAt(0) % bannerColors.length];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-5 px-4 pb-12">
       {/* ── Banner ─────────────────────────────────────────── */}
-      <div className={`relative rounded-3xl overflow-hidden border border-border/60 bg-linear-to-br ${colorClass} h-36 md:h-48`}>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.05),transparent_60%)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-card/80 to-transparent" />
+      <div className={`relative rounded-2xl overflow-hidden border border-border/30 bg-linear-to-br ${colorClass} h-28 md:h-36 shadow-sm`}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.03),transparent_60%)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-10 bg-linear-to-t from-background/40 to-transparent" />
       </div>
 
       {/* ── Community Header ────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row gap-5 items-start md:items-center -mt-12 px-2 relative z-10">
+      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center -mt-10 px-1 relative z-10">
         {/* Avatar */}
-        <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl border-4 border-card bg-muted overflow-hidden shadow-lg shrink-0">
+        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl border-4 border-background bg-muted overflow-hidden shadow-md shrink-0 flex items-center justify-center p-0.5 transition-transform hover:scale-[1.02]">
           <img
             src={`https://api.dicebear.com/7.x/identicon/svg?seed=${seed}&backgroundColor=transparent`}
             alt={community.name}
@@ -136,25 +136,25 @@ const CommunityProfile = () => {
           />
         </div>
 
-        <div className="flex-1 min-w-0 pt-10 md:pt-8">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
+        <div className="flex-1 min-w-0 pt-8 md:pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-wrap">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-black tracking-tight">c/{community.name}</h1>
+                <h1 className="text-xl font-bold tracking-tight text-foreground/90">c/{community.name}</h1>
                 {isCreator && (
-                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                    <Crown size={10} /> Mod
+                  <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/5 px-1.5 py-0.5 rounded border border-orange-500/20">
+                    <Crown size={9} /> Founder
                   </span>
                 )}
                 {isMember && !isCreator && (
-                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
-                    <UserCheck size={10} /> Member
+                  <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-primary bg-primary/5 px-1.5 py-0.5 rounded border border-primary/20">
+                    <UserCheck size={9} /> Member
                   </span>
                 )}
               </div>
               {community.category && (
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground/70 mt-0.5">
-                  <Tag size={11} /> {community.category}
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-muted-foreground/60 mt-0.5 uppercase tracking-tighter">
+                  <Tag size={10} /> {community.category}
                 </span>
               )}
             </div>
@@ -166,9 +166,9 @@ const CommunityProfile = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-9 px-4 rounded-full font-semibold gap-2 border-border/60"
+                    className="h-8 px-3.5 rounded-lg font-bold gap-2 border-border/40 text-xs"
                   >
-                    <PenSquare size={14} /> Post
+                    <PenSquare size={13} /> New Post
                   </Button>
                 </CreatePostModal>
               )}
@@ -181,9 +181,9 @@ const CommunityProfile = () => {
                     variant="outline"
                     onClick={handleLeave}
                     disabled={leaving}
-                    className="h-9 px-5 rounded-full font-semibold gap-2 hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5"
+                    className="h-8 px-4 rounded-lg font-bold gap-2 text-xs hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5"
                   >
-                    {leaving ? <Loader2 size={13} className="animate-spin" /> : <LogOut size={13} />}
+                    {leaving ? <Loader2 size={12} className="animate-spin" /> : <LogOut size={12} />}
                     Leave
                   </Button>
                 ) : (
@@ -191,10 +191,10 @@ const CommunityProfile = () => {
                     size="sm"
                     onClick={handleJoin}
                     disabled={joining}
-                    className="h-9 px-5 rounded-full font-semibold gap-2"
+                    className="h-8 px-4 rounded-lg font-bold gap-2 text-xs"
                   >
-                    {joining ? <Loader2 size={13} className="animate-spin" /> : <Users size={13} />}
-                    Join Community
+                    {joining ? <Loader2 size={12} className="animate-spin" /> : <Users size={12} />}
+                    Join
                   </Button>
                 )
               )}
@@ -206,9 +206,9 @@ const CommunityProfile = () => {
                   variant="destructive"
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="h-9 px-4 rounded-full font-semibold gap-2 opacity-80 hover:opacity-100"
+                  className="h-8 px-3 rounded-lg font-bold gap-2 text-xs opacity-80 hover:opacity-100"
                 >
-                  {deleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                  {deleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
                   Delete
                 </Button>
               )}
@@ -218,38 +218,38 @@ const CommunityProfile = () => {
       </div>
 
       {/* ── About + Stats + Content ─────────────────────────── */}
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-5">
         {/* Sidebar */}
-        <aside className="md:w-72 shrink-0 space-y-4">
+        <aside className="md:w-64 shrink-0 space-y-4">
           {/* About Card */}
-          <div className="border border-border/60 bg-card rounded-3xl p-5 space-y-4 shadow-sm">
-            <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">
-              About
+          <div className="border border-border/40 bg-card rounded-xl p-4 space-y-3 shadow-xs">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-foreground/40">
+              Information
             </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {community.description || "No description yet."}
+            <p className="text-[13px] text-muted-foreground font-medium leading-relaxed italic">
+              {community.description || "Welcome to the group."}
             </p>
-            <div className="pt-2 border-t border-border/40 space-y-3">
-              <div className="flex items-center gap-3 text-sm">
-                <Users className="w-4 h-4 text-primary/70 shrink-0" />
-                <span>
-                  <strong className="font-black text-foreground">{memberCount.toLocaleString()}</strong>
-                  <span className="text-muted-foreground ml-1">{memberCount === 1 ? "member" : "members"}</span>
+            <div className="pt-2 border-t border-border/30 space-y-2.5">
+              <div className="flex items-center gap-2.5 text-[12px] font-medium">
+                <Users className="w-3.5 h-3.5 text-foreground/30 shrink-0" />
+                <span className="text-foreground/80">
+                  <strong className="font-bold">{memberCount.toLocaleString()}</strong>
+                  <span className="text-muted-foreground ml-1">Members</span>
                 </span>
               </div>
-              <div className="flex items-center gap-3 text-sm">
-                <Grid className="w-4 h-4 text-primary/70 shrink-0" />
-                <span>
-                  <strong className="font-black text-foreground">{postCount.toLocaleString()}</strong>
-                  <span className="text-muted-foreground ml-1">{postCount === 1 ? "post" : "posts"}</span>
+              <div className="flex items-center gap-2.5 text-[12px] font-medium">
+                <Grid className="w-3.5 h-3.5 text-foreground/30 shrink-0" />
+                <span className="text-foreground/80">
+                  <strong className="font-bold">{postCount.toLocaleString()}</strong>
+                  <span className="text-muted-foreground ml-1">Discussions</span>
                 </span>
               </div>
-              <div className="flex items-center gap-3 text-sm">
-                <Calendar className="w-4 h-4 text-primary/70 shrink-0" />
-                <span className="text-muted-foreground">
-                  Created{" "}
+              <div className="flex items-center gap-2.5 text-[12px] font-medium">
+                <Calendar className="w-3.5 h-3.5 text-foreground/30 shrink-0" />
+                <span className="text-muted-foreground/80">
+                  EST{" "}
                   {new Date(community.createdAt).toLocaleDateString(undefined, {
-                    month: "long",
+                    month: "short",
                     year: "numeric",
                   })}
                 </span>
@@ -258,8 +258,8 @@ const CommunityProfile = () => {
           </div>
 
           {/* Moderator card */}
-          <div className="border border-border/60 bg-card rounded-3xl p-5 space-y-3 shadow-sm">
-            <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">
+          <div className="border border-border/40 bg-card rounded-xl p-4 space-y-3 shadow-xs">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-foreground/40">
               Moderator
             </h3>
             {community.createdBy ? (
@@ -267,72 +267,40 @@ const CommunityProfile = () => {
                 to={`/profile/${community.createdBy._id || community.createdBy}`}
                 className="flex items-center gap-3 group"
               >
-                <div className="w-9 h-9 rounded-full bg-muted border border-border/40 overflow-hidden group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-full bg-muted border border-border/30 overflow-hidden flex items-center justify-center p-0.5 transition-transform group-hover:scale-105">
                   <img
                     src={`https://api.dicebear.com/7.x/notionists/svg?seed=${community.createdBy.username}`}
-                    alt={community.createdBy.username}
-                    className="w-full h-full p-0.5"
+                    alt=""
+                    className="w-full h-full"
                   />
                 </div>
                 <div>
-                  <p className="text-sm font-bold group-hover:text-primary transition-colors">
+                  <p className="text-[13px] font-bold group-hover:text-primary transition-colors">
                     u/{community.createdBy.username}
                   </p>
-                  <p className="text-[11px] text-amber-500 font-semibold">Community Founder</p>
                 </div>
               </Link>
             ) : (
-              <p className="text-sm text-muted-foreground">Unknown</p>
+              <p className="text-xs text-muted-foreground">Anonymous</p>
             )}
           </div>
-
-          {/* Top Members */}
-          {community.members?.length > 0 && (
-            <div className="border border-border/60 bg-card rounded-3xl p-5 space-y-3 shadow-sm">
-              <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">
-                Members
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {community.members.slice(0, 8).map((member) => (
-                  <Link
-                    key={member._id || member}
-                    to={`/profile/${member._id || member}`}
-                    title={`u/${member.username}`}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-muted border border-border/40 overflow-hidden hover:scale-110 hover:border-primary/40 transition-all">
-                      <img
-                        src={`https://api.dicebear.com/7.x/notionists/svg?seed=${member.username || member}`}
-                        alt={member.username}
-                        className="w-full h-full p-0.5"
-                      />
-                    </div>
-                  </Link>
-                ))}
-                {community.members.length > 8 && (
-                  <div className="w-8 h-8 rounded-full bg-muted/60 border border-border/40 flex items-center justify-center text-[10px] font-black text-muted-foreground">
-                    +{community.members.length - 8}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </aside>
 
         {/* Main Content */}
-        <div className="flex-1 min-w-0 space-y-5">
+        <div className="flex-1 min-w-0 space-y-4">
           {/* Tab bar */}
-          <div className="flex items-center gap-1 border-b border-border/60 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-4 border-b border-border/30 px-1 overflow-x-auto no-scrollbar">
             {[
-              { id: "posts", icon: <Grid size={14} />, label: "Posts" },
-              { id: "members", icon: <Users size={14} />, label: `Members (${memberCount})` },
+              { id: "posts", icon: <Grid size={13} strokeWidth={2.5} />, label: "Feed" },
+              { id: "members", icon: <Users size={13} strokeWidth={2.5} />, label: `People` },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 text-sm font-semibold border-b-2 pb-3 px-3 transition-all whitespace-nowrap ${
+                className={`flex items-center gap-1.5 text-[13px] font-bold border-b-2 py-2 transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "border-primary text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                    : "border-transparent text-muted-foreground/60 hover:text-foreground"
                 }`}
               >
                 {tab.icon} {tab.label}
@@ -346,12 +314,12 @@ const CommunityProfile = () => {
               {posts.length > 0 ? (
                 <>
                   {!isMember && userInfo && (
-                    <div className="border border-primary/20 bg-primary/5 rounded-2xl p-4 flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-foreground/80">
-                        <span className="text-primary">Join</span> this community to start posting and commenting.
+                    <div className="border border-primary/20 bg-primary/5 rounded-xl p-3 flex items-center justify-between gap-3">
+                      <p className="text-[12px] font-medium text-foreground/70">
+                        Join this community to participate in the conversation.
                       </p>
-                      <Button size="sm" onClick={handleJoin} disabled={joining} className="h-8 px-4 rounded-full shrink-0">
-                        {joining ? <Loader2 size={12} className="animate-spin" /> : "Join"}
+                      <Button size="sm" onClick={handleJoin} disabled={joining} className="h-7 px-3 rounded-lg text-xs font-bold">
+                        {joining ? <Loader2 size={10} className="animate-spin" /> : "Join Now"}
                       </Button>
                     </div>
                   )}
@@ -360,21 +328,21 @@ const CommunityProfile = () => {
                   ))}
                 </>
               ) : (
-                <div className="border border-border/60 bg-card rounded-3xl min-h-[280px] flex items-center justify-center shadow-sm">
-                  <div className="text-center p-8 space-y-4">
-                    <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto">
-                      <Grid className="w-8 h-8 text-muted-foreground/30" />
+                <div className="border border-border/40 bg-card rounded-xl min-h-[220px] flex items-center justify-center shadow-xs">
+                  <div className="text-center p-6 space-y-3">
+                    <div className="w-10 h-10 rounded-full bg-muted/30 flex items-center justify-center mx-auto">
+                      <Grid className="w-5 h-5 text-muted-foreground/20" />
                     </div>
                     <div>
-                      <p className="font-black text-foreground/70 text-lg">No posts yet</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Be the first to post in c/{community.name}!
+                      <p className="font-bold text-foreground/70 text-base">Quiet in here...</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Be the first to start a discussion.
                       </p>
                     </div>
                     {isMember && (
                       <CreatePostModal defaultCommunity={community._id}>
-                        <Button size="sm" className="rounded-full px-6 gap-2">
-                          <PenSquare size={14} /> Create Post
+                        <Button size="sm" className="rounded-lg px-5 h-8 text-xs font-bold gap-2">
+                          <PenSquare size={13} /> Create First Post
                         </Button>
                       </CreatePostModal>
                     )}
@@ -386,33 +354,33 @@ const CommunityProfile = () => {
 
           {/* Members tab */}
           {activeTab === "members" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {community.members?.length > 0 ? (
                 community.members.map((member) => (
                   <Link
                     key={member._id || member}
                     to={`/profile/${member._id || member}`}
-                    className="flex items-center gap-3 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                    className="flex items-center gap-3 p-3 rounded-xl border border-border/30 bg-card hover:border-primary/20 hover:bg-muted/10 transition-all group"
                   >
-                    <div className="w-10 h-10 rounded-full bg-muted border border-border/40 overflow-hidden group-hover:scale-105 transition-transform">
+                    <div className="w-8 h-8 rounded-full bg-muted border border-border/30 overflow-hidden flex items-center justify-center p-0.5 transition-transform group-hover:scale-105">
                       <img
                         src={`https://api.dicebear.com/7.x/notionists/svg?seed=${member.username || member}`}
-                        alt={member.username}
-                        className="w-full h-full p-1"
+                        alt=""
+                        className="w-full h-full"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm truncate group-hover:text-primary transition-colors">
+                      <p className="font-bold text-[13px] truncate group-hover:text-primary transition-colors">
                         u/{member.username}
                       </p>
                       {(member._id || member).toString() === (community.createdBy?._id || community.createdBy)?.toString() && (
-                        <p className="text-[11px] text-amber-500 font-semibold">Moderator</p>
+                        <p className="text-[10px] text-orange-500 font-bold uppercase tracking-tighter">Founder</p>
                       )}
                     </div>
                   </Link>
                 ))
               ) : (
-                <div className="col-span-full text-center text-muted-foreground py-12 italic text-sm">
+                <div className="col-span-full text-center text-muted-foreground py-8 italic text-xs">
                   No members yet.
                 </div>
               )}

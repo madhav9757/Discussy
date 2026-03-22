@@ -119,24 +119,24 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
         <div className="absolute left-0 top-0 bottom-0 w-px bg-border/50 ml-2" />
       )}
 
-      <div className="flex gap-3 group py-2">
-        <div className="shrink-0 w-7 h-7 rounded-full bg-muted/50 border border-border/40 overflow-hidden mt-0.5 shadow-xs">
+      <div className="flex gap-2.5 group py-1.5">
+        <div className="shrink-0 w-6 h-6 rounded-full bg-muted/30 border border-border/20 overflow-hidden mt-0.5 shadow-xs flex items-center justify-center p-0.5">
           <img
             src={avatarUrl}
-            alt={comment.createdBy?.username}
-            className="w-full h-full p-0.5"
+            alt=""
+            className="w-full h-full"
           />
         </div>
 
-        <div className="flex-1 min-w-0 space-y-1">
+        <div className="flex-1 min-w-0 space-y-0.5">
           <div className="flex items-center gap-2 flex-wrap">
             <Link
               to={`/profile/${comment.createdBy?._id}`}
-              className="text-[11px] font-bold text-foreground/90 hover:text-primary transition-colors uppercase tracking-tight"
+              className="text-[10px] font-bold text-foreground/70 hover:text-primary transition-colors tracking-tight"
             >
               u/{comment.createdBy?.username}
             </Link>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-[9px] text-muted-foreground font-medium uppercase tracking-tighter opacity-50">
               {new Date(comment.createdAt).toLocaleDateString(undefined, {
                 month: "short",
                 day: "numeric",
@@ -144,32 +144,32 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
             </span>
           </div>
 
-          <p className="text-[13.5px] text-foreground/85 leading-relaxed">
+          <p className="text-[13px] text-foreground/80 leading-relaxed font-medium">
             {comment.content}
           </p>
 
           {/* Actions */}
           <div className="flex items-center gap-1 -ml-1 pt-0.5 flex-wrap">
             {/* Vote pill — ONLY for this comment */}
-            <div className="flex items-center gap-0.5 bg-muted/40 rounded-full px-1 border border-border/20">
+            <div className="flex items-center gap-0.5 bg-muted/5 rounded-lg px-0.5 border border-border/10">
               <button
                 onClick={() => handleVote("upvote")}
                 title="Upvote comment"
-                className={`h-6 w-6 flex items-center justify-center rounded-full transition-colors ${
+                className={`h-5 w-5 flex items-center justify-center rounded transition-colors ${
                   hasUpvoted
                     ? "text-orange-500"
-                    : "text-muted-foreground/50 hover:text-orange-500"
+                    : "text-muted-foreground/30 hover:text-orange-500"
                 }`}
               >
-                <ArrowBigUp size={15} fill={hasUpvoted ? "currentColor" : "none"} />
+                <ArrowBigUp size={14} fill={hasUpvoted ? "currentColor" : "none"} />
               </button>
               <span
-                className={`text-xs font-black min-w-[18px] text-center ${
+                className={`text-[10px] font-bold min-w-[12px] text-center ${
                   hasUpvoted
                     ? "text-orange-500"
                     : hasDownvoted
                     ? "text-indigo-500"
-                    : "text-foreground/70"
+                    : "text-foreground/50"
                 }`}
               >
                 {voteScore}
@@ -177,40 +177,40 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
               <button
                 onClick={() => handleVote("downvote")}
                 title="Downvote comment"
-                className={`h-6 w-6 flex items-center justify-center rounded-full transition-colors ${
+                className={`h-5 w-5 flex items-center justify-center rounded transition-colors ${
                   hasDownvoted
                     ? "text-indigo-500"
-                    : "text-muted-foreground/50 hover:text-indigo-500"
+                    : "text-muted-foreground/30 hover:text-indigo-500"
                 }`}
               >
-                <ArrowBigDown size={15} fill={hasDownvoted ? "currentColor" : "none"} />
+                <ArrowBigDown size={14} fill={hasDownvoted ? "currentColor" : "none"} />
               </button>
             </div>
 
             {userInfo && (
               <button
                 onClick={() => setReplyOpen(!replyOpen)}
-                className={`flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full transition-all ${
+                className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded transition-all ${
                   replyOpen
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/50"
+                    ? "bg-primary/5 text-primary"
+                    : "text-muted-foreground/40 hover:text-foreground hover:bg-muted/30"
                 }`}
               >
-                <CornerDownRight size={11} /> Reply
+                <CornerDownRight size={10} /> Reply
               </button>
             )}
 
             {hasReplies && (
               <button
                 onClick={() => setChildrenVisible(!childrenVisible)}
-                className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full text-muted-foreground/50 hover:text-foreground hover:bg-muted/50 transition-all"
+                className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded text-muted-foreground/30 hover:text-foreground hover:bg-muted/30 transition-all"
               >
                 {childrenVisible ? (
-                  <ChevronUp size={11} />
+                  <ChevronUp size={10} />
                 ) : (
-                  <ChevronDown size={11} />
+                  <ChevronDown size={10} />
                 )}
-                {comment.replies.length} {comment.replies.length === 1 ? "reply" : "replies"}
+                {comment.replies.length}
               </button>
             )}
 
@@ -218,12 +218,12 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
               <button
                 onClick={handleDelete}
                 disabled={deletingComment}
-                className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-full text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-all ml-auto opacity-0 group-hover:opacity-100"
+                className="flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded text-muted-foreground/20 hover:text-destructive hover:bg-destructive/5 transition-all ml-auto opacity-0 group-hover:opacity-100"
               >
                 {deletingComment ? (
-                  <Loader2 size={11} className="animate-spin" />
+                  <Loader2 size={10} className="animate-spin" />
                 ) : (
-                  <Trash2 size={11} />
+                  <Trash2 size={10} />
                 )}
               </button>
             )}
@@ -369,28 +369,28 @@ const PostCard = ({ post }) => {
   const avatarUrl = `https://api.dicebear.com/7.x/notionists/svg?seed=${post.author?.username || "anon"}`;
 
   return (
-    <article className="rounded-2xl border border-border/60 bg-card overflow-hidden hover:border-border/80 hover:shadow-sm transition-all duration-200">
-      <div className="p-5 flex gap-4">
+    <article className="rounded-xl border border-border/40 bg-card overflow-hidden hover:border-border/60 hover:shadow-xs transition-all duration-200">
+      <div className="p-4 flex gap-3">
         {/* POST vote sidebar — completely isolated from comment votes */}
-        <div className="flex flex-col items-center gap-1 min-w-[36px] pt-1">
+        <div className="flex flex-col items-center gap-0.5 min-w-[32px] pt-0.5">
           <button
             onClick={() => handleVote("upvote")}
             title="Upvote post"
-            className={`flex items-center justify-center h-8 w-8 rounded-full transition-colors hover:bg-orange-500/10 ${
+            className={`flex items-center justify-center h-7 w-7 rounded-lg transition-colors hover:bg-orange-500/5 ${
               hasUpvoted
                 ? "text-orange-500"
-                : "text-muted-foreground/40 hover:text-orange-500"
+                : "text-muted-foreground/30 hover:text-orange-500"
             }`}
           >
-            <ArrowBigUp size={24} fill={hasUpvoted ? "currentColor" : "none"} />
+            <ArrowBigUp size={20} fill={hasUpvoted ? "currentColor" : "none"} strokeWidth={2.5} />
           </button>
           <span
-            className={`text-sm font-black leading-none ${
+            className={`text-[12px] font-bold leading-none py-0.5 ${
               hasUpvoted
                 ? "text-orange-500"
                 : hasDownvoted
                 ? "text-indigo-500"
-                : "text-foreground/80"
+                : "text-foreground/60"
             }`}
           >
             {voteScore}
@@ -398,49 +398,50 @@ const PostCard = ({ post }) => {
           <button
             onClick={() => handleVote("downvote")}
             title="Downvote post"
-            className={`flex items-center justify-center h-8 w-8 rounded-full transition-colors hover:bg-indigo-500/10 ${
+            className={`flex items-center justify-center h-7 w-7 rounded-lg transition-colors hover:bg-indigo-500/5 ${
               hasDownvoted
                 ? "text-indigo-500"
-                : "text-muted-foreground/40 hover:text-indigo-500"
+                : "text-muted-foreground/30 hover:text-indigo-500"
             }`}
           >
             <ArrowBigDown
-              size={24}
+              size={20}
               fill={hasDownvoted ? "currentColor" : "none"}
+              strokeWidth={2.5}
             />
           </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-2.5">
-            <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
               <Link to={`/profile/${post.author?._id}`} className="shrink-0">
-                <div className="w-8 h-8 rounded-full bg-muted border border-border/40 overflow-hidden shadow-xs hover:scale-105 transition-transform">
+                <div className="w-7 h-7 rounded-full bg-muted border border-border/30 overflow-hidden shadow-xs hover:scale-105 transition-transform p-0.5">
                   <img
                     src={avatarUrl}
-                    alt={post.author?.username}
-                    className="w-full h-full p-1"
+                    alt=""
+                    className="w-full h-full"
                   />
                 </div>
               </Link>
-              <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground font-medium">
+              <div className="flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground font-medium uppercase tracking-tight">
                 {post.community && (
                   <>
-                    <span className="text-foreground font-black hover:underline cursor-pointer text-[12px]">
+                    <span className="text-foreground/80 font-bold hover:text-primary cursor-pointer transition-colors">
                       c/{post.community.name}
                     </span>
-                    <span className="text-muted-foreground/30">•</span>
+                    <span className="text-muted-foreground/20">•</span>
                   </>
                 )}
                 <Link
                   to={`/profile/${post.author?._id}`}
-                  className="hover:underline hover:text-primary transition-colors uppercase tracking-tight font-bold text-[11px]"
+                  className="hover:text-primary transition-colors font-bold opacity-70"
                 >
                   u/{post.author?.username || "anon"}
                 </Link>
-                <span className="text-muted-foreground/30">•</span>
-                <span className="text-[11px]">
+                <span className="text-muted-foreground/20">•</span>
+                <span className="opacity-60">
                   {new Date(post.createdAt || Date.now()).toLocaleDateString(
                     undefined,
                     { month: "short", day: "numeric" }
@@ -451,34 +452,34 @@ const PostCard = ({ post }) => {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="h-7 w-7 flex items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground/50 hover:text-foreground">
-                  <MoreHorizontal size={16} />
+                <button className="h-6 w-6 flex items-center justify-center rounded-lg hover:bg-muted transition-colors text-muted-foreground/30 hover:text-foreground">
+                  <MoreHorizontal size={14} />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="rounded-xl w-40 border-border/60"
+                className="rounded-lg w-36 border-border/40"
               >
-                <DropdownMenuItem className="gap-2 cursor-pointer rounded-lg text-sm">
-                  <Share2 size={13} /> Share
+                <DropdownMenuItem className="gap-2 cursor-pointer rounded-md text-[12px] font-bold">
+                  <Share2 size={12} /> Share
                 </DropdownMenuItem>
                 {isAuthor && (
                   <>
                     <DropdownMenuItem
-                      className="gap-2 cursor-pointer rounded-lg text-sm"
+                      className="gap-2 cursor-pointer rounded-md text-[12px] font-bold"
                       onClick={() => toast.info("Edit coming soon!")}
                     >
-                      <Edit2 size={13} /> Edit Post
+                      <Edit2 size={12} /> Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="gap-2 cursor-pointer text-destructive focus:text-destructive rounded-lg text-sm"
+                      className="gap-2 cursor-pointer text-destructive focus:text-destructive rounded-md text-[12px] font-bold"
                       onClick={handleDelete}
                       disabled={isDeleting}
                     >
                       {isDeleting ? (
-                        <Loader2 size={13} className="animate-spin" />
+                        <Loader2 size={12} className="animate-spin" />
                       ) : (
-                        <Trash2 size={13} />
+                        <Trash2 size={12} />
                       )}
                       Delete
                     </DropdownMenuItem>
@@ -488,33 +489,33 @@ const PostCard = ({ post }) => {
             </DropdownMenu>
           </div>
 
-          <h2 className="text-base font-black leading-snug text-foreground/95 mb-1.5">
+          <h2 className="text-[14px] font-bold leading-snug text-foreground/90 mb-1">
             {post.title}
           </h2>
           {post.content && (
-            <p className="text-[14px] text-muted-foreground/85 whitespace-pre-wrap leading-relaxed font-normal">
+            <p className="text-[13px] text-muted-foreground/80 whitespace-pre-wrap leading-relaxed font-medium">
               {post.content}
             </p>
           )}
 
           {/* Footer */}
-          <div className="flex items-center gap-1 mt-4 pt-3.5 border-t border-border/40 -ml-2">
+          <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/20 -ml-1">
             <button
               onClick={() => setShowComments(!showComments)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all ${
                 showComments
-                  ? "bg-primary/8 text-primary"
-                  : "text-muted-foreground/60 hover:bg-muted/60 hover:text-foreground"
+                  ? "bg-primary/5 text-primary"
+                  : "text-muted-foreground/50 hover:bg-muted/40 hover:text-foreground"
               }`}
             >
-              <MessageSquare size={14} />
+              <MessageSquare size={13} strokeWidth={2.5} />
               <span>{commentCount}</span>
               <span className="hidden sm:inline">
                 {commentCount === 1 ? "Comment" : "Comments"}
               </span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-xs text-muted-foreground/60 hover:bg-muted/60 hover:text-foreground transition-all">
-              <Share2 size={14} />
+            <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[11px] text-muted-foreground/50 hover:bg-muted/40 hover:text-foreground transition-all">
+              <Share2 size={13} strokeWidth={2.5} />
               <span className="hidden sm:inline">Share</span>
             </button>
           </div>
