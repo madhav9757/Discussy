@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { CreatePostModal } from "../components/modals/CreatePostModal";
 import PostCard from "../components/PostCard";
-import { cn } from "@/lib/utils";
+import { cn, getAvatarUrl } from "@/lib/utils";
 
 /* ── Feed sort tabs ── */
 const SORT_TABS = [
@@ -94,7 +94,7 @@ const Home = () => {
             <div className="flex items-center gap-3 bg-card border border-border/50 rounded-2xl px-4 py-3 shadow-sm">
               <div className="w-8 h-8 rounded-xl overflow-hidden border border-border/40 bg-muted shrink-0">
                 <img
-                  src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userInfo.username}`}
+                  src={getAvatarUrl(userInfo)}
                   alt="me"
                   className="w-full h-full"
                 />

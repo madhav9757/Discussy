@@ -42,16 +42,18 @@ const extendedApi = discusslyApi.injectEndpoints({
             }),
             invalidatesTags: (result) => [
                 'User',
-                { type: 'User', id: result?._id }
+                ...(result?._id ? [{ type: 'User', id: result._id }] : []),
+                ...(result?.username ? [{ type: 'User', id: result.username }] : [])
             ],
         }),
 
         // 👤 Get any user by ID or Username
         getUserById: builder.query({
             query: (idOrUsername) => `${USER_API_URL}/${idOrUsername}`,
-            providesTags: (result, error, idOrUsername) => [
+            providesTags: (result) => [
                 'User',
-                { type: 'User', id: idOrUsername }
+                ...(result?._id ? [{ type: 'User', id: result._id }] : []),
+                ...(result?.username ? [{ type: 'User', id: result.username }] : [])
             ],
         }),
 

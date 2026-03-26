@@ -20,6 +20,8 @@ export function CreateCommunityModal({ children }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
+  const [image, setImage] = useState('');
+  const [bannerImage, setBannerImage] = useState('');
   
   const [createCommunity, { isLoading }] = useCreateCommunityMutation();
 
@@ -34,7 +36,9 @@ export function CreateCommunityModal({ children }) {
       await createCommunity({ 
         name, 
         description, 
-        category 
+        category,
+        image,
+        bannerImage
       }).unwrap();
       
       toast.success(`c/${name} created successfully!`);
@@ -42,6 +46,8 @@ export function CreateCommunityModal({ children }) {
       setName('');
       setDescription('');
       setCategory('');
+      setImage('');
+      setBannerImage('');
     } catch (error) {
       toast.error(error.data?.message || "Failed to create community");
     }
@@ -84,6 +90,28 @@ export function CreateCommunityModal({ children }) {
               placeholder="e.g. Technology, Art, Science" 
               value={category}
               onChange={(e) => setCategory(e.target.value)}
+              className="rounded-xl border-border/60 bg-muted/20 h-11 transition-all focus-visible:ring-1 focus-visible:ring-primary"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="image" className="text-foreground/90 font-medium">Icon URL (Optional)</Label>
+            <Input 
+              id="image" 
+              placeholder="https://example.com/icon.png" 
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
+              className="rounded-xl border-border/60 bg-muted/20 h-11 transition-all focus-visible:ring-1 focus-visible:ring-primary"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="bannerImage" className="text-foreground/90 font-medium">Banner URL (Optional)</Label>
+            <Input 
+              id="bannerImage" 
+              placeholder="https://example.com/banner.png" 
+              value={bannerImage}
+              onChange={(e) => setBannerImage(e.target.value)}
               className="rounded-xl border-border/60 bg-muted/20 h-11 transition-all focus-visible:ring-1 focus-visible:ring-primary"
             />
           </div>

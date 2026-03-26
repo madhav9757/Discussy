@@ -8,7 +8,7 @@ export const discusslyApi = createApi({
     credentials: 'include',
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token');
-      if (token) {
+      if (token && token !== 'undefined' && token !== 'null') {
         headers.set('authorization', `Bearer ${token}`);
       }
       return headers;

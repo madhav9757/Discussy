@@ -10,7 +10,7 @@ export const getAllCommunities = asyncHandler(async (req, res) => {
 
 export const createCommunity = asyncHandler(async (req, res) => {
     // ✅ Destructure 'category' from req.body
-    const { name, description, category } = req.body; 
+    const { name, description, category, image, bannerImage } = req.body; 
 
     if (!name) {
         res.status(400);
@@ -25,11 +25,18 @@ export const createCommunity = asyncHandler(async (req, res) => {
     }
 
     const community = await Community.create({
-        name,
+        name: name.toLowerCase(), // Ensure consistent lowercase
         description,
-        category, // ✅ Include category when creating the community
+        category,
+        image,
+        bannerImage,
         createdBy: req.user._id,
         members: [req.user._id],
+    });
+
+    // Add to user's joined communities
+    await User.findByIdAndUpdate(req.user._id, {
+        $addToSet: { joinedCommunities: community._id }
     });
 
     res.status(201).json(community);
@@ -45,8 +52,8 @@ export const getCommunityById = asyncHandler(async (req, res) => {
     const query = isObjectId ? { _id: idOrName } : { name: idOrName.toLowerCase() };
 
     const community = await Community.findOne(query)
-        .populate('createdBy', 'username email')
-        .populate('members', 'username email');
+        .populate('createdBy', 'username email image')
+        .populate('members', 'username email image');
 
     if (!community) {
         res.status(404);
@@ -54,8 +61,8 @@ export const getCommunityById = asyncHandler(async (req, res) => {
     }
 
     const posts = await Post.find({ community: community._id })
-        .populate({ path: 'community', select: 'name _id createdBy' })
-        .populate('author', 'username')
+        .populate({ path: 'community', select: 'name _id createdBy image' })
+        .populate('author', 'username image')
         .sort({ createdAt: -1 });
 
     res.status(200).json({ ...community.toObject(), posts });
@@ -144,4 +151,42 @@ export const deleteCommunity = asyncHandler(async (req, res) => {
     await community.deleteOne();
 
     res.status(200).json({ message: 'Community deleted successfully' });
+});
+
+export const updateCommunity = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { name, description, category, image, bannerImage } = req.body;
+    const idOrName = decodeURIComponent(id);
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrName);
+    const query = isObjectId ? { _id: idOrName } : { name: idOrName.toLowerCase() };
+
+    const community = await Community.findOne(query);
+
+    if (!community) {
+        res.status(404);
+        throw new Error('Community not found');
+    }
+
+    if (community.createdBy.toString() !== req.user._id.toString()) {
+        res.status(403);
+        throw new Error('Only the creator can update this community');
+    }
+
+    if (name && name.toLowerCase() !== community.name.toLowerCase()) {
+        const nameExists = await Community.findOne({ name: name.toLowerCase() });
+        if (nameExists && nameExists._id.toString() !== community._id.toString()) {
+            res.status(400);
+            throw new Error('Community name already exists');
+        }
+        community.name = name;
+    }
+
+    if (description !== undefined) community.description = description;
+    if (category !== undefined) community.category = category;
+    if (image !== undefined) community.image = image;
+    if (bannerImage !== undefined) community.bannerImage = bannerImage;
+
+    await community.save();
+
+    res.status(200).json(community);
 });

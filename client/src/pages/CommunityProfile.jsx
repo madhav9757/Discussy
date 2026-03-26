@@ -9,6 +9,7 @@ import {
 } from "../app/api/communitiesApi";
 import PostCard from "../components/PostCard";
 import { CreatePostModal } from "../components/modals/CreatePostModal";
+import EditCommunityModal from "../components/modals/EditCommunityModal";
 import {
   Hash,
   Users,
@@ -25,12 +26,14 @@ import {
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { toast } from "sonner";
+import { getAvatarUrl, getCommunityIconUrl, getCommunityBannerUrl, cn } from "@/lib/utils";
 
 const CommunityProfile = () => {
   const { idOrName } = useParams();
   const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState("posts");
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const {
     data: community,
@@ -122,7 +125,14 @@ const CommunityProfile = () => {
       <div className="flex-1 overflow-y-auto custom-scrollbar px-8 md:px-12 py-8 pb-20">
         <div className="max-w-[1600px] mx-auto space-y-8">
           {/* ── Banner ─────────────────────────────────────────── */}
-          <div className={`relative rounded-2xl overflow-hidden border border-border/30 bg-linear-to-br ${colorClass} h-28 md:h-36 shadow-sm`}>
+          <div 
+            className={`relative rounded-2xl overflow-hidden border border-border/30 ${!getCommunityBannerUrl(community) && `bg-linear-to-br ${colorClass}`} h-[25vh] md:h-[30vh] shadow-sm`}
+            style={getCommunityBannerUrl(community) ? {
+              backgroundImage: `url("${getCommunityBannerUrl(community)}")`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            } : {}}
+          >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.03),transparent_60%)]" />
             <div className="absolute bottom-0 left-0 right-0 h-10 bg-linear-to-t from-background/40 to-transparent" />
           </div>
@@ -130,11 +140,11 @@ const CommunityProfile = () => {
           {/* ── Community Header ────────────────────────────────── */}
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center -mt-10 px-1 relative z-10">
             {/* Avatar */}
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl border-4 border-background bg-muted overflow-hidden shadow-md shrink-0 flex items-center justify-center p-0.5 transition-transform hover:scale-[1.02]">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl border-4 border-background bg-muted overflow-hidden shadow-md shrink-0 flex items-center justify-center transition-transform hover:scale-[1.02]">
               <img
-                src={`https://api.dicebear.com/7.x/identicon/svg?seed=${seed}&backgroundColor=transparent`}
+                src={getCommunityIconUrl(community)}
                 alt={community.name}
-                className="w-full h-full"
+                className="w-full h-full object-cover"
               />
             </div>
 
@@ -203,16 +213,26 @@ const CommunityProfile = () => {
 
                   {/* Mod actions */}
                   {isCreator && (
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={handleDelete}
-                      disabled={deleting}
-                      className="h-8 px-3 rounded-lg font-bold gap-2 text-xs opacity-80 hover:opacity-100"
-                    >
-                      {deleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
-                      Delete
-                    </Button>
+                    <div className="flex items-center gap-2">
+                       <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setIsEditOpen(true)}
+                        className="h-8 px-3.5 rounded-lg font-bold gap-2 border-border/40 text-xs"
+                      >
+                        <Settings size={13} /> Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="h-8 px-3 rounded-lg font-bold gap-2 text-xs opacity-80 hover:opacity-100"
+                      >
+                        {deleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                        Delete
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -269,11 +289,11 @@ const CommunityProfile = () => {
                     to={`/profile/${community.createdBy.username}`}
                     className="flex items-center gap-3 group"
                   >
-                    <div className="w-8 h-8 rounded-full bg-muted border border-border/30 overflow-hidden flex items-center justify-center p-0.5 transition-transform group-hover:scale-105">
+                    <div className="w-8 h-8 rounded-full bg-muted border border-border/30 overflow-hidden flex items-center justify-center transition-transform group-hover:scale-105">
                       <img
-                        src={`https://api.dicebear.com/7.x/notionists/svg?seed=${community.createdBy.username}`}
+                        src={getAvatarUrl(community.createdBy)}
                         alt=""
-                        className="w-full h-full"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                     <div>
@@ -364,11 +384,11 @@ const CommunityProfile = () => {
                         to={`/profile/${member.username}`}
                         className="flex items-center gap-3 p-3 rounded-xl border border-border/30 bg-card hover:border-primary/20 hover:bg-muted/10 transition-all group"
                       >
-                        <div className="w-8 h-8 rounded-full bg-muted border border-border/30 overflow-hidden flex items-center justify-center p-0.5 transition-transform group-hover:scale-105">
+                        <div className="w-8 h-8 rounded-full bg-muted border border-border/30 overflow-hidden flex items-center justify-center transition-transform group-hover:scale-105">
                           <img
-                            src={`https://api.dicebear.com/7.x/notionists/svg?seed=${member.username || member}`}
+                            src={getAvatarUrl(member)}
                             alt=""
-                            className="w-full h-full"
+                            className="w-full h-full object-cover"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -392,6 +412,12 @@ const CommunityProfile = () => {
           </div>
         </div>
       </div>
+
+      <EditCommunityModal 
+        isOpen={isEditOpen} 
+        onClose={() => setIsEditOpen(false)} 
+        community={community} 
+      />
     </div>
   );
 };

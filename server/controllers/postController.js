@@ -1,6 +1,7 @@
 import Post from "../models/Post.js";
 import Comment from "../models/Comment.js";
 import Community from "../models/Community.js";
+import User from "../models/User.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { createNotification } from "./notificationController.js";
 
@@ -17,11 +18,34 @@ const generateSlug = (title) => {
 // @desc Get all posts
 // @route GET /api/posts
 export const getAllPosts = asyncHandler(async (req, res) => {
-  const query = req.query.user ? { author: req.query.user } : {};
+  let query = {};
+
+  if (req.query.user) {
+    const userParam = req.query.user;
+    let user;
+
+    // Check if it's an ObjectId
+    if (userParam.match(/^[0-9a-fA-F]{24}$/)) {
+      user = await User.findById(userParam);
+    }
+
+    // If not found by ID, try Username
+    if (!user) {
+      user = await User.findOne({ username: userParam });
+    }
+
+    if (user) {
+      query.author = user._id;
+    } else {
+      // If user not found, return empty array
+      return res.status(200).json([]);
+    }
+  }
+
   const posts = await Post.find(query)
     .sort({ createdAt: -1 })
-    .populate({ path: "community", select: "name _id createdBy" })
-    .populate({ path: "author", select: "username _id" })
+    .populate({ path: "community", select: "name _id createdBy image" })
+    .populate({ path: "author", select: "username _id image" })
     .lean();
 
   const postIds = posts.map((p) => p._id);
@@ -74,8 +98,8 @@ export const createPost = asyncHandler(async (req, res) => {
   });
 
   const populatedPost = await Post.findById(post._id)
-    .populate({ path: "community", select: "name _id createdBy" })
-    .populate({ path: "author", select: "username _id" });
+    .populate({ path: "community", select: "name _id createdBy image" })
+    .populate({ path: "author", select: "username _id image" });
 
   const communityDetails = await Community.findById(community).populate(
     "members",
@@ -110,13 +134,13 @@ export const getPostById = asyncHandler(async (req, res) => {
   // Try ID first if it looks like one, otherwise try Slug
   if (idOrSlug.match(/^[0-9a-fA-F]{24}$/)) {
     post = await Post.findById(idOrSlug)
-      .populate("author", "username email")
+      .populate("author", "username email image")
       .populate("community", "name");
   }
 
   if (!post) {
     post = await Post.findOne({ slug: idOrSlug })
-      .populate("author", "username email")
+      .populate("author", "username email image")
       .populate("community", "name");
   }
 
@@ -155,8 +179,8 @@ export const updatePost = asyncHandler(async (req, res) => {
   const updatedPost = await post.save();
 
   const populatedPost = await Post.findById(updatedPost._id)
-    .populate({ path: 'community', select: 'name _id createdBy' })
-    .populate({ path: 'author', select: 'username _id' });
+    .populate({ path: 'community', select: 'name _id createdBy image' })
+    .populate({ path: 'author', select: 'username _id image' });
 
   console.log(`✏️ Post ${id} updated by ${req.user.username}`);
   res.json(populatedPost);
@@ -199,7 +223,7 @@ export const toggleVote = asyncHandler(async (req, res) => {
     throw new Error('Invalid vote type');
   }
 
-  const post = await Post.findById(id).populate('author', 'username _id');
+  const post = await Post.findById(id).populate('author', 'username _id image');
 
   if (!post) {
     res.status(404);

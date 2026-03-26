@@ -5,7 +5,7 @@ dotenv.config();
 
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = '7d';
+const JWT_EXPIRES_IN = '36500d'; // 100 years (effectively infinite)
 
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is missing in .env file");
@@ -26,5 +26,5 @@ export const cookieOptions = {
   httpOnly: true,
   sameSite: 'none',
   secure: process.env.NODE_ENV === 'production',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  maxAge: 36500 * 24 * 60 * 60 * 1000, 
 };

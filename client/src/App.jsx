@@ -1,62 +1,35 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
 
 import AppRouter from "./router.jsx";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 import Header from "./components/header/Header.jsx";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
+
 import { setCredentials } from "./features/auth/authSlice.js";
 import {
   notificationsApi,
   useGetNotificationsQuery,
 } from "./app/api/notificationsApi.js";
-
-import { ThemeProvider } from "./context/ThemeContext.jsx";
-import { Toaster } from "@/components/ui/sonner";
-import { toast } from "sonner";
 import socket from "./socket";
 
-function App() {
+const useNotificationSocket = (userInfo) => {
   const dispatch = useDispatch();
-  const location = useLocation();
-  const userInfo = useSelector((state) => state.auth.userInfo);
 
-  // Sync Auth State
-  useEffect(() => {
-    try {
-      const user = localStorage.getItem("userInfo");
-      const token = localStorage.getItem("token");
-      if (user && token) {
-        dispatch(
-          setCredentials({
-            user: JSON.parse(user),
-            token,
-          }),
-        );
-      }
-    } catch {
-      localStorage.removeItem("userInfo");
-      localStorage.removeItem("token");
-    }
-  }, [dispatch]);
-
-  // Notifications Sync
   const { refetch } = useGetNotificationsQuery(undefined, {
     skip: !userInfo?._id,
     pollingInterval: 30000,
     refetchOnMountOrArgChange: true,
   });
 
-  // Socket Logic
   useEffect(() => {
     if (!userInfo?._id) return;
 
     socket.emit("join", userInfo._id);
 
     const onNotification = (notification) => {
-      toast.message("Notification", {
-        description: notification.message,
-        className: "font-bold uppercase text-[10px] tracking-widest border-2",
-      });
+      toast.message("Notification", { description: notification.message });
 
       dispatch(
         notificationsApi.util.updateQueryData(
@@ -96,49 +69,61 @@ function App() {
       );
     };
 
+    const onReconnect = () => {
+      socket.emit("join", userInfo._id);
+      refetch();
+    };
+
     socket.on("notification", onNotification);
     socket.on("notificationsMarkedRead", onReadAll);
     socket.on("notificationRead", onReadOne);
+    socket.on("reconnect", onReconnect);
 
     return () => {
       socket.emit("leave", userInfo._id);
       socket.off("notification", onNotification);
       socket.off("notificationsMarkedRead", onReadAll);
       socket.off("notificationRead", onReadOne);
+      socket.off("reconnect", onReconnect);
     };
-  }, [userInfo?._id, dispatch]);
+  }, [userInfo?._id, dispatch, refetch]);
+};
+
+function App() {
+  const dispatch = useDispatch();
+  const userInfo = useSelector((state) => state.auth.userInfo);
+
+  useNotificationSocket(userInfo);
 
   useEffect(() => {
-    const onReconnect = () => {
-      if (userInfo?._id) {
-        socket.emit("join", userInfo._id);
-        refetch();
-      }
-    };
+    try {
+      const userStr = localStorage.getItem("userInfo");
+      const token = localStorage.getItem("token");
 
-    socket.on("reconnect", onReconnect);
-    return () => socket.off("reconnect", onReconnect);
-  }, [userInfo?._id, refetch]);
+      if (userStr && token) {
+        dispatch(
+          setCredentials({
+            user: JSON.parse(userStr),
+            token,
+          }),
+        );
+      }
+    } catch (error) {
+      localStorage.removeItem("userInfo");
+      localStorage.removeItem("token");
+    }
+  }, [dispatch]);
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="ui-theme">
-      <div className="h-screen w-screen bg-muted/30 dark:bg-muted/5 flex items-center justify-center overflow-hidden">
-        <div className="h-full w-full bg-background border-x border-border/40 shadow-[0_0_50px_-12px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden relative">
-          <Header />
+      <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+        <Header />
 
-          <main className="flex-1 overflow-hidden w-full relative selection:bg-primary/10">
-            <AppRouter />
-          </main>
+        <main className="flex-1 flex flex-col w-full mx-auto">
+          <AppRouter />
+        </main>
 
-          <Toaster
-            closeButton
-            richColors
-            position="bottom-right"
-            toastOptions={{
-              className: "border border-border/50 shadow-xl rounded-2xl",
-            }}
-          />
-        </div>
+        <Toaster closeButton position="bottom-right" />
       </div>
     </ThemeProvider>
   );

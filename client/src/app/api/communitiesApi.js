@@ -55,6 +55,18 @@ const extendedApi = discusslyApi.injectEndpoints({
       }),
       invalidatesTags: ['Community'],
     }),
+    // 📝 Update community
+    updateCommunity: builder.mutation({
+      query: ({ id, ...updatedData }) => ({
+        url: `${COMMUNITY_API_URL}/${id}`,
+        method: 'PUT',
+        body: updatedData,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        'Community',
+        { type: 'Community', id },
+      ],
+    }),
   }),
   overrideExisting: false,
 });
@@ -66,5 +78,6 @@ export const {
   useCreateCommunityMutation,
   useJoinCommunityMutation,
   useLeaveCommunityMutation,
-  useDeleteCommunityMutation
+  useDeleteCommunityMutation,
+  useUpdateCommunityMutation,
 } = extendedApi;

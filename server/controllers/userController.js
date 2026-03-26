@@ -94,20 +94,20 @@ export const login = asyncHandler(async (req, res) => {
 export const getProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id)
     .select('-passwordHash')
-    .populate('joinedCommunities', 'name _id')
-    .populate('followers', 'username _id')
-    .populate('following', 'username _id');
+    .populate('joinedCommunities', 'name _id image')
+    .populate('followers', 'username _id image')
+    .populate('following', 'username _id image');
 
   if (!user) {
     res.status(404);
     throw new Error('User not found');
   }
 
-  const createdCommunities = await Community.find({ createdBy: req.user.id }).select('name _id');
+  const createdCommunities = await Community.find({ createdBy: req.user.id }).select('name _id image');
 
   const posts = await Post.find({ author: req.user.id })
     .select('title _id community createdAt upvotes downvotes')
-    .populate('community', 'name _id');
+    .populate('community', 'name _id image');
 
   res.status(200).json({
     ...user.toObject(),
@@ -216,7 +216,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 
-  const { username, email, image, bio, isPrivate } = req.body;
+  const { username, email, image, bannerImage, bio, isPrivate } = req.body;
 
   // Validate if new username or email is already taken by *another* user
   if (username && username !== user.username) {
@@ -240,7 +240,11 @@ export const updateProfile = asyncHandler(async (req, res) => {
   if (image !== undefined) {
     user.image = image;
   }
-
+  
+  if (bannerImage !== undefined) {
+    user.bannerImage = bannerImage;
+  }
+  
   if (bio !== undefined) {
     user.bio = bio;
   }
@@ -257,6 +261,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
     username: user.username,
     email: user.email,
     image: user.image,
+    bannerImage: user.bannerImage,
     bio: user.bio,
     isPrivate: user.isPrivate
   });
@@ -279,9 +284,9 @@ export const getUserById = asyncHandler(async (req, res) => {
 
   const user = await User.findOne(query)
     .select('-passwordHash')
-    .populate('joinedCommunities', 'name _id')
-    .populate('followers', 'username _id')
-    .populate('following', 'username _id');
+    .populate('joinedCommunities', 'name _id image')
+    .populate('followers', 'username _id image')
+    .populate('following', 'username _id image');
 
   if (!user) {
     res.status(404);
@@ -290,11 +295,11 @@ export const getUserById = asyncHandler(async (req, res) => {
 
   const userId = user._id;
 
-  const createdCommunities = await Community.find({ createdBy: userId }).select('name _id');
+  const createdCommunities = await Community.find({ createdBy: userId }).select('name _id image');
 
   const posts = await Post.find({ author: userId })
     .select('title _id community createdAt upvotes downvotes content')
-    .populate('community', 'name _id');
+    .populate('community', 'name _id image');
 
   res.status(200).json({
     ...user.toObject(),

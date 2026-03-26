@@ -26,6 +26,7 @@ import {
 } from "../app/api/postsApi";
 import { toast } from "sonner";
 import { Input } from "./ui/input";
+import { cn, getAvatarUrl, getCommunityIconUrl } from "@/lib/utils";
 import { useSelector } from "react-redux";
 import {
   DropdownMenu,
@@ -122,7 +123,7 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
     }
   };
 
-  const avatarUrl = `https://api.dicebear.com/7.x/notionists/svg?seed=${comment.createdBy?.username || "anon"}`;
+    const avatarUrl = getAvatarUrl(comment.createdBy);
 
   return (
     <div
@@ -134,8 +135,8 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
       )}
 
       <div className="flex gap-2.5 group py-1.5">
-        <div className="shrink-0 w-6 h-6 rounded-full bg-muted/30 border border-border/20 overflow-hidden mt-0.5 shadow-xs flex items-center justify-center p-0.5">
-          <img src={avatarUrl} alt="" className="w-full h-full" />
+        <div className="shrink-0 w-6 h-6 rounded-full bg-muted/30 border border-border/20 overflow-hidden mt-0.5 shadow-xs flex items-center justify-center">
+          <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
         </div>
 
         <div className="flex-1 min-w-0 space-y-0.5">
@@ -382,7 +383,7 @@ const PostCard = ({ post }) => {
     }
   };
 
-  const avatarUrl = `https://api.dicebear.com/7.x/notionists/svg?seed=${post.author?.username || "anon"}`;
+    const avatarUrl = getAvatarUrl(post.author);
 
   return (
     <article className="rounded-xl border border-border/40 bg-card overflow-hidden hover:border-border/60 hover:shadow-xs transition-all duration-200">
@@ -440,8 +441,8 @@ const PostCard = ({ post }) => {
                 to={`/profile/${post.author?.username}`}
                 className="shrink-0"
               >
-                <div className="w-7 h-7 rounded-full bg-muted border border-border/30 overflow-hidden shadow-xs hover:scale-105 transition-transform p-0.5">
-                  <img src={avatarUrl} alt="" className="w-full h-full" />
+                <div className="w-8 h-8 rounded-full bg-muted border border-border/20 overflow-hidden shrink-0 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <img src={getAvatarUrl(post.author)} alt="" className="w-full h-full object-cover" />
                 </div>
               </Link>
               <div className="flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground font-medium uppercase tracking-tight">
@@ -449,8 +450,11 @@ const PostCard = ({ post }) => {
                   <>
                     <Link
                       to={`/communities/${post.community.name}`}
-                      className="text-foreground/80 font-bold hover:text-primary cursor-pointer transition-colors"
+                      className="text-foreground/80 font-bold hover:text-primary cursor-pointer transition-colors flex items-center gap-1"
                     >
+                      <div className="w-4 h-4 rounded-full bg-muted border border-border/20 overflow-hidden shrink-0">
+                        <img src={getCommunityIconUrl(post.community)} alt="" className="w-full h-full object-cover" />
+                      </div>
                       c/{post.community.name}
                     </Link>
                     <span className="text-muted-foreground/20">•</span>
@@ -552,9 +556,9 @@ const PostCard = ({ post }) => {
               <div className="flex gap-3 items-start">
                 <div className="w-7 h-7 shrink-0 rounded-full bg-muted border border-border/40 overflow-hidden mt-1 shadow-xs">
                   <img
-                    src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userInfo.username}`}
+                    src={getAvatarUrl(userInfo)}
                     alt="You"
-                    className="w-full h-full p-0.5"
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="flex-1 relative">

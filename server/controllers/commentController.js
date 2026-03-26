@@ -1,5 +1,6 @@
 import Comment from '../models/Comment.js';
 import Post from '../models/Post.js';
+import User from '../models/User.js';
 import buildCommentTree from '../utils/buildCommentTree.js';
 import { createNotification } from './notificationController.js';
 
@@ -10,15 +11,25 @@ import { createNotification } from './notificationController.js';
  */
 export const getCommentsByUser = async (req, res) => {
     try {
-        const { userId } = req.params;
+        const { userId: idOrUsername } = req.params;
+        let queryUserId = idOrUsername;
 
-        const comments = await Comment.find({ createdBy: userId })
+        // If not a valid ObjectId, try finding the user by username
+        if (!idOrUsername.match(/^[0-9a-fA-F]{24}$/)) {
+            const user = await User.findOne({ username: idOrUsername });
+            if (!user) {
+                return res.status(200).json([]); // No user, no comments
+            }
+            queryUserId = user._id;
+        }
+
+        const comments = await Comment.find({ createdBy: queryUserId })
             .sort({ createdAt: -1 })
-            .populate('createdBy', 'username _id')
+            .populate('createdBy', 'username _id image')
             .populate({
                 path: 'postId',
                 select: 'title _id community',
-                populate: { path: 'community', select: 'name _id' },
+                populate: { path: 'community', select: 'name _id image' },
             })
             .lean();
 
@@ -44,13 +55,13 @@ export const getCommentsByPostId = async (req, res) => {
         }
 
         const comments = await Comment.find({ postId })
-            .populate('createdBy', 'username')
+            .populate('createdBy', 'username image')
             .populate({
                 path: 'parentId',
                 select: 'content createdBy',
                 populate: {
                     path: 'createdBy',
-                    select: 'username'
+                    select: 'username image'
                 }
             })
             .sort({ createdAt: 1 }) // or -1 for newest first
@@ -81,7 +92,7 @@ export const createComment = async (req, res) => {
 
     try {
         // ✅ Validate post
-        const post = await Post.findById(postId).populate('author', 'username _id');
+        const post = await Post.findById(postId).populate('author', 'username _id image');
         if (!post) {
             return res.status(404).json({ message: 'Post not found.' });
         }
@@ -89,7 +100,7 @@ export const createComment = async (req, res) => {
         // ✅ Validate parent comment (if it's a reply)
         let parentComment = null;
         if (parentId) {
-            parentComment = await Comment.findById(parentId).populate('createdBy', 'username _id');
+            parentComment = await Comment.findById(parentId).populate('createdBy', 'username _id image');
             if (!parentComment) {
                 return res.status(404).json({ message: 'Parent comment not found.' });
             }
@@ -112,7 +123,7 @@ export const createComment = async (req, res) => {
         await Post.findByIdAndUpdate(postId, { $push: { comments: newComment._id } });
 
         // ✅ Populate author and parent author
-        await newComment.populate('createdBy', 'username _id');
+        await newComment.populate('createdBy', 'username _id image');
 
         if (newComment.parentId) {
             await newComment.populate({
@@ -120,7 +131,7 @@ export const createComment = async (req, res) => {
                 select: 'createdBy',
                 populate: {
                     path: 'createdBy',
-                    select: 'username',
+                    select: 'username image',
                 },
             });
         }
@@ -185,14 +196,14 @@ export const updateComment = async (req, res) => {
         await comment.save();
 
         // Re-populate for response
-        await comment.populate('createdBy', 'username');
+        await comment.populate('createdBy', 'username image');
         if (comment.parentId) {
             await comment.populate({
                 path: 'parentId',
                 select: 'createdBy',
                 populate: {
                     path: 'createdBy',
-                    select: 'username'
+                    select: 'username image'
                 }
             });
         }
@@ -254,7 +265,7 @@ export const toggleCommentVote = async (req, res) => {
     }
 
     try {
-        const comment = await Comment.findById(commentId).populate('createdBy', 'username _id');
+        const comment = await Comment.findById(commentId).populate('createdBy', 'username _id image');
         if (!comment) {
             return res.status(404).json({ message: 'Comment not found.' });
         }

@@ -9,7 +9,7 @@ import { io, connectedUsers } from '../server.js';
 export const getNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find({ user: req.user._id })
-      .populate('relatedUser', 'username _id')
+      .populate('relatedUser', 'username _id image')
       .sort({ createdAt: -1 })
       .limit(50); // Limit to latest 50 notifications
     
@@ -104,7 +104,7 @@ export const createNotification = async ({ userId, type, message, link = '', rel
     });
 
     // Populate the relatedUser field for the response
-    await newNotification.populate('relatedUser', 'username _id');
+    await newNotification.populate('relatedUser', 'username _id image');
 
     console.log(`📨 Created notification for user ${userId}:`, {
       type,

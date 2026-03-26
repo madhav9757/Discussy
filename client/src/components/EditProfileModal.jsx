@@ -1,33 +1,34 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useUpdateProfileMutation } from "../app/api/userApi";
+import { setCredentials } from "@/features/auth/authSlice";
+import { toast } from "sonner";
+
+// shadcn/ui components
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
-import {
-  Loader2,
-  User,
-  Mail,
-  FileText,
-  ShieldCheck,
-  ShieldAlert,
-} from "lucide-react";
-import { useUpdateProfileMutation } from "../app/api/userApi";
-import { toast } from "sonner";
-import { useDispatch } from "react-redux";
-import { setCredentials } from "@/features/auth/authSlice";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+// lucide icons
+import { Loader2, Lock, Globe } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const EditProfileModal = ({ isOpen, onClose, user }) => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     bio: "",
+    image: "",
+    bannerImage: "",
     isPrivate: false,
   });
 
@@ -40,6 +41,8 @@ const EditProfileModal = ({ isOpen, onClose, user }) => {
         username: user.username || "",
         email: user.email || "",
         bio: user.bio || "",
+        image: user.image || "",
+        bannerImage: user.bannerImage || "",
         isPrivate: user.isPrivate || false,
       });
     }
@@ -49,9 +52,8 @@ const EditProfileModal = ({ isOpen, onClose, user }) => {
     e.preventDefault();
     try {
       const result = await updateProfile(formData).unwrap();
-      // Update local auth state if it's the current user
       dispatch(setCredentials({ user: result }));
-      toast.success("Profile updated successfully!");
+      toast.success("Profile updated successfully");
       onClose();
     } catch (err) {
       toast.error(err.data?.message || "Failed to update profile");
@@ -60,152 +62,202 @@ const EditProfileModal = ({ isOpen, onClose, user }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[440px] rounded-2xl p-0 overflow-hidden border-border/30 shadow-2xl bg-card">
-        <div className="bg-muted/10 p-5 pb-3">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold tracking-tight flex items-center gap-2 text-foreground/90">
-              <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary/60 border border-primary/10">
-                <User size={16} strokeWidth={2.5} />
-              </div>
-              Identity Update
-            </DialogTitle>
-            <p className="text-[11px] text-muted-foreground/50 mt-1 font-bold uppercase tracking-widest">
-              Modify your digital presence
-            </p>
-          </DialogHeader>
-        </div>
+      <DialogContent className="sm:max-w-[425px] p-0 gap-0 overflow-hidden bg-background border-border/50">
+        <DialogHeader className="px-6 py-5 border-b border-border/50">
+          <DialogTitle className="text-lg font-semibold text-foreground">
+            Edit Profile
+          </DialogTitle>
+          <DialogDescription className="text-sm mt-1">
+            Update your personal information and privacy settings.
+          </DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="px-5 py-4 space-y-5">
-          <div className="space-y-3.5">
-            <div className="space-y-1.5">
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          <div className="px-6 py-4 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+            {/* Username */}
+            <div className="space-y-2">
               <Label
                 htmlFor="username"
-                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1"
+                className="text-xs font-medium text-foreground"
               >
                 Username
               </Label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground/20 group-focus-within:text-primary/50 transition-colors">
-                  <User size={14} />
-                </div>
-                <Input
-                  id="username"
-                  value={formData.username}
-                  onChange={(e) =>
-                    setFormData({ ...formData, username: e.target.value })
-                  }
-                  placeholder="The handle you go by"
-                  className="pl-9 h-10 rounded-xl border-border/30 bg-muted/20 focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40 transition-all font-medium text-sm"
-                />
-              </div>
+              <Input
+                id="username"
+                value={formData.username}
+                onChange={(e) =>
+                  setFormData({ ...formData, username: e.target.value })
+                }
+                placeholder="Username"
+                className="h-10 bg-muted/30 shadow-none border-border/50 focus-visible:ring-1"
+              />
             </div>
 
-            <div className="space-y-1.5">
+            {/* Email */}
+            <div className="space-y-2">
               <Label
                 htmlFor="email"
-                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1"
+                className="text-xs font-medium text-foreground"
               >
-                Email Address
+                Email
               </Label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground/20 group-focus-within:text-primary/50 transition-colors">
-                  <Mail size={14} />
-                </div>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  placeholder="your@email.com"
-                  className="pl-9 h-10 rounded-xl border-border/30 bg-muted/20 focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40 transition-all font-medium text-sm"
-                />
-              </div>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                placeholder="m@example.com"
+                className="h-10 bg-muted/30 shadow-none border-border/50 focus-visible:ring-1"
+              />
             </div>
 
-            <div className="space-y-1.5">
+            {/* Profile Picture URL */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="image"
+                className="text-xs font-medium text-foreground"
+              >
+                Profile Picture URL
+              </Label>
+              <Input
+                id="image"
+                value={formData.image}
+                onChange={(e) =>
+                  setFormData({ ...formData, image: e.target.value })
+                }
+                placeholder="https://example.com/pfp.png"
+                className="h-10 bg-muted/30 shadow-none border-border/50 focus-visible:ring-1"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Leave blank to use default DiceBear avatar.
+              </p>
+            </div>
+
+            {/* Banner Image URL */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="bannerImage"
+                className="text-xs font-medium text-foreground"
+              >
+                Banner Image URL
+              </Label>
+              <Input
+                id="bannerImage"
+                value={formData.bannerImage}
+                onChange={(e) =>
+                  setFormData({ ...formData, bannerImage: e.target.value })
+                }
+                placeholder="https://example.com/banner.png"
+                className="h-10 bg-muted/30 shadow-none border-border/50 focus-visible:ring-1"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                External URL for your profile background.
+              </p>
+            </div>
+
+            {/* Bio */}
+            <div className="space-y-2">
               <Label
                 htmlFor="bio"
-                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1"
+                className="text-xs font-medium text-foreground"
               >
-                Biography
+                Bio
               </Label>
-              <div className="relative group">
-                <div className="absolute top-2.5 left-3 pointer-events-none text-muted-foreground/20 group-focus-within:text-primary/50 transition-colors">
-                  <FileText size={14} />
-                </div>
-                <Textarea
-                  id="bio"
-                  value={formData.bio}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bio: e.target.value })
-                  }
-                  placeholder="What's your story?"
-                  className="pl-9 min-h-[90px] rounded-xl border-border/30 bg-muted/20 focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40 transition-all resize-none py-2.5 font-medium text-sm"
-                />
-              </div>
+              <Textarea
+                id="bio"
+                value={formData.bio}
+                onChange={(e) =>
+                  setFormData({ ...formData, bio: e.target.value })
+                }
+                placeholder="Tell us a little bit about yourself"
+                className="resize-none min-h-[80px] bg-muted/30 shadow-none border-border/50 focus-visible:ring-1 text-sm"
+              />
             </div>
 
-            <div className="pt-1">
+            {/* Privacy Setting (Settings Row Style) */}
+            <div className="pt-2">
               <button
                 type="button"
                 onClick={() =>
                   setFormData({ ...formData, isPrivate: !formData.isPrivate })
                 }
-                className={`w-full p-3 rounded-xl border transition-all flex items-center gap-3 text-left ${formData.isPrivate ? "bg-primary/5 border-primary/20" : "bg-muted/10 border-border/20 hover:border-border/40"}`}
+                className={cn(
+                  "w-full flex items-center justify-between p-4 rounded-lg border transition-colors text-left",
+                  formData.isPrivate
+                    ? "bg-primary/5 border-primary/20"
+                    : "bg-background border-border/50 hover:bg-muted/30",
+                )}
               >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      "p-2 rounded-md",
+                      formData.isPrivate
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {formData.isPrivate ? (
+                      <Lock size={16} />
+                    ) : (
+                      <Globe size={16} />
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-foreground">
+                      Private Account
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formData.isPrivate
+                        ? "Only approved members can see your profile."
+                        : "Your profile is visible to everyone."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Minimal Custom Toggle (if shadcn Switch isn't used) */}
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${formData.isPrivate ? "bg-primary text-primary-foreground" : "bg-muted-foreground/10 text-muted-foreground/40"}`}
-                >
-                  {formData.isPrivate ? (
-                    <ShieldCheck size={16} />
-                  ) : (
-                    <ShieldAlert size={16} />
+                  className={cn(
+                    "w-9 h-5 rounded-full relative transition-colors shrink-0 flex items-center px-0.5",
+                    formData.isPrivate
+                      ? "bg-primary"
+                      : "bg-muted-foreground/30",
                   )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-foreground/80 text-[13px] leading-tight">
-                    {formData.isPrivate ? "Stealth Mode" : "Public Discovery"}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/40 font-bold uppercase tracking-tight mt-0.5">
-                    {formData.isPrivate
-                      ? "Only approved tribe members"
-                      : "Open to the entire collective"}
-                  </p>
-                </div>
-                <div
-                  className={`w-8 h-4 rounded-full relative transition-colors overflow-hidden ${formData.isPrivate ? "bg-primary" : "bg-muted-foreground/20"}`}
                 >
                   <div
-                    className={`absolute top-0.5 w-3 h-3 rounded-full bg-background transition-all shadow-xs ${formData.isPrivate ? "right-0.5" : "left-0.5"}`}
+                    className={cn(
+                      "w-4 h-4 rounded-full bg-background transition-transform shadow-sm",
+                      formData.isPrivate ? "translate-x-4" : "translate-x-0",
+                    )}
                   />
                 </div>
               </button>
             </div>
           </div>
 
-          <DialogFooter className="pt-2 flex flex-row items-center gap-2">
+          <DialogFooter className="px-6 py-4 border-t border-border/50 bg-muted/10 flex-row justify-end gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="flex-1 h-10 rounded-xl font-bold text-xs uppercase tracking-widest border-border/30"
+              className="shadow-none border-border/50 h-9 px-4 text-xs font-medium"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
-              className="flex-1 h-10 rounded-xl font-bold text-xs uppercase tracking-widest shadow-xs transition-transform active:scale-95"
+              className="shadow-none h-9 px-4 text-xs font-medium"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                  Syncing...
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  Saving...
                 </>
               ) : (
-                "Finalize"
+                "Save Changes"
               )}
             </Button>
           </DialogFooter>

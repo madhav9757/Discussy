@@ -20,6 +20,14 @@ const communitySchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    image: {
+      type: String,
+      default: '',
+    },
+    bannerImage: {
+      type: String,
+      default: '',
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
