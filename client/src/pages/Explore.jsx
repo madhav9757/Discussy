@@ -414,7 +414,7 @@ const CommunityCard = ({ comm, badge, onClick }) => (
   >
     <Avatar className="w-8 h-8 shrink-0 rounded-xl border border-border/20">
       <AvatarImage src={getCommunityIconUrl(comm)} />
-      <AvatarFallback className="text-[11px] font-black rounded-xl bg-gradient-to-br from-muted to-muted/50">
+      <AvatarFallback className="text-[11px] font-black rounded-xl bg-linear-to-br from-muted to-muted/50">
         {comm.name?.charAt(0)?.toUpperCase()}
       </AvatarFallback>
     </Avatar>

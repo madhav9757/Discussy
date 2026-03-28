@@ -186,7 +186,7 @@ const CommunityWidget = ({ community }) => {
       {/* Banner */}
       <div className="h-[72px] relative overflow-hidden">
         <div
-          className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-orange-400/10 to-rose-500/20"
+          className="absolute inset-0 bg-linear-to-br from-amber-500/20 via-orange-400/10 to-rose-500/20"
           aria-hidden
         />
         {getCommunityBannerUrl(community) && (
@@ -196,7 +196,7 @@ const CommunityWidget = ({ community }) => {
             className="w-full h-full object-cover opacity-60 mix-blend-luminosity"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-card via-card/20 to-transparent" />
       </div>
 
       <CardContent className="px-4 pb-4 pt-0">
@@ -204,7 +204,7 @@ const CommunityWidget = ({ community }) => {
           <div className="relative">
             <Avatar className="w-14 h-14 border-[3px] border-card rounded-2xl shadow-lg ring-1 ring-border/20">
               <AvatarImage src={getCommunityIconUrl(community)} />
-              <AvatarFallback className="rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white font-black text-lg">
+              <AvatarFallback className="rounded-2xl bg-linear-to-br from-amber-400 to-orange-500 text-white font-black text-lg">
                 {community?.name?.[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -301,7 +301,7 @@ const AuthorWidget = ({ author, navigate }) => {
           >
             <Avatar className="w-11 h-11 rounded-xl border border-border/20 shadow-sm">
               <AvatarImage src={getAvatarUrl(author)} />
-              <AvatarFallback className="rounded-xl bg-gradient-to-br from-violet-400 to-indigo-500 text-white font-bold text-base">
+              <AvatarFallback className="rounded-xl bg-linear-to-br from-violet-400 to-indigo-500 text-white font-bold text-base">
                 {author?.username?.[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -415,7 +415,7 @@ const RulesWidget = () => (
    ShareWidget
 ───────────────────────────────────────── */
 const ShareWidget = ({ onCopy }) => (
-  <Card className="border-border/20 border-dashed bg-gradient-to-br from-primary/[0.04] via-transparent to-amber-500/[0.03] rounded-2xl p-5 relative overflow-hidden group">
+  <Card className="border-border/20 border-dashed bg-linear-to-br from-primary/4 via-transparent to-amber-500/3 rounded-2xl p-5 relative overflow-hidden group">
     <div
       className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
       style={{
@@ -424,7 +424,7 @@ const ShareWidget = ({ onCopy }) => (
       }}
       aria-hidden
     />
-    <Sparkles className="absolute -right-3 -bottom-3 w-20 h-20 text-primary/[0.04] group-hover:text-primary/[0.09] transition-colors duration-500" />
+    <Sparkles className="absolute -right-3 -bottom-3 w-20 h-20 text-primary/4 group-hover:text-primary/9 transition-colors duration-500" />
     <div className="relative z-10">
       <p className="text-sm font-black text-foreground mb-1 tracking-tight">
         Loved this post?
@@ -722,7 +722,7 @@ const PostPage = () => {
               >
                 <Avatar className="h-7 w-7 rounded-full border border-border/20 shrink-0">
                   <AvatarImage src={getAvatarUrl(post.author)} />
-                  <AvatarFallback className="text-[10px] font-black bg-gradient-to-br from-violet-400 to-indigo-500 text-white">
+                  <AvatarFallback className="text-[10px] font-black bg-linear-to-br from-violet-400 to-indigo-500 text-white">
                     {post.author?.username?.[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -772,7 +772,7 @@ const PostPage = () => {
                 transition={{ delay: 0.18 }}
                 className="relative mb-7"
               >
-                <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-primary/30 via-primary/10 to-transparent" />
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-linear-to-b from-primary/30 via-primary/10 to-transparent" />
                 <p className="text-[15px] md:text-[15.5px] text-foreground/75 leading-[1.78] whitespace-pre-wrap pl-5">
                   {post.content}
                 </p>
@@ -895,7 +895,7 @@ const PostPage = () => {
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-black tracking-tight flex items-center gap-2.5">
                     Discussion
-                    <span className="inline-flex items-center justify-center bg-muted text-muted-foreground text-[10px] font-black rounded-full px-2 py-0.5 min-w-[1.5rem]">
+                    <span className="inline-flex items-center justify-center bg-muted text-muted-foreground text-[10px] font-black rounded-full px-2 py-0.5 min-w-6">
                       {fmt(post.commentCount || 0)}
                     </span>
                   </h3>

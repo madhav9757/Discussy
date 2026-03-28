@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -30,11 +30,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // customized components
 import PostCard from "../components/PostCard";
 import EditProfileModal from "../components/EditProfileModal";
-import { cn, getAvatarUrl, getCommunityIconUrl, getUserBannerUrl } from "@/lib/utils";
+import {
+  cn,
+  getAvatarUrl,
+  getCommunityIconUrl,
+  getUserBannerUrl,
+} from "@/lib/utils";
 import { toast } from "sonner";
 
 // icons
@@ -50,6 +61,7 @@ import {
   Users,
   ExternalLink,
   ArrowBigUp,
+  ArrowBigDown,
   UserPlus,
   UserMinus,
   MessageCircle,
@@ -58,77 +70,308 @@ import {
   MoreHorizontal,
   Share2,
   ShieldAlert,
-  Link as LinkIcon,
   Flame,
+  TrendingUp,
+  Award,
+  Sparkles,
+  BookOpen,
+  ChevronUp,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
 
-/* ── Stat Box ── */
-const StatBox = ({ value, label, active, onClick }) => (
-  <div
+/* ═══════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════════ */
+
+/** Compute total karma from posts + comments */
+const computeKarma = (posts = [], comments = []) => {
+  const postKarma = posts.reduce(
+    (acc, p) => acc + (p.upvotes?.length || 0) - (p.downvotes?.length || 0),
+    0,
+  );
+  const commentKarma = comments.reduce(
+    (acc, c) => acc + (c.upvotes?.length || 0) - (c.downvotes?.length || 0),
+    0,
+  );
+  return postKarma + commentKarma;
+};
+
+/** Format large numbers: 1200 → 1.2k */
+const fmt = (n) => {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}m`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+};
+
+/* ═══════════════════════════════════════════════════════
+   STAT BOX
+════════════════════════════════════════════════════════ */
+const StatBox = ({ value, label, icon: Icon, active, onClick }) => (
+  <button
     onClick={onClick}
     className={cn(
-      "flex flex-col items-center p-3 rounded-xl cursor-pointer transition-all duration-200 border",
+      "group flex flex-col items-center gap-1.5 p-3.5 rounded-2xl cursor-pointer",
+      "border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
       active
-        ? "bg-primary/10 border-primary/20 text-primary shadow-sm"
-        : "bg-card border-transparent hover:bg-accent hover:border-border text-foreground",
+        ? "bg-primary/10 border-primary/25 shadow-[0_0_0_1px_hsl(var(--primary)/0.15)] text-primary"
+        : "bg-muted/40 border-transparent hover:bg-muted/70 hover:border-border/60 text-foreground",
     )}
   >
-    <span className="text-xl font-bold tracking-tight leading-none mb-1">
-      {value}
+    {Icon && (
+      <Icon
+        className={cn(
+          "h-4 w-4 transition-colors",
+          active
+            ? "text-primary"
+            : "text-muted-foreground group-hover:text-foreground",
+        )}
+      />
+    )}
+    <span className="text-lg font-black tracking-tight leading-none tabular-nums">
+      {fmt(value)}
     </span>
     <span
       className={cn(
-        "text-[11px] font-medium uppercase tracking-wider",
+        "text-[10px] font-semibold uppercase tracking-widest",
         active ? "text-primary/80" : "text-muted-foreground",
       )}
     >
       {label}
     </span>
-  </div>
+  </button>
 );
 
-/* ── Loading Skeleton ── */
+/* ═══════════════════════════════════════════════════════
+   PROFILE SKELETON
+════════════════════════════════════════════════════════ */
 const ProfileSkeleton = () => (
-  <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8 animate-pulse">
-    <Skeleton className="h-48 md:h-64 w-full rounded-2xl" />
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <div className="lg:col-span-4 space-y-6 -mt-20 z-10">
-        <Skeleton className="w-32 h-32 rounded-full border-4 border-background" />
-        <Skeleton className="h-8 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-24 w-full" />
-      </div>
-      <div className="lg:col-span-8 space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-40 w-full" />
+  <div className="w-full max-w-7xl mx-auto animate-pulse">
+    <Skeleton className="h-52 md:h-64 w-full" />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 -mt-16">
+        <div className="lg:col-span-4 space-y-4 z-10">
+          <Skeleton className="w-28 h-28 rounded-full border-4 border-background" />
+          <Skeleton className="h-7 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-20 w-full rounded-2xl" />
+          <div className="grid grid-cols-2 gap-3">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-20 rounded-2xl" />
+            ))}
+          </div>
+        </div>
+        <div className="lg:col-span-8 space-y-4 mt-6">
+          <Skeleton className="h-11 w-full rounded-xl" />
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-36 w-full rounded-xl" />
+          ))}
+        </div>
       </div>
     </div>
   </div>
 );
 
-/* ══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   EMPTY STATE
+════════════════════════════════════════════════════════ */
+const EmptyState = ({ Icon, title, desc, action }) => (
+  <div className="flex flex-col items-center justify-center py-16 px-6 text-center rounded-2xl border-2 border-dashed border-border/50 bg-muted/20">
+    <div className="h-14 w-14 rounded-2xl bg-muted border border-border/50 flex items-center justify-center mb-4 shadow-sm">
+      <Icon className="h-6 w-6 text-muted-foreground/60" />
+    </div>
+    <h3 className="text-base font-bold mb-1.5">{title}</h3>
+    <p className="text-sm text-muted-foreground max-w-xs mb-5">{desc}</p>
+    {action && (
+      <Button
+        onClick={action.onClick}
+        size="sm"
+        className="rounded-xl font-semibold shadow-sm"
+      >
+        {action.label}
+      </Button>
+    )}
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════
+   COMMENT CARD
+════════════════════════════════════════════════════════ */
+const CommentCard = ({ comment, onClick }) => {
+  const voteScore =
+    (comment.upvotes?.length || 0) - (comment.downvotes?.length || 0);
+
+  return (
+    <Card
+      onClick={onClick}
+      className={cn(
+        "group overflow-hidden cursor-pointer transition-all duration-200",
+        "border-border/40 hover:border-primary/30 hover:shadow-md",
+        "bg-card/60 backdrop-blur-sm",
+      )}
+    >
+      <CardContent className="p-0">
+        {/* Post context header */}
+        <div className="px-4 pt-3.5 pb-2.5 flex items-center gap-2.5 border-b border-border/30 bg-muted/20">
+          <div className="w-7 h-7 rounded-lg bg-muted border border-border/30 overflow-hidden shrink-0">
+            <img
+              src={getCommunityIconUrl(comment.postId?.community)}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0 flex-1">
+            <Link
+              to={`/communities/${comment.postId?.community?.name}`}
+              onClick={(e) => e.stopPropagation()}
+              className="font-bold text-foreground/80 hover:text-primary transition-colors truncate"
+            >
+              c/{comment.postId?.community?.name || "unknown"}
+            </Link>
+            <span className="opacity-30 shrink-0">·</span>
+            <span className="truncate">
+              {comment.postId?.title || "Deleted post"}
+            </span>
+          </div>
+          <span className="text-[10px] text-muted-foreground/60 shrink-0">
+            {formatDistanceToNow(new Date(comment.createdAt), {
+              addSuffix: true,
+            })}
+          </span>
+        </div>
+
+        {/* Comment body */}
+        <div className="px-4 py-3 flex gap-3 items-start">
+          <div className="flex flex-col items-center gap-0.5 shrink-0 pt-0.5">
+            <ChevronUp
+              className={cn(
+                "h-4 w-4",
+                voteScore > 0 ? "text-orange-500" : "text-muted-foreground/40",
+              )}
+            />
+            <span
+              className={cn(
+                "text-[11px] font-black tabular-nums",
+                voteScore > 0
+                  ? "text-orange-500"
+                  : voteScore < 0
+                    ? "text-blue-500"
+                    : "text-muted-foreground",
+              )}
+            >
+              {voteScore}
+            </span>
+          </div>
+          <p className="text-sm leading-relaxed text-foreground/85 line-clamp-3">
+            {comment.content}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   USER CARD  (followers / following)
+════════════════════════════════════════════════════════ */
+const UserCard = ({ u, onClick }) => (
+  <Card
+    onClick={onClick}
+    className="group cursor-pointer border-border/40 hover:border-primary/30 hover:shadow-md transition-all duration-200 bg-card/60"
+  >
+    <CardContent className="p-4 flex items-center gap-3">
+      <div className="relative shrink-0">
+        <div className="w-11 h-11 rounded-full border-2 border-background ring-1 ring-border/30 overflow-hidden shadow-sm">
+          <img
+            src={getAvatarUrl(u)}
+            alt={u.username}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          />
+        </div>
+        {/* online indicator placeholder */}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-black text-sm truncate group-hover:text-primary transition-colors">
+          {u.username}
+        </p>
+        <p className="text-xs text-muted-foreground truncate">
+          @{u.username?.toLowerCase()}
+        </p>
+      </div>
+      <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+    </CardContent>
+  </Card>
+);
+
+/* ═══════════════════════════════════════════════════════
+   COMMUNITY CARD
+════════════════════════════════════════════════════════ */
+const CommunityCard = ({ community, isFounder, onClick }) => (
+  <Card
+    onClick={onClick}
+    className="group cursor-pointer border-border/40 hover:border-primary/30 hover:shadow-md transition-all duration-200 bg-card/60 overflow-hidden"
+  >
+    <CardContent className="p-4 flex items-center gap-3.5">
+      <div className="w-11 h-11 rounded-xl bg-muted border border-border/20 overflow-hidden shrink-0 shadow-sm">
+        <img
+          src={getCommunityIconUrl(community)}
+          alt={community.name}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+        />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-black text-sm truncate group-hover:text-primary transition-colors">
+          c/{community.name}
+        </h3>
+        <div className="flex items-center gap-2 mt-0.5">
+          <Badge
+            variant="outline"
+            className={cn(
+              "h-4 px-1.5 text-[9px] font-bold uppercase tracking-wider border",
+              isFounder
+                ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                : "bg-primary/5 text-primary/80 border-primary/15",
+            )}
+          >
+            {isFounder ? "Founder" : "Member"}
+          </Badge>
+          {community.memberCount != null && (
+            <span className="text-[10px] text-muted-foreground font-medium">
+              {fmt(community.memberCount)} members
+            </span>
+          )}
+        </div>
+      </div>
+      <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+    </CardContent>
+  </Card>
+);
+
+/* ═══════════════════════════════════════════════════════
+   MAIN PROFILE PAGE
+════════════════════════════════════════════════════════ */
 const Profile = () => {
   const { idOrUsername } = useParams();
   const navigate = useNavigate();
   const { userInfo } = useSelector((s) => s.auth);
+
   const [activeTab, setActiveTab] = useState("posts");
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [followHover, setFollowHover] = useState(false);
 
+  /* ── API ── */
   const {
     data: user,
     isLoading: userLoading,
     isError,
   } = useGetUserByIdQuery(idOrUsername, { skip: !idOrUsername });
 
-  const { data: posts, isLoading: postsLoading } = useGetPostsByUserQuery(
+  const { data: posts = [], isLoading: postsLoading } = useGetPostsByUserQuery(
     idOrUsername,
     { skip: !idOrUsername },
   );
 
-  const { data: userComments, isLoading: commentsLoading } =
+  const { data: userComments = [], isLoading: commentsLoading } =
     useGetCommentsByUserQuery(idOrUsername, {
       skip: !idOrUsername || activeTab !== "comments",
     });
@@ -137,15 +380,33 @@ const Profile = () => {
   const [unfollowUser, { isLoading: isUnfollowing }] =
     useUnfollowUserMutation();
 
+  /* ── Derived ── */
   const isOwnProfile =
     userInfo?._id === user?._id || userInfo?.username === idOrUsername;
+
   const isFollowingUser = user?.followers?.some(
     (f) => (f._id || f) === userInfo?._id,
   );
 
+  const karma = computeKarma(posts, userComments);
+
+  const allCommunities = React.useMemo(() => {
+    const combined = [
+      ...(user?.createdCommunities || []),
+      ...(user?.joinedCommunities || []),
+    ];
+    const seen = new Set();
+    return combined.filter((c) => {
+      if (!c?._id || seen.has(c._id)) return false;
+      seen.add(c._id);
+      return true;
+    });
+  }, [user?.createdCommunities, user?.joinedCommunities]);
+
+  /* ── Handlers ── */
   const handleFollowToggle = async () => {
     if (!userInfo) {
-      toast.error("Please login to follow users");
+      toast.error("Please log in to follow users");
       navigate("/login");
       return;
     }
@@ -155,59 +416,32 @@ const Profile = () => {
         toast.success(`Unfollowed ${user.username}`);
       } else {
         await followUser(user._id).unwrap();
-        toast.success(`Now following ${user.username}`);
+        toast.success(`Now following ${user.username}! 🎉`);
       }
     } catch (err) {
-      toast.error(err.data?.message || "Failed to update follow status");
+      toast.error(err?.data?.message || "Failed to update follow status");
     }
   };
 
   const copyProfileLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast.success("Profile link copied to clipboard");
+    toast.success("Profile link copied!");
   };
 
-  const allCommunities = React.useMemo(() => {
-    const combined = [
-      ...(user?.createdCommunities || []),
-      ...(user?.joinedCommunities || []),
-    ];
-    // De-duplicate by _id
-    const unique = [];
-    const seen = new Set();
-    combined.forEach((c) => {
-      if (c && c._id && !seen.has(c._id)) {
-        seen.add(c._id);
-        unique.push(c);
-      }
-    });
-    return unique;
-  }, [user?.createdCommunities, user?.joinedCommunities]);
-
-  if (isError && !userLoading) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-6">
-        <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center">
-          <User className="w-12 h-12 text-muted-foreground" />
-        </div>
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold">User not found</h2>
-          <p className="text-muted-foreground">
-            This account doesn't exist or has been removed.
-          </p>
-        </div>
-        <Button onClick={() => navigate("/")} variant="outline">
-          Back to Home
-        </Button>
-      </div>
-    );
-  }
-
-  if (userLoading) return <ProfileSkeleton />;
-
+  /* ── Tab definitions ── */
   const TABS = [
-    { id: "posts", Icon: Grid3x3, label: "Posts", count: posts?.length || 0 },
-    { id: "comments", Icon: MessageSquare, label: "Comments" },
+    {
+      id: "posts",
+      Icon: Grid3x3,
+      label: "Posts",
+      count: posts.length,
+    },
+    {
+      id: "comments",
+      Icon: MessageSquare,
+      label: "Comments",
+      count: userComments.length || undefined,
+    },
     {
       id: "communities",
       Icon: Hash,
@@ -218,262 +452,363 @@ const Profile = () => {
       id: "followers",
       Icon: Users,
       label: "Followers",
-      count: user.followers?.length || 0,
+      count: user?.followers?.length || 0,
     },
     {
       id: "following",
       Icon: User,
       label: "Following",
-      count: user.following?.length || 0,
+      count: user?.following?.length || 0,
     },
   ];
 
-  return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* ── Banner ── */}
-      <div
-        className={`w-full h-[25vh] md:h-[30vh] ${!getUserBannerUrl(user) && "bg-linear-to-tr from-primary/80 via-primary/40 to-muted"} relative border-b overflow-hidden`}
-        style={
-          getUserBannerUrl(user)
-            ? {
-                backgroundImage: `url("${getUserBannerUrl(user)}")`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-            : {}
-        }
-      >
-        {!user.bannerImage && (
-          <div
-            className="absolute inset-0 opacity-[0.15]"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)",
-              backgroundSize: "32px 32px",
-            }}
-          />
-        )}
+  /* ── Error ── */
+  if (isError && !userLoading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-5 px-4">
+        <div className="w-20 h-20 rounded-3xl bg-muted border border-border/50 flex items-center justify-center">
+          <User className="w-9 h-9 text-muted-foreground/60" />
+        </div>
+        <div className="text-center">
+          <h2 className="text-xl font-black mb-1">User not found</h2>
+          <p className="text-sm text-muted-foreground">
+            This account doesn't exist or has been removed.
+          </p>
+        </div>
+        <Button
+          onClick={() => navigate("/")}
+          variant="outline"
+          size="sm"
+          className="rounded-xl"
+        >
+          Back to Home
+        </Button>
       </div>
+    );
+  }
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* ── Left Sidebar (Profile Info) ── */}
-          <div className="lg:col-span-4 lg:col-start-1 -mt-16 md:-mt-24 z-10 relative space-y-6">
-            <Card className="border-none shadow-lg bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/75">
-              <CardContent className="pt-6">
-                <div className="flex flex-col sm:flex-row lg:flex-col items-start gap-4 sm:gap-6 lg:gap-4">
-                  {/* Avatar */}
-                  <Avatar className="w-28 h-28 md:w-36 md:h-36 border-4 border-background shadow-xl ring-2 ring-border/50 bg-muted">
-                    <AvatarImage
-                      src={getAvatarUrl(user)}
-                      className="object-cover"
-                    />
-                    <AvatarFallback className="text-4xl font-bold">
-                      {user.username.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+  if (userLoading) return <ProfileSkeleton />;
 
-                  {/* Info & Actions Container */}
-                  <div className="flex-1 w-full space-y-4">
-                    <div className="flex items-start justify-between w-full gap-2">
-                      <div>
-                        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight flex items-center gap-2">
-                          {user.username}
-                          {isOwnProfile && (
-                            <Badge
-                              variant="secondary"
-                              className="text-[10px] h-5"
-                            >
-                              YOU
-                            </Badge>
-                          )}
-                        </h1>
-                        <p className="text-sm text-muted-foreground font-medium flex items-center gap-1 mt-1">
-                          @{user.username?.toLowerCase()}
-                        </p>
-                      </div>
+  const hasBanner = !!getUserBannerUrl(user);
 
-                      {/* Dropdown Actions */}
+  return (
+    <TooltipProvider delayDuration={300}>
+      <div className="min-h-screen bg-background pb-24">
+        {/* ══════════════════════════════════════
+            BANNER
+        ══════════════════════════════════════ */}
+        <div className="relative w-full h-44 md:h-56 overflow-hidden">
+          {hasBanner ? (
+            <img
+              src={getUserBannerUrl(user)}
+              alt="profile banner"
+              className="w-full h-full object-cover object-center"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-linear-to-br from-primary/30 via-primary/10 to-background">
+              {/* Subtle dot-grid texture */}
+              <div
+                className="absolute inset-0 opacity-[0.12]"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 1.5px 1.5px, currentColor 1px, transparent 0)",
+                  backgroundSize: "28px 28px",
+                }}
+              />
+            </div>
+          )}
+          {/* Bottom fade so content blends into page */}
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-background to-transparent" />
+        </div>
+
+        {/* ══════════════════════════════════════
+            MAIN GRID
+        ══════════════════════════════════════ */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* ────────────────────────────────────
+                LEFT SIDEBAR
+            ──────────────────────────────────── */}
+            <aside className="lg:col-span-4 -mt-14 md:-mt-20 z-10 relative space-y-4">
+              {/* ── Profile Card ── */}
+              <Card className="border-border/50 shadow-xl bg-card/95 backdrop-blur-md overflow-visible">
+                <CardContent className="pt-5 pb-5 px-5 space-y-4">
+                  {/* Avatar row */}
+                  <div className="flex items-end justify-between">
+                    <Avatar className="w-24 h-24 md:w-28 md:h-28 border-4 border-background shadow-2xl ring-2 ring-border/40">
+                      <AvatarImage
+                        src={getAvatarUrl(user)}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="text-3xl font-black bg-primary/10 text-primary">
+                        {user.username.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    {/* Actions cluster */}
+                    <div className="flex items-center gap-2 pb-1">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-full"
+                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuContent align="end" className="w-44">
                           <DropdownMenuItem onClick={copyProfileLink}>
-                            <Share2 className="mr-2 h-4 w-4" /> Share Profile
+                            <Share2 className="mr-2 h-3.5 w-3.5" />
+                            Share Profile
                           </DropdownMenuItem>
                           {!isOwnProfile && (
                             <>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive">
-                                <ShieldAlert className="mr-2 h-4 w-4" /> Report
-                                User
+                              <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                <ShieldAlert className="mr-2 h-3.5 w-3.5" />
+                                Report User
                               </DropdownMenuItem>
                             </>
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
+                  </div>
 
-                    {user.bio && (
-                      <p className="text-sm leading-relaxed text-foreground/90">
-                        {user.bio}
-                      </p>
-                    )}
+                  {/* Name + badges */}
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h1 className="text-xl font-black tracking-tight">
+                        {user.displayName || user.username}
+                      </h1>
+                      {isOwnProfile && (
+                        <Badge
+                          variant="secondary"
+                          className="text-[9px] h-4 px-1.5 font-bold uppercase tracking-widest"
+                        >
+                          You
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground font-medium mt-0.5">
+                      @{user.username?.toLowerCase()}
+                    </p>
+                  </div>
 
-                    {/* Meta Details */}
-                    <div className="space-y-2.5 pt-2">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4 text-primary/70" />
-                        <span>{user.location || "Location hidden"}</span>
+                  {/* Bio */}
+                  {user.bio && (
+                    <p className="text-sm leading-relaxed text-foreground/80">
+                      {user.bio}
+                    </p>
+                  )}
+
+                  <Separator className="opacity-50" />
+
+                  {/* Meta */}
+                  <div className="space-y-2">
+                    {user.location && (
+                      <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-primary/60" />
+                        <span className="truncate">{user.location}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <CalendarDays className="h-4 w-4 text-primary/70" />
-                        <span>
-                          Joined{" "}
-                          {new Date(
-                            user.createdAt || Date.now(),
-                          ).toLocaleDateString(undefined, {
-                            month: "long",
-                            year: "numeric",
-                          })}
+                    )}
+                    <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                      <CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary/60" />
+                      <span>
+                        Joined{" "}
+                        {new Date(
+                          user.createdAt || Date.now(),
+                        ).toLocaleDateString(undefined, {
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    {user.website && (
+                      <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                        <Globe className="h-3.5 w-3.5 shrink-0 text-primary/60" />
+                        <a
+                          href={
+                            user.website.startsWith("http")
+                              ? user.website
+                              : `https://${user.website}`
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary hover:underline flex items-center gap-1 truncate"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {user.website.replace(/^https?:\/\//, "")}
+                          <ExternalLink className="h-3 w-3 shrink-0" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Karma chip */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 cursor-default w-fit">
+                        <Flame className="h-3.5 w-3.5 text-amber-500" />
+                        <span className="text-sm font-black text-amber-600 tabular-nums">
+                          {fmt(karma)}
+                        </span>
+                        <span className="text-xs text-amber-600/70 font-semibold">
+                          karma
                         </span>
                       </div>
-                      {user.website && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Globe className="h-4 w-4 text-primary/70" />
-                          <a
-                            href={user.website}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-primary hover:underline hover:text-primary/80 transition-colors flex items-center gap-1"
-                          >
-                            {user.website.replace(/^https?:\/\//, "")}
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </div>
-                      )}
-                    </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">Total post + comment karma</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                    {/* Primary Actions */}
-                    <div className="pt-4 grid grid-cols-2 gap-3 w-full">
-                      {isOwnProfile ? (
-                        <Button
-                          onClick={() => setIsEditOpen(true)}
-                          className="col-span-2 shadow-sm font-semibold"
-                        >
-                          <Settings className="mr-2 h-4 w-4" /> Edit Profile
-                        </Button>
-                      ) : (
-                        <>
-                          <Button
-                            onClick={handleFollowToggle}
-                            disabled={isFollowing || isUnfollowing}
-                            variant={isFollowingUser ? "outline" : "default"}
-                            className={cn(
-                              "shadow-sm font-semibold transition-all",
-                              isFollowingUser &&
-                                "hover:border-destructive hover:text-destructive",
-                            )}
-                          >
-                            {isFollowing || isUnfollowing ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : isFollowingUser ? (
-                              <>
-                                <UserMinus className="mr-2 h-4 w-4" /> Unfollow
-                              </>
-                            ) : (
-                              <>
-                                <UserPlus className="mr-2 h-4 w-4" /> Follow
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            className="shadow-sm font-semibold"
-                          >
-                            <MessageCircle className="mr-2 h-4 w-4" /> Message
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-3">
-              <StatBox
-                value={posts?.length || 0}
-                label="Posts"
-                active={activeTab === "posts"}
-                onClick={() => setActiveTab("posts")}
-              />
-              <StatBox
-                value={user.joinedCommunities?.length || 0}
-                label="Communities"
-                active={activeTab === "communities"}
-                onClick={() => setActiveTab("communities")}
-              />
-              <StatBox
-                value={user.followers?.length || 0}
-                label="Followers"
-                active={activeTab === "followers"}
-                onClick={() => setActiveTab("followers")}
-              />
-              <StatBox
-                value={user.following?.length || 0}
-                label="Following"
-                active={activeTab === "following"}
-                onClick={() => setActiveTab("following")}
-              />
-            </div>
-          </div>
-
-          {/* ── Right Main Content (Tabs) ── */}
-          <div className="lg:col-span-8 lg:mt-8 space-y-6">
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="w-full justify-start h-auto p-1 bg-card border shadow-sm rounded-xl overflow-x-auto custom-scrollbar flex-nowrap">
-                {TABS.map(({ id, Icon, label, count }) => (
-                  <TabsTrigger
-                    key={id}
-                    value={id}
-                    className="flex items-center gap-2 py-2.5 px-4 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all shrink-0"
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span className="font-semibold">{label}</span>
-                    {count !== undefined && (
-                      <Badge
-                        variant="secondary"
-                        className="ml-1.5 h-5 px-1.5 bg-background/20 hover:bg-background/20 data-[state=active]:text-primary-foreground border-none"
-                      >
-                        {count}
-                      </Badge>
+                  {/* CTA buttons */}
+                  <div
+                    className={cn(
+                      "grid gap-2.5",
+                      isOwnProfile ? "grid-cols-1" : "grid-cols-2",
                     )}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+                  >
+                    {isOwnProfile ? (
+                      <Button
+                        onClick={() => setIsEditOpen(true)}
+                        className="w-full rounded-xl font-bold shadow-sm"
+                        size="sm"
+                      >
+                        <Settings className="mr-2 h-3.5 w-3.5" />
+                        Edit Profile
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          onClick={handleFollowToggle}
+                          onMouseEnter={() => setFollowHover(true)}
+                          onMouseLeave={() => setFollowHover(false)}
+                          disabled={isFollowing || isUnfollowing}
+                          variant={isFollowingUser ? "outline" : "default"}
+                          size="sm"
+                          className={cn(
+                            "rounded-xl font-bold shadow-sm transition-all",
+                            isFollowingUser &&
+                              followHover &&
+                              "border-destructive/60 text-destructive hover:bg-destructive/5",
+                          )}
+                        >
+                          {isFollowing || isUnfollowing ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : isFollowingUser ? (
+                            <>
+                              {followHover ? (
+                                <UserMinus className="mr-1.5 h-3.5 w-3.5" />
+                              ) : (
+                                <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+                              )}
+                              {followHover ? "Unfollow" : "Following"}
+                            </>
+                          ) : (
+                            <>
+                              <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+                              Follow
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl font-bold shadow-sm hover:bg-primary/5 hover:border-primary/30"
+                        >
+                          <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
+                          Message
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
-              {/* Tab Content Wrappers with Animation */}
-              <div className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {/* ── Stats Grid ── */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <StatBox
+                  value={posts.length}
+                  label="Posts"
+                  icon={BookOpen}
+                  active={activeTab === "posts"}
+                  onClick={() => setActiveTab("posts")}
+                />
+                <StatBox
+                  value={allCommunities.length}
+                  label="Communities"
+                  icon={Hash}
+                  active={activeTab === "communities"}
+                  onClick={() => setActiveTab("communities")}
+                />
+                <StatBox
+                  value={user.followers?.length || 0}
+                  label="Followers"
+                  icon={Users}
+                  active={activeTab === "followers"}
+                  onClick={() => setActiveTab("followers")}
+                />
+                <StatBox
+                  value={user.following?.length || 0}
+                  label="Following"
+                  icon={UserPlus}
+                  active={activeTab === "following"}
+                  onClick={() => setActiveTab("following")}
+                />
+              </div>
+            </aside>
+
+            {/* ────────────────────────────────────
+                RIGHT MAIN CONTENT
+            ──────────────────────────────────── */}
+            <main className="lg:col-span-8 mt-0 lg:mt-6 space-y-5">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                {/* Tab bar */}
+                <TabsList className="w-full justify-start h-auto p-1 bg-card border border-border/50 shadow-sm rounded-2xl overflow-x-auto scrollbar-hide flex-nowrap">
+                  {TABS.map(({ id, Icon, label, count }) => (
+                    <TabsTrigger
+                      key={id}
+                      value={id}
+                      className={cn(
+                        "flex items-center gap-1.5 py-2 px-3.5 rounded-xl shrink-0",
+                        "text-sm font-semibold transition-all duration-150",
+                        "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm",
+                        "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground data-[state=inactive]:hover:bg-muted/60",
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5 shrink-0" />
+                      <span>{label}</span>
+                      {count !== undefined && (
+                        <span
+                          className={cn(
+                            "text-[10px] font-black tabular-nums px-1.5 py-0.5 rounded-md",
+                            "data-[state=active]:bg-primary-foreground/20 data-[state=active]:text-primary-foreground",
+                            "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {fmt(count)}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
                 {/* ── Posts ── */}
-                <TabsContent value="posts" className="m-0 space-y-4">
+                <TabsContent value="posts" className="mt-5 space-y-3">
                   {postsLoading ? (
-                    <div className="flex justify-center py-12">
-                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/50" />
+                    <div className="space-y-3">
+                      {[...Array(3)].map((_, i) => (
+                        <Skeleton key={i} className="h-32 w-full rounded-xl" />
+                      ))}
                     </div>
-                  ) : posts?.length > 0 ? (
+                  ) : posts.length > 0 ? (
                     posts.map((post) => <PostCard key={post._id} post={post} />)
                   ) : (
                     <EmptyState
@@ -486,7 +821,10 @@ const Profile = () => {
                       }
                       action={
                         isOwnProfile
-                          ? { label: "Create Post", onClick: () => {} }
+                          ? {
+                              label: "Create Post",
+                              onClick: () => navigate("/submit"),
+                            }
                           : null
                       }
                     />
@@ -494,77 +832,21 @@ const Profile = () => {
                 </TabsContent>
 
                 {/* ── Comments ── */}
-                <TabsContent value="comments" className="m-0 space-y-4">
+                <TabsContent value="comments" className="mt-5 space-y-3">
                   {commentsLoading ? (
-                    <div className="flex justify-center py-12">
-                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/50" />
-                    </div>
-                  ) : userComments?.length > 0 ? (
-                    <div className="flex flex-col gap-4">
-                      {userComments.map((comment) => (
-                        <Card
-                          key={comment._id}
-                          className="group overflow-hidden border-border/40 hover:border-primary/30 hover:shadow-md transition-all duration-300 cursor-pointer bg-card/50"
-                          onClick={() =>
-                            navigate(`/post/${comment.postId?._id}`)
-                          }
-                        >
-                          <div className="p-5 flex gap-4">
-                            {/* Left: Community Icon */}
-                            <div className="shrink-0 pt-0.5">
-                              <div className="w-9 h-9 rounded-xl bg-muted border border-border/10 overflow-hidden flex items-center justify-center shadow-xs">
-                                <img
-                                  src={getCommunityIconUrl(
-                                    comment.postId?.community,
-                                  )}
-                                  alt=""
-                                  className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Right: Content */}
-                            <div className="flex-1 min-w-0 space-y-2">
-                              <div className="flex items-center justify-between gap-4">
-                                <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                                  <Link
-                                    to={`/communities/${comment.postId?.community?.name}`}
-                                    className="text-foreground/80 hover:text-primary transition-colors flex items-center gap-1.5"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    c/{comment.postId?.community?.name}
-                                  </Link>
-                                  <span className="opacity-30">•</span>
-                                  <span>
-                                    {formatDistanceToNow(
-                                      new Date(comment.createdAt),
-                                      { addSuffix: true },
-                                    )}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1.5 bg-muted/30 px-2 py-0.5 rounded-full border border-border/10">
-                                  <ArrowBigUp className="h-3.5 w-3.5 text-orange-500" />
-                                  <span className="text-[10px] font-black">
-                                    {(comment.upvotes?.length || 0) -
-                                      (comment.downvotes?.length || 0)}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <h4 className="text-[13px] font-bold text-foreground/70 group-hover:text-primary transition-colors line-clamp-1">
-                                Re: {comment.postId?.title || "Deleted post"}
-                              </h4>
-
-                              <div className="relative">
-                                <p className="text-[14px] leading-relaxed text-foreground/90 font-medium pl-4 border-l-2 border-primary/20 group-hover:border-primary transition-colors line-clamp-3 italic">
-                                  "{comment.content}"
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
+                    <div className="space-y-3">
+                      {[...Array(3)].map((_, i) => (
+                        <Skeleton key={i} className="h-24 w-full rounded-xl" />
                       ))}
                     </div>
+                  ) : userComments.length > 0 ? (
+                    userComments.map((comment) => (
+                      <CommentCard
+                        key={comment._id}
+                        comment={comment}
+                        onClick={() => navigate(`/post/${comment.postId?._id}`)}
+                      />
+                    ))
                   ) : (
                     <EmptyState
                       Icon={MessageSquare}
@@ -579,61 +861,22 @@ const Profile = () => {
                 </TabsContent>
 
                 {/* ── Communities ── */}
-                <TabsContent value="communities" className="m-0">
+                <TabsContent value="communities" className="mt-5">
                   {allCommunities.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {allCommunities.map((community) => {
                         const isFounder = (user.createdCommunities || []).some(
                           (c) => c._id === community._id,
                         );
                         return (
-                          <Card
+                          <CommunityCard
                             key={community._id}
-                            className="group relative overflow-hidden border-border/40 hover:border-primary/40 hover:shadow-lg transition-all duration-300 cursor-pointer bg-card/50"
+                            community={community}
+                            isFounder={isFounder}
                             onClick={() =>
                               navigate(`/communities/${community.name}`)
                             }
-                          >
-                            <CardContent className="p-5 flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-2xl bg-muted border border-border/10 overflow-hidden flex items-center justify-center shadow-xs">
-                                <img
-                                  src={getCommunityIconUrl(community)}
-                                  alt=""
-                                  className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-black text-base truncate group-hover:text-primary transition-colors tracking-tight">
-                                  c/{community.name}
-                                </h3>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <Badge
-                                    variant="secondary"
-                                    className={cn(
-                                      "h-5 px-1.5 text-[9px] font-bold uppercase tracking-wider",
-                                      isFounder
-                                        ? "bg-orange-500/10 text-orange-500 border-orange-500/20"
-                                        : "bg-primary/5 text-primary border-primary/10",
-                                    )}
-                                  >
-                                    {isFounder ? "Founder" : "Member"}
-                                  </Badge>
-                                  <span className="text-[11px] text-muted-foreground font-medium">
-                                    Join Date:{" "}
-                                    {new Date(
-                                      community.createdAt || Date.now(),
-                                    ).toLocaleDateString(undefined, {
-                                      month: "short",
-                                      year: "numeric",
-                                    })}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center text-muted-foreground/40 group-hover:text-primary group-hover:bg-primary/5 transition-all">
-                                <ChevronRight className="h-4 w-4" />
-                              </div>
-                            </CardContent>
-                          </Card>
+                          />
                         );
                       })}
                     </div>
@@ -643,7 +886,7 @@ const Profile = () => {
                       title="No communities"
                       desc={
                         isOwnProfile
-                          ? "Find communities that interest you!"
+                          ? "Find and join communities that interest you!"
                           : "This user hasn't joined any communities yet."
                       }
                       action={
@@ -660,43 +903,18 @@ const Profile = () => {
 
                 {/* ── Followers / Following ── */}
                 {["followers", "following"].map((tab) => (
-                  <TabsContent key={tab} value={tab} className="m-0">
+                  <TabsContent key={tab} value={tab} className="mt-5">
                     {(() => {
                       const list =
                         tab === "followers" ? user.followers : user.following;
                       return list?.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {list.map((u) => (
-                            <Card
+                            <UserCard
                               key={u._id}
-                              className="group relative overflow-hidden border-border/40 hover:border-primary/40 hover:shadow-lg transition-all duration-300 cursor-pointer bg-card/50"
+                              u={u}
                               onClick={() => navigate(`/profile/${u.username}`)}
-                            >
-                              <CardContent className="p-4 flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full border-2 border-background ring-1 ring-border/20 overflow-hidden shadow-sm">
-                                  <img
-                                    src={getAvatarUrl(u)}
-                                    alt=""
-                                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                                  />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="font-black text-base truncate group-hover:text-primary transition-colors tracking-tight">
-                                    {u.username}
-                                  </h3>
-                                  <p className="text-xs text-muted-foreground font-medium truncate">
-                                    @{u.username.toLowerCase()}
-                                  </p>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 group-hover:bg-primary/5 group-hover:text-primary transition-all"
-                                >
-                                  <ChevronRight className="h-4 w-4" />
-                                </Button>
-                              </CardContent>
-                            </Card>
+                            />
                           ))}
                         </div>
                       ) : (
@@ -709,7 +927,7 @@ const Profile = () => {
                                 ? "Share great content to grow your audience."
                                 : "This user has no followers yet."
                               : isOwnProfile
-                                ? "Find interesting people to follow!"
+                                ? "Explore and find interesting people to follow."
                                 : "This user isn't following anyone yet."
                           }
                         />
@@ -717,35 +935,20 @@ const Profile = () => {
                     })()}
                   </TabsContent>
                 ))}
-              </div>
-            </Tabs>
+              </Tabs>
+            </main>
           </div>
         </div>
-      </div>
 
-      <EditProfileModal
-        isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        user={user}
-      />
-    </div>
+        {/* Edit profile modal */}
+        <EditProfileModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          user={user}
+        />
+      </div>
+    </TooltipProvider>
   );
 };
-
-/* ── Refined Empty State Component ── */
-const EmptyState = ({ Icon, title, desc, action }) => (
-  <Card className="flex flex-col items-center justify-center py-16 px-6 text-center border-dashed border-2 bg-muted/30 shadow-none">
-    <div className="h-16 w-16 rounded-full bg-background border shadow-sm flex items-center justify-center mb-4">
-      <Icon className="h-8 w-8 text-muted-foreground/60" />
-    </div>
-    <CardTitle className="text-lg mb-2">{title}</CardTitle>
-    <CardDescription className="max-w-sm mb-6 text-sm">{desc}</CardDescription>
-    {action && (
-      <Button onClick={action.onClick} variant="default" className="shadow-sm">
-        {action.label}
-      </Button>
-    )}
-  </Card>
-);
 
 export default Profile;
