@@ -38,7 +38,7 @@ const AppRouter = () => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/profile/:idOrUsername" element={<Profile />} />
           <Route path="/communities/:idOrName" element={<CommunityProfile />} />
-          <Route path="/posts/:idOrSlug" element={<PostPage />} />
+          <Route path="/post/:idOrSlug" element={<PostPage />} />
         </Route>
       </Routes>
     </Suspense>

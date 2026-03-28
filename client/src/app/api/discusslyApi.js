@@ -14,6 +14,6 @@ export const discusslyApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Post', 'Community', 'Comments', 'User'],
+  tagTypes: ['Post', 'Community', 'Comments', 'User', 'Notification'],
   endpoints: () => ({}), // Will be injected later
 });

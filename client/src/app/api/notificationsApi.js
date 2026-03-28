@@ -35,6 +35,13 @@ const extendedNotificationsApi = discusslyApi.injectEndpoints({
       }),
       invalidatesTags: ['Notification'],
     }),
+    deleteAllNotifications: builder.mutation({
+      query: () => ({
+        url: NOTIFICATION_API_URL,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Notification'],
+    }),
   }),
 });
 
@@ -44,6 +51,7 @@ export const {
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
   useDeleteNotificationMutation,
+  useDeleteAllNotificationsMutation,
 } = extendedNotificationsApi;
 
 export const notificationsApi = extendedNotificationsApi;

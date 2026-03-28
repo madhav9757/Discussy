@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   MessageSquare,
   Share2,
@@ -12,6 +12,10 @@ import {
   CornerDownRight,
   ChevronDown,
   ChevronUp,
+  Bookmark,
+  Flag,
+  Link2,
+  Check,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -25,64 +29,132 @@ import {
   useDeletePostMutation,
 } from "../app/api/postsApi";
 import { toast } from "sonner";
-import { Input } from "./ui/input";
 import { cn, getAvatarUrl, getCommunityIconUrl } from "@/lib/utils";
 import { useSelector } from "react-redux";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-// ─── Single Comment (recursive) ───────────────────────────────────────────────
-const CommentItem = ({ comment, postId, depth = 0 }) => {
-  const { userInfo } = useSelector((state) => state.auth);
+/* ── Helpers ── */
+const timeAgo = (date) => {
+  if (!date) return "";
+  const s = Math.floor((Date.now() - new Date(date)) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)}m`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h`;
+  return `${Math.floor(s / 86400)}d`;
+};
+
+const Img = ({ src, alt = "", className }) => (
+  <img
+    src={src}
+    alt={alt}
+    className={cn("object-cover w-full h-full", className)}
+  />
+);
+
+/* ── Copy link with feedback ── */
+const useCopyLink = (postId) => {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+  return { copied, copy };
+};
+
+/* ── Vote button ── */
+const VoteBtn = ({ direction, active, onClick, size = 18 }) => {
+  const Icon = direction === "up" ? ArrowBigUp : ArrowBigDown;
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex items-center justify-center rounded transition-colors",
+        direction === "up"
+          ? active
+            ? "text-orange-500"
+            : "text-muted-foreground/30 hover:text-orange-500 hover:bg-orange-500/5"
+          : active
+            ? "text-indigo-500"
+            : "text-muted-foreground/30 hover:text-indigo-500 hover:bg-indigo-500/5",
+      )}
+      style={{ width: size + 8, height: size + 8 }}
+    >
+      <Icon
+        size={size}
+        fill={active ? "currentColor" : "none"}
+        strokeWidth={2}
+      />
+    </button>
+  );
+};
+
+/* ── Avatar ── */
+const Av = ({ src, size = 6, fallback }) => (
+  <div
+    className="rounded-full bg-muted border border-border/20 overflow-hidden shrink-0 flex items-center justify-center"
+    style={{ width: `${size * 4}px`, height: `${size * 4}px` }}
+  >
+    {src ? (
+      <Img src={src} />
+    ) : (
+      <span className="text-[10px] font-bold text-muted-foreground">
+        {fallback?.charAt(0)?.toUpperCase()}
+      </span>
+    )}
+  </div>
+);
+
+/* ── Comment item (recursive) ── */
+const CommentItem = ({ comment, postId, depth = 0, focusId, setFocusId }) => {
+  const { userInfo } = useSelector((s) => s.auth);
   const [replyOpen, setReplyOpen] = useState(false);
   const [replyText, setReplyText] = useState("");
-  const [childrenVisible, setChildrenVisible] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState(comment.content);
+  const replyRef = useRef(null);
 
-  // Optimistic local vote state for this comment
-  const [localUpvotes, setLocalUpvotes] = useState(comment.upvotes || []);
-  const [localDownvotes, setLocalDownvotes] = useState(comment.downvotes || []);
+  const [localUp, setLocalUp] = useState(comment.upvotes || []);
+  const [localDown, setLocalDown] = useState(comment.downvotes || []);
 
   const [createComment, { isLoading: submittingReply }] =
     useCreateCommentMutation();
-  const [deleteComment, { isLoading: deletingComment }] =
-    useDeleteCommentMutation();
+  const [deleteComment, { isLoading: deleting }] = useDeleteCommentMutation();
   const [toggleCommentVote] = useToggleCommentVoteMutation();
 
-  const isAuthor =
-    userInfo?._id === (comment.createdBy?._id || comment.createdBy);
-  const hasUpvoted = localUpvotes.includes(userInfo?._id);
-  const hasDownvoted = localDownvotes.includes(userInfo?._id);
-  const voteScore = localUpvotes.length - localDownvotes.length;
+  const uid = userInfo?._id;
+  const isAuthor = uid === (comment.createdBy?._id || comment.createdBy);
+  const hasUp = localUp.includes(uid);
+  const hasDown = localDown.includes(uid);
+  const score = localUp.length - localDown.length;
   const hasReplies = comment.replies?.length > 0;
 
-  const handleVote = async (type) => {
-    if (!userInfo) {
-      toast.error("Please login to vote");
-      return;
-    }
+  useEffect(() => {
+    if (replyOpen && replyRef.current) replyRef.current.focus();
+  }, [replyOpen]);
 
-    // Optimistic update — mutate local state immediately
-    const uid = userInfo._id;
+  const vote = async (type) => {
+    if (!userInfo) return toast.error("Login to vote");
+    const prevUp = [...localUp];
+    const prevDown = [...localDown];
     if (type === "upvote") {
-      if (hasUpvoted) {
-        setLocalUpvotes((p) => p.filter((id) => id !== uid));
-      } else {
-        setLocalUpvotes((p) => [...p, uid]);
-        setLocalDownvotes((p) => p.filter((id) => id !== uid));
-      }
+      hasUp
+        ? setLocalUp((p) => p.filter((id) => id !== uid))
+        : (setLocalUp((p) => [...p, uid]),
+          setLocalDown((p) => p.filter((id) => id !== uid)));
     } else {
-      if (hasDownvoted) {
-        setLocalDownvotes((p) => p.filter((id) => id !== uid));
-      } else {
-        setLocalDownvotes((p) => [...p, uid]);
-        setLocalUpvotes((p) => p.filter((id) => id !== uid));
-      }
+      hasDown
+        ? setLocalDown((p) => p.filter((id) => id !== uid))
+        : (setLocalDown((p) => [...p, uid]),
+          setLocalUp((p) => p.filter((id) => id !== uid)));
     }
-
     try {
       await toggleCommentVote({
         commentId: comment._id,
@@ -90,14 +162,13 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
         type,
       }).unwrap();
     } catch {
-      // Revert on failure
-      setLocalUpvotes(comment.upvotes || []);
-      setLocalDownvotes(comment.downvotes || []);
+      setLocalUp(prevUp);
+      setLocalDown(prevDown);
       toast.error("Vote failed");
     }
   };
 
-  const handleReply = async (e) => {
+  const reply = async (e) => {
     e.preventDefault();
     if (!replyText.trim()) return;
     try {
@@ -108,180 +179,218 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
       }).unwrap();
       setReplyText("");
       setReplyOpen(false);
-      toast.success("Reply posted!");
     } catch {
       toast.error("Failed to post reply");
     }
   };
 
-  const handleDelete = async () => {
+  const remove = async () => {
     try {
       await deleteComment({ commentId: comment._id, postId }).unwrap();
-      toast.success("Comment deleted");
     } catch {
       toast.error("Failed to delete");
     }
   };
 
-    const avatarUrl = getAvatarUrl(comment.createdBy);
+  const indent = Math.min(depth, 5) * 14;
 
   return (
-    <div
-      className="relative animate-in fade-in duration-200"
-      style={{ paddingLeft: depth > 0 ? `${Math.min(depth, 4) * 18}px` : 0 }}
-    >
-      {depth > 0 && (
-        <div className="absolute left-0 top-0 bottom-0 w-px bg-border/50 ml-2" />
-      )}
+    <div style={{ paddingLeft: indent }}>
+      <div className="relative group">
+        {/* Thread line */}
+        {depth > 0 && (
+          <div
+            className="absolute left-0 top-0 bottom-0 w-px bg-border/30 hover:bg-border/70 transition-colors cursor-pointer"
+            style={{ left: -8 }}
+            onClick={() => setCollapsed(!collapsed)}
+          />
+        )}
 
-      <div className="flex gap-2.5 group py-1.5">
-        <div className="shrink-0 w-6 h-6 rounded-full bg-muted/30 border border-border/20 overflow-hidden mt-0.5 shadow-xs flex items-center justify-center">
-          <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
-        </div>
-
-        <div className="flex-1 min-w-0 space-y-0.5">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Link
-              to={`/profile/${comment.createdBy?.username}`}
-              className="text-[10px] font-bold text-foreground/70 hover:text-primary transition-colors tracking-tight"
-            >
-              u/{comment.createdBy?.username}
+        <div className={cn("py-2", collapsed && "opacity-50")}>
+          {/* Header */}
+          <div className="flex items-center gap-2 mb-1">
+            <Link to={`/profile/${comment.createdBy?.username}`}>
+              <Av
+                src={getAvatarUrl(comment.createdBy)}
+                size={5}
+                fallback={comment.createdBy?.username}
+              />
             </Link>
-            <span className="text-[9px] text-muted-foreground font-medium uppercase tracking-tighter opacity-50">
-              {new Date(comment.createdAt).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-              })}
-            </span>
-          </div>
-
-          <p className="text-[13px] text-foreground/80 leading-relaxed font-medium">
-            {comment.content}
-          </p>
-
-          {/* Actions */}
-          <div className="flex items-center gap-1 -ml-1 pt-0.5 flex-wrap">
-            {/* Vote pill — ONLY for this comment */}
-            <div className="flex items-center gap-0.5 bg-muted/5 rounded-lg px-0.5 border border-border/10">
-              <button
-                onClick={() => handleVote("upvote")}
-                title="Upvote comment"
-                className={`h-5 w-5 flex items-center justify-center rounded transition-colors ${
-                  hasUpvoted
-                    ? "text-orange-500"
-                    : "text-muted-foreground/30 hover:text-orange-500"
-                }`}
+            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+              <Link
+                to={`/profile/${comment.createdBy?.username}`}
+                className="text-[11px] font-bold text-foreground/80 hover:text-primary transition-colors"
               >
-                <ArrowBigUp
-                  size={14}
-                  fill={hasUpvoted ? "currentColor" : "none"}
-                />
-              </button>
-              <span
-                className={`text-[10px] font-bold min-w-[12px] text-center ${
-                  hasUpvoted
-                    ? "text-orange-500"
-                    : hasDownvoted
-                      ? "text-indigo-500"
-                      : "text-foreground/50"
-                }`}
-              >
-                {voteScore}
+                u/{comment.createdBy?.username}
+              </Link>
+              <span className="text-[10px] text-muted-foreground/40">
+                {timeAgo(comment.createdAt)}
               </span>
-              <button
-                onClick={() => handleVote("downvote")}
-                title="Downvote comment"
-                className={`h-5 w-5 flex items-center justify-center rounded transition-colors ${
-                  hasDownvoted
-                    ? "text-indigo-500"
-                    : "text-muted-foreground/30 hover:text-indigo-500"
-                }`}
-              >
-                <ArrowBigDown
-                  size={14}
-                  fill={hasDownvoted ? "currentColor" : "none"}
-                />
-              </button>
+              {isAuthor && (
+                <span className="text-[9px] font-bold uppercase tracking-wider text-primary/50 bg-primary/5 px-1.5 py-0.5 rounded">
+                  OP
+                </span>
+              )}
             </div>
-
-            {userInfo && (
-              <button
-                onClick={() => setReplyOpen(!replyOpen)}
-                className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded transition-all ${
-                  replyOpen
-                    ? "bg-primary/5 text-primary"
-                    : "text-muted-foreground/40 hover:text-foreground hover:bg-muted/30"
-                }`}
-              >
-                <CornerDownRight size={10} /> Reply
-              </button>
-            )}
-
             {hasReplies && (
               <button
-                onClick={() => setChildrenVisible(!childrenVisible)}
-                className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded text-muted-foreground/30 hover:text-foreground hover:bg-muted/30 transition-all"
+                onClick={() => setCollapsed(!collapsed)}
+                className="ml-auto flex items-center gap-1 text-[10px] font-bold text-muted-foreground/30 hover:text-foreground transition-colors"
               >
-                {childrenVisible ? (
-                  <ChevronUp size={10} />
-                ) : (
+                {collapsed ? (
                   <ChevronDown size={10} />
-                )}
-                {comment.replies.length}
-              </button>
-            )}
-
-            {isAuthor && (
-              <button
-                onClick={handleDelete}
-                disabled={deletingComment}
-                className="flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded text-muted-foreground/20 hover:text-destructive hover:bg-destructive/5 transition-all ml-auto opacity-0 group-hover:opacity-100"
-              >
-                {deletingComment ? (
-                  <Loader2 size={10} className="animate-spin" />
                 ) : (
-                  <Trash2 size={10} />
+                  <ChevronUp size={10} />
                 )}
+                {collapsed ? `${comment.replies.length} replies` : ""}
               </button>
             )}
           </div>
 
-          {replyOpen && (
-            <form
-              onSubmit={handleReply}
-              className="relative mt-2 animate-in slide-in-from-top-1 duration-150"
-            >
-              <Input
-                autoFocus
-                placeholder={`Reply to u/${comment.createdBy?.username}...`}
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                className="pr-10 h-9 text-sm rounded-xl bg-muted/30 border-border/50 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary"
-              />
-              <button
-                type="submit"
-                disabled={submittingReply || !replyText.trim()}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-primary disabled:opacity-30 transition-colors"
-              >
-                {submittingReply ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <Send size={14} />
+          {!collapsed && (
+            <>
+              {/* Body */}
+              {editing ? (
+                <div className="flex gap-2 mt-1 mb-1.5">
+                  <textarea
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    className="flex-1 text-[12.5px] leading-relaxed bg-muted/30 border border-border/40 rounded-lg px-3 py-2 outline-none resize-none focus:border-border/70 transition-colors"
+                    rows={2}
+                    autoFocus
+                  />
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => setEditing(false)}
+                      className="text-[10px] font-bold px-2 py-1 rounded bg-foreground text-background"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditing(false);
+                        setEditText(comment.content);
+                      }}
+                      className="text-[10px] font-bold px-2 py-1 rounded bg-muted/50 text-muted-foreground"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-[12.5px] text-foreground/80 leading-relaxed mb-1.5 pl-7">
+                  {comment.content}
+                </p>
+              )}
+
+              {/* Actions */}
+              <div className="flex items-center gap-0.5 pl-7">
+                {/* vote */}
+                <div className="flex items-center gap-0.5 mr-1">
+                  <VoteBtn
+                    direction="up"
+                    active={hasUp}
+                    onClick={() => vote("upvote")}
+                    size={12}
+                  />
+                  <span
+                    className={cn(
+                      "text-[10px] font-bold min-w-[14px] text-center",
+                      hasUp
+                        ? "text-orange-500"
+                        : hasDown
+                          ? "text-indigo-500"
+                          : "text-foreground/40",
+                    )}
+                  >
+                    {score}
+                  </span>
+                  <VoteBtn
+                    direction="down"
+                    active={hasDown}
+                    onClick={() => vote("downvote")}
+                    size={12}
+                  />
+                </div>
+
+                {userInfo && (
+                  <button
+                    onClick={() => setReplyOpen(!replyOpen)}
+                    className={cn(
+                      "flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded transition-all",
+                      replyOpen
+                        ? "text-primary bg-primary/5"
+                        : "text-muted-foreground/40 hover:text-foreground hover:bg-muted/30",
+                    )}
+                  >
+                    <CornerDownRight size={9} /> Reply
+                  </button>
                 )}
-              </button>
-            </form>
+
+                {/* author actions — visible on hover */}
+                {isAuthor && (
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+                    <button
+                      onClick={() => setEditing(true)}
+                      className="flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded text-muted-foreground/30 hover:text-foreground hover:bg-muted/30 transition-all"
+                    >
+                      <Edit2 size={9} />
+                    </button>
+                    <button
+                      onClick={remove}
+                      disabled={deleting}
+                      className="flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded text-muted-foreground/30 hover:text-destructive hover:bg-destructive/5 transition-all"
+                    >
+                      {deleting ? (
+                        <Loader2 size={9} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={9} />
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Reply box */}
+              {replyOpen && (
+                <form onSubmit={reply} className="flex gap-2 mt-2 pl-7">
+                  <input
+                    ref={replyRef}
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder={`Reply to u/${comment.createdBy?.username}…`}
+                    className="flex-1 h-8 text-[12px] bg-muted/30 border border-border/30 rounded-lg px-3 outline-none focus:border-border/70 transition-colors placeholder:text-muted-foreground/30"
+                    onKeyDown={(e) => e.key === "Escape" && setReplyOpen(false)}
+                  />
+                  <button
+                    type="submit"
+                    disabled={submittingReply || !replyText.trim()}
+                    className="w-8 h-8 rounded-lg bg-foreground/5 hover:bg-foreground/10 disabled:opacity-30 flex items-center justify-center transition-colors"
+                  >
+                    {submittingReply ? (
+                      <Loader2 size={11} className="animate-spin" />
+                    ) : (
+                      <Send size={11} />
+                    )}
+                  </button>
+                </form>
+              )}
+            </>
           )}
         </div>
       </div>
 
-      {hasReplies && childrenVisible && (
-        <div className="mt-0.5">
+      {/* Children */}
+      {!collapsed && hasReplies && (
+        <div>
           {comment.replies.map((child) => (
             <CommentItem
               key={child._id}
               comment={child}
               postId={postId}
               depth={depth + 1}
+              focusId={focusId}
+              setFocusId={setFocusId}
             />
           ))}
         </div>
@@ -290,19 +399,72 @@ const CommentItem = ({ comment, postId, depth = 0 }) => {
   );
 };
 
-// ─── Main PostCard ─────────────────────────────────────────────────────────────
-const PostCard = ({ post }) => {
-  const [showComments, setShowComments] = useState(false);
-  const [newComment, setNewComment] = useState("");
+/* ── Comment input ── */
+const CommentInput = ({ userInfo, onSubmit, loading, navigate }) => {
+  const [text, setText] = useState("");
+  const ref = useRef(null);
 
-  // Separate optimistic state for POST votes only
-  const [localUpvotes, setLocalUpvotes] = useState(post.upvotes || []);
-  const [localDownvotes, setLocalDownvotes] = useState(post.downvotes || []);
+  if (!userInfo) {
+    return (
+      <p className="text-[11px] text-center text-muted-foreground py-2">
+        <button
+          onClick={() => navigate("/login")}
+          className="font-bold text-foreground underline underline-offset-2"
+        >
+          Log in
+        </button>{" "}
+        to comment
+      </p>
+    );
+  }
 
-  const { userInfo } = useSelector((state) => state.auth);
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!text.trim()) return;
+        onSubmit(text);
+        setText("");
+      }}
+      className="flex gap-2 items-center"
+    >
+      <Av src={getAvatarUrl(userInfo)} size={6} fallback={userInfo.username} />
+      <div className="flex-1 relative">
+        <input
+          ref={ref}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Add a comment…"
+          className="w-full h-9 text-[12.5px] bg-muted/20 border border-border/30 rounded-lg px-3 pr-10 outline-none focus:border-border/60 transition-colors placeholder:text-muted-foreground/30"
+        />
+        <button
+          type="submit"
+          disabled={loading || !text.trim()}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground disabled:opacity-30 transition-colors"
+        >
+          {loading ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : (
+            <Send size={13} />
+          )}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+/* ── PostCard ── */
+const PostCard = ({ post, customLayout, initialShowComments = false }) => {
+  const [showComments, setShowComments] = useState(initialShowComments);
+  const [saved, setSaved] = useState(false);
+  const [focusId, setFocusId] = useState(null);
+  const [localUp, setLocalUp] = useState(post.upvotes || []);
+  const [localDown, setLocalDown] = useState(post.downvotes || []);
+
+  const { userInfo } = useSelector((s) => s.auth);
   const navigate = useNavigate();
+  const { copied, copy } = useCopyLink(post._id);
 
-  // Comments are fetched only when the section is opened
   const { data: comments, isLoading: loadingComments } =
     useGetCommentsByPostIdQuery(post._id, { skip: !showComments });
   const [createComment, { isLoading: submittingComment }] =
@@ -310,202 +472,204 @@ const PostCard = ({ post }) => {
   const [toggleVote] = useToggleVoteMutation();
   const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation();
 
-  // Post-level vote state (optimistic)
-  const isAuthor = userInfo?._id === (post.author?._id || post.author);
-  const hasUpvoted = localUpvotes.includes(userInfo?._id);
-  const hasDownvoted = localDownvotes.includes(userInfo?._id);
-  const voteScore = localUpvotes.length - localDownvotes.length;
+  const uid = userInfo?._id;
+  const isAuthor = uid === (post.author?._id || post.author);
+  const hasUp = localUp.includes(uid);
+  const hasDown = localDown.includes(uid);
+  const score = localUp.length - localDown.length;
 
-  // Comment count: server gives us `post.commentCount` (real count from Comment collection).
-  // When panel is open, switch to the live recursive count from the fetched tree.
-  const countRecursive = (list) =>
-    (list || []).reduce((acc, c) => acc + 1 + countRecursive(c.replies), 0);
+  const countAll = (list = []) =>
+    list.reduce((a, c) => a + 1 + countAll(c.replies), 0);
   const commentCount =
     showComments && comments != null
-      ? countRecursive(comments)
+      ? countAll(comments)
       : (post.commentCount ?? post.comments?.length ?? 0);
 
-  const handleRootComment = async (e) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-    try {
-      await createComment({ postId: post._id, content: newComment }).unwrap();
-      setNewComment("");
-      toast.success("Comment added!");
-    } catch {
-      toast.error("Failed to post comment");
-    }
-  };
-
-  // Post vote — optimistic, does NOT touch comment votes
-  const handleVote = async (type) => {
-    if (!userInfo) {
-      toast.error("Please login to vote");
-      return;
-    }
-    const uid = userInfo._id;
-    // Snapshot for rollback
-    const prevUp = [...localUpvotes];
-    const prevDown = [...localDownvotes];
-
+  const vote = async (type) => {
+    if (!userInfo) return toast.error("Login to vote");
+    const prevUp = [...localUp];
+    const prevDown = [...localDown];
     if (type === "upvote") {
-      if (hasUpvoted) {
-        setLocalUpvotes((p) => p.filter((id) => id !== uid));
-      } else {
-        setLocalUpvotes((p) => [...p, uid]);
-        setLocalDownvotes((p) => p.filter((id) => id !== uid));
-      }
+      hasUp
+        ? setLocalUp((p) => p.filter((id) => id !== uid))
+        : (setLocalUp((p) => [...p, uid]),
+          setLocalDown((p) => p.filter((id) => id !== uid)));
     } else {
-      if (hasDownvoted) {
-        setLocalDownvotes((p) => p.filter((id) => id !== uid));
-      } else {
-        setLocalDownvotes((p) => [...p, uid]);
-        setLocalUpvotes((p) => p.filter((id) => id !== uid));
-      }
+      hasDown
+        ? setLocalDown((p) => p.filter((id) => id !== uid))
+        : (setLocalDown((p) => [...p, uid]),
+          setLocalUp((p) => p.filter((id) => id !== uid)));
     }
-
     try {
       await toggleVote({ id: post._id, type }).unwrap();
     } catch {
-      // Rollback
-      setLocalUpvotes(prevUp);
-      setLocalDownvotes(prevDown);
-      toast.error("Failed to update vote");
+      setLocalUp(prevUp);
+      setLocalDown(prevDown);
+      toast.error("Vote failed");
     }
   };
 
-  const handleDelete = async () => {
+  const submitComment = async (text) => {
+    try {
+      await createComment({ postId: post._id, content: text }).unwrap();
+    } catch {
+      toast.error("Failed to post");
+    }
+  };
+
+  const remove = async () => {
     try {
       await deletePost(post._id).unwrap();
       toast.success("Post deleted");
     } catch {
-      toast.error("Failed to delete post");
+      toast.error("Failed to delete");
     }
   };
 
-    const avatarUrl = getAvatarUrl(post.author);
+  /* ── customLayout: just comments (used in PostDetail) ── */
+  if (customLayout) {
+    return (
+      <div className="space-y-4">
+        <CommentInput
+          userInfo={userInfo}
+          onSubmit={submitComment}
+          loading={submittingComment}
+          navigate={navigate}
+        />
+        <div>
+          {loadingComments ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground/30" />
+            </div>
+          ) : comments?.length > 0 ? (
+            <div className="space-y-0">
+              {comments.map((c) => (
+                <CommentItem
+                  key={c._id}
+                  comment={c}
+                  postId={post._id}
+                  depth={0}
+                  focusId={focusId}
+                  setFocusId={setFocusId}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="py-10 text-center">
+              <MessageSquare className="w-8 h-8 mx-auto mb-2 text-muted-foreground/15" />
+              <p className="text-[11px] text-muted-foreground/40 font-medium uppercase tracking-wider">
+                No comments yet
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
+  /* ── default card ── */
   return (
-    <article className="rounded-xl border border-border/40 bg-card overflow-hidden hover:border-border/60 hover:shadow-xs transition-all duration-200">
-      <div className="p-4 flex gap-3">
-        {/* POST vote sidebar — completely isolated from comment votes */}
-        <div className="flex flex-col items-center gap-0.5 min-w-[32px] pt-0.5">
-          <button
-            onClick={() => handleVote("upvote")}
-            title="Upvote post"
-            className={`flex items-center justify-center h-7 w-7 rounded-lg transition-colors hover:bg-primary/5 ${
-              hasUpvoted
-                ? "text-primary"
-                : "text-muted-foreground/30 hover:text-primary"
-            }`}
-          >
-            <ArrowBigUp
-              size={20}
-              fill={hasUpvoted ? "currentColor" : "none"}
-              strokeWidth={2.5}
-            />
-          </button>
+    <article className="border-b border-border/15 hover:bg-muted/5 transition-colors duration-150">
+      <div className="flex gap-3 px-3 pt-3 pb-2">
+        {/* Vote column */}
+        <div className="flex flex-col items-center gap-0.5 pt-0.5 shrink-0">
+          <VoteBtn
+            direction="up"
+            active={hasUp}
+            onClick={() => vote("upvote")}
+            size={16}
+          />
           <span
-            className={`text-[12px] font-black leading-none py-0.5 ${
-              hasUpvoted
-                ? "text-primary"
-                : hasDownvoted
-                  ? "text-secondary"
-                  : "text-foreground/60"
-            }`}
+            className={cn(
+              "text-[11px] font-black leading-none",
+              hasUp
+                ? "text-orange-500"
+                : hasDown
+                  ? "text-indigo-500"
+                  : "text-foreground/50",
+            )}
           >
-            {voteScore}
+            {score}
           </span>
-          <button
-            onClick={() => handleVote("downvote")}
-            title="Downvote post"
-            className={`flex items-center justify-center h-7 w-7 rounded-lg transition-colors hover:bg-secondary/5 ${
-              hasDownvoted
-                ? "text-secondary"
-                : "text-muted-foreground/30 hover:text-secondary"
-            }`}
-          >
-            <ArrowBigDown
-              size={20}
-              fill={hasDownvoted ? "currentColor" : "none"}
-              strokeWidth={2.5}
-            />
-          </button>
+          <VoteBtn
+            direction="down"
+            active={hasDown}
+            onClick={() => vote("downvote")}
+            size={16}
+          />
         </div>
 
-        {/* Content */}
+        {/* Main content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
+          {/* Meta */}
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap text-[10.5px] text-muted-foreground min-w-0">
+              {post.community && (
+                <>
+                  <Link
+                    to={`/communities/${post.community.name}`}
+                    className="flex items-center gap-1 font-bold text-foreground/70 hover:text-primary transition-colors"
+                  >
+                    <div className="w-3.5 h-3.5 rounded-full bg-muted border border-border/20 overflow-hidden shrink-0">
+                      <Img src={getCommunityIconUrl(post.community)} />
+                    </div>
+                    c/{post.community.name}
+                  </Link>
+                  <span className="text-border/50">·</span>
+                </>
+              )}
               <Link
                 to={`/profile/${post.author?.username}`}
-                className="shrink-0"
+                className="font-medium hover:text-foreground/80 transition-colors"
               >
-                <div className="w-8 h-8 rounded-full bg-muted border border-border/20 overflow-hidden shrink-0 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <img src={getAvatarUrl(post.author)} alt="" className="w-full h-full object-cover" />
-                </div>
+                u/{post.author?.username || "anon"}
               </Link>
-              <div className="flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground font-medium uppercase tracking-tight">
-                {post.community && (
-                  <>
-                    <Link
-                      to={`/communities/${post.community.name}`}
-                      className="text-foreground/80 font-bold hover:text-primary cursor-pointer transition-colors flex items-center gap-1"
-                    >
-                      <div className="w-4 h-4 rounded-full bg-muted border border-border/20 overflow-hidden shrink-0">
-                        <img src={getCommunityIconUrl(post.community)} alt="" className="w-full h-full object-cover" />
-                      </div>
-                      c/{post.community.name}
-                    </Link>
-                    <span className="text-muted-foreground/20">•</span>
-                  </>
-                )}
-                <Link
-                  to={`/profile/${post.author?.username}`}
-                  className="hover:text-primary transition-colors font-bold opacity-70"
-                >
-                  u/{post.author?.username || "anon"}
-                </Link>
-                <span className="text-muted-foreground/20">•</span>
-                <span className="opacity-60">
-                  {new Date(post.createdAt || Date.now()).toLocaleDateString(
-                    undefined,
-                    { month: "short", day: "numeric" },
-                  )}
-                </span>
-              </div>
+              <span className="text-border/50">·</span>
+              <span className="opacity-50">{timeAgo(post.createdAt)}</span>
             </div>
 
+            {/* Actions menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="h-6 w-6 flex items-center justify-center rounded-lg hover:bg-muted transition-colors text-muted-foreground/30 hover:text-foreground">
-                  <MoreHorizontal size={14} />
+                <button className="w-6 h-6 flex items-center justify-center rounded hover:bg-muted/50 text-muted-foreground/30 hover:text-foreground transition-colors shrink-0">
+                  <MoreHorizontal size={13} />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="rounded-lg w-36 border-border/40"
+                className="w-36 rounded-lg border-border/30 text-[12px]"
               >
-                <DropdownMenuItem className="gap-2 cursor-pointer rounded-md text-[12px] font-bold">
-                  <Share2 size={12} /> Share
+                <DropdownMenuItem
+                  onClick={copy}
+                  className="gap-2 cursor-pointer font-medium rounded-md"
+                >
+                  {copied ? <Check size={11} /> : <Link2 size={11} />}
+                  {copied ? "Copied!" : "Copy link"}
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2 cursor-pointer font-medium rounded-md">
+                  <Share2 size={11} /> Share
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2 cursor-pointer font-medium rounded-md">
+                  <Flag size={11} /> Report
                 </DropdownMenuItem>
                 {isAuthor && (
                   <>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      className="gap-2 cursor-pointer rounded-md text-[12px] font-bold"
-                      onClick={() => toast.info("Edit coming soon!")}
+                      onClick={() => toast.info("Edit coming soon")}
+                      className="gap-2 cursor-pointer font-medium rounded-md"
                     >
-                      <Edit2 size={12} /> Edit
+                      <Edit2 size={11} /> Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="gap-2 cursor-pointer text-destructive focus:text-destructive rounded-md text-[12px] font-bold"
-                      onClick={handleDelete}
+                      onClick={remove}
                       disabled={isDeleting}
+                      className="gap-2 cursor-pointer font-medium rounded-md text-destructive focus:text-destructive"
                     >
                       {isDeleting ? (
-                        <Loader2 size={12} className="animate-spin" />
+                        <Loader2 size={11} className="animate-spin" />
                       ) : (
-                        <Trash2 size={12} />
+                        <Trash2 size={11} />
                       )}
                       Delete
                     </DropdownMenuItem>
@@ -515,104 +679,105 @@ const PostCard = ({ post }) => {
             </DropdownMenu>
           </div>
 
-          <h2 className="text-[14px] font-bold leading-snug text-foreground/90 mb-1">
+          {/* Title */}
+          <h2
+            className="text-[13.5px] font-semibold leading-snug text-foreground/90 mb-1 cursor-pointer hover:text-primary transition-colors"
+            onClick={() => navigate(`/post/${post._id}`)}
+          >
             {post.title}
           </h2>
+
+          {/* Body preview */}
           {post.content && (
-            <p className="text-[13px] text-muted-foreground/80 whitespace-pre-wrap leading-relaxed font-medium">
+            <p className="text-[12px] text-muted-foreground/70 line-clamp-2 leading-relaxed mb-2">
               {post.content}
             </p>
           )}
 
-          {/* Footer */}
-          <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/20 -ml-1">
+          {/* Footer actions */}
+          <div className="flex items-center gap-0.5 -ml-1.5">
             <button
               onClick={() => setShowComments(!showComments)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all ${
+              className={cn(
+                "flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold transition-all",
                 showComments
-                  ? "bg-primary/5 text-primary"
-                  : "text-muted-foreground/50 hover:bg-muted/40 hover:text-foreground"
-              }`}
+                  ? "text-primary bg-primary/5"
+                  : "text-muted-foreground/40 hover:text-foreground hover:bg-muted/30",
+              )}
             >
-              <MessageSquare size={13} strokeWidth={2.5} />
+              <MessageSquare size={12} strokeWidth={2} />
               <span>{commentCount}</span>
               <span className="hidden sm:inline">
-                {commentCount === 1 ? "Comment" : "Comments"}
+                {commentCount === 1 ? "comment" : "comments"}
               </span>
             </button>
-            <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[11px] text-muted-foreground/50 hover:bg-muted/40 hover:text-foreground transition-all">
-              <Share2 size={13} strokeWidth={2.5} />
-              <span className="hidden sm:inline">Share</span>
+
+            <button
+              onClick={copy}
+              className="flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold text-muted-foreground/40 hover:text-foreground hover:bg-muted/30 transition-all"
+            >
+              {copied ? (
+                <Check size={12} strokeWidth={2} />
+              ) : (
+                <Share2 size={12} strokeWidth={2} />
+              )}
+              <span className="hidden sm:inline">
+                {copied ? "Copied" : "Share"}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setSaved((s) => !s)}
+              className={cn(
+                "flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold transition-all",
+                saved
+                  ? "text-foreground bg-muted/40"
+                  : "text-muted-foreground/40 hover:text-foreground hover:bg-muted/30",
+              )}
+            >
+              <Bookmark
+                size={12}
+                strokeWidth={2}
+                fill={saved ? "currentColor" : "none"}
+              />
+              <span className="hidden sm:inline">
+                {saved ? "Saved" : "Save"}
+              </span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Comment panel — only rendered when open */}
+      {/* Comment panel */}
       {showComments && (
-        <div className="border-t border-border/40 bg-muted/5 p-5 space-y-4 animate-in slide-in-from-top-2 duration-200">
-          {userInfo ? (
-            <form onSubmit={handleRootComment}>
-              <div className="flex gap-3 items-start">
-                <div className="w-7 h-7 shrink-0 rounded-full bg-muted border border-border/40 overflow-hidden mt-1 shadow-xs">
-                  <img
-                    src={getAvatarUrl(userInfo)}
-                    alt="You"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="flex-1 relative">
-                  <Input
-                    placeholder="Add a comment..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    className="pr-10 h-10 text-sm rounded-xl bg-card border-border/50 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary shadow-xs"
-                  />
-                  <button
-                    type="submit"
-                    disabled={submittingComment || !newComment.trim()}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-primary disabled:opacity-30 transition-colors"
-                  >
-                    {submittingComment ? (
-                      <Loader2 size={14} className="animate-spin" />
-                    ) : (
-                      <Send size={14} />
-                    )}
-                  </button>
-                </div>
-              </div>
-            </form>
-          ) : (
-            <p className="text-xs text-center text-muted-foreground py-2">
-              <button
-                onClick={() => navigate("/login")}
-                className="text-primary font-bold hover:underline"
-              >
-                Log in
-              </button>{" "}
-              to join the conversation
-            </p>
-          )}
-
-          <div className="space-y-0 pt-1">
+        <div className="border-t border-border/10 bg-muted/5 px-4 py-3 space-y-3">
+          <CommentInput
+            userInfo={userInfo}
+            onSubmit={submitComment}
+            loading={submittingComment}
+            navigate={navigate}
+          />
+          <div>
             {loadingComments ? (
-              <div className="flex justify-center py-6">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground/30" />
+              <div className="flex justify-center py-5">
+                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground/20" />
               </div>
             ) : comments?.length > 0 ? (
-              <div className="divide-y divide-border/20">
-                {comments.map((comment) => (
+              <div>
+                {comments.map((c) => (
                   <CommentItem
-                    key={comment._id}
-                    comment={comment}
+                    key={c._id}
+                    comment={c}
                     postId={post._id}
                     depth={0}
+                    focusId={focusId}
+                    setFocusId={setFocusId}
                   />
                 ))}
               </div>
             ) : (
-              <p className="text-center text-xs text-muted-foreground py-6 italic">
-                No comments yet — be the first!
+              <p className="text-center text-[11px] text-muted-foreground/30 py-4 italic">
+                Be the first to comment
               </p>
             )}
           </div>

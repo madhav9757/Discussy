@@ -8,7 +8,6 @@ export function cn(...inputs) {
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
-// Standardizing Dicebear version to 9.x as 7.x may be deprecated or slower
 const DICEBEAR_USER_URL = "https://api.dicebear.com/9.x/notionists/svg";
 const DICEBEAR_COMM_URL = "https://api.dicebear.com/9.x/identicon/svg";
 

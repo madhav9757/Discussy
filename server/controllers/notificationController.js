@@ -153,3 +153,20 @@ export const deleteNotification = async (req, res) => {
     res.status(500).json({ message: 'Failed to delete notification' });
   }
 };
+
+/**
+ * @desc    Delete all notifications for the logged-in user
+ * @route   DELETE /api/notifications
+ * @access  Private
+ */
+export const deleteAllNotifications = async (req, res) => {
+  try {
+    const result = await Notification.deleteMany({ user: req.user._id });
+    
+    console.log(`🗑️ Deleted all (${result.deletedCount}) notifications for user ${req.user._id}`);
+    res.json({ message: 'All notifications deleted successfully', deletedCount: result.deletedCount });
+  } catch (error) {
+    console.error('Error deleting all notifications:', error);
+    res.status(500).json({ message: 'Failed to delete all notifications' });
+  }
+};

@@ -1,5 +1,12 @@
 import React, { useState, useMemo } from "react";
-import { useGetNotificationsQuery } from "../app/api/notificationsApi";
+import { useNavigate } from "react-router-dom";
+import { 
+  useGetNotificationsQuery, 
+  useMarkNotificationAsReadMutation, 
+  useMarkAllNotificationsAsReadMutation, 
+  useDeleteNotificationMutation, 
+  useDeleteAllNotificationsMutation 
+} from "../app/api/notificationsApi";
 import {
   Bell,
   BellOff,
@@ -87,7 +94,7 @@ const NotifSkeleton = () => (
 );
 
 /* ── Single notification row ── */
-const NotifRow = ({ notification, onMarkRead }) => {
+const NotifRow = ({ notification, onMarkRead, onDelete }) => {
   const { Icon, color, bg } = getType(notification);
   const unread = !notification.isRead;
 
@@ -105,7 +112,7 @@ const NotifRow = ({ notification, onMarkRead }) => {
             ? "bg-muted/20 hover:bg-muted/40"
             : "bg-background hover:bg-muted/20",
         )}
-        onClick={() => !unread || onMarkRead?.(notification._id)}
+        onClick={() => onMarkRead?.(notification._id, true)}
       >
         {/* Unread Indicator Bar */}
         {unread && (
@@ -160,20 +167,33 @@ const NotifRow = ({ notification, onMarkRead }) => {
           </p>
         </div>
 
-        {/* Hover Action */}
-        {unread && (
+        {/* Actions */}
+        <div className="absolute right-4 bottom-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          {unread && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMarkRead?.(notification._id, false);
+              }}
+              className="h-7 text-xs gap-1.5 px-2 bg-background/80 backdrop-blur-sm border shadow-sm hover:bg-background"
+            >
+              <Check size={14} /> Mark read
+            </Button>
+          )}
           <Button
             size="sm"
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
-              onMarkRead?.(notification._id);
+              onDelete?.(notification._id);
             }}
-            className="absolute right-4 bottom-3 opacity-0 group-hover:opacity-100 transition-opacity h-7 text-xs gap-1.5 px-2 bg-background/80 backdrop-blur-sm border shadow-sm hover:bg-background"
+            className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 bg-background/80 backdrop-blur-sm border shadow-sm"
           >
-            <Check size={14} /> Mark read
+            <Trash2 size={14} />
           </Button>
-        )}
+        </div>
       </Card>
     </motion.div>
   );
@@ -182,7 +202,12 @@ const NotifRow = ({ notification, onMarkRead }) => {
 /* ════════════════════════════════════════════════════ */
 const Notifications = () => {
   const { data: notifications, isLoading } = useGetNotificationsQuery();
+  const [markRead] = useMarkNotificationAsReadMutation();
+  const [markAllRead] = useMarkAllNotificationsAsReadMutation();
+  const [deleteNotif] = useDeleteNotificationMutation();
+  const [deleteAllNotifs] = useDeleteAllNotificationsMutation();
   const [filter, setFilter] = useState("all");
+  const navigate = useNavigate();
 
   const unreadCount = useMemo(
     () => notifications?.filter((n) => !n.isRead).length ?? 0,
@@ -196,10 +221,41 @@ const Notifications = () => {
     return notifications;
   }, [notifications, filter]);
 
-  /* Handlers — wire to your mutations */
-  const handleMarkRead = (id) => console.log("mark read", id);
-  const handleMarkAll = () => console.log("mark all read");
-  const handleClearAll = () => console.log("clear all");
+  /* Handlers */
+  const handleMarkRead = async (id, link, shouldNavigate = false) => {
+    try {
+      await markRead(id).unwrap();
+      if (shouldNavigate && link) navigate(link);
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
+  };
+
+  const handleMarkAll = async () => {
+    try {
+      await markAllRead().unwrap();
+    } catch (err) {
+      console.error("Failed to mark all notifications as read:", err);
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (window.confirm("Are you sure you want to clear all notifications?")) {
+      try {
+        await deleteAllNotifs().unwrap();
+      } catch (err) {
+        console.error("Failed to clear notifications:", err);
+      }
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteNotif(id).unwrap();
+    } catch (err) {
+      console.error("Failed to delete notification:", err);
+    }
+  };
 
   return (
     <div className="w-full h-full flex flex-col bg-background min-h-0 overflow-hidden font-sans">
@@ -373,7 +429,8 @@ const Notifications = () => {
                           <NotifRow
                             key={n._id}
                             notification={n}
-                            onMarkRead={handleMarkRead}
+                            onMarkRead={(id, navigate) => handleMarkRead(id, n.link, navigate)}
+                            onDelete={handleDelete}
                           />
                         ))}
                       </div>

@@ -134,14 +134,14 @@ export const getPostById = asyncHandler(async (req, res) => {
   // Try ID first if it looks like one, otherwise try Slug
   if (idOrSlug.match(/^[0-9a-fA-F]{24}$/)) {
     post = await Post.findById(idOrSlug)
-      .populate("author", "username email image")
-      .populate("community", "name");
+      .populate("author", "username email image bio createdAt followers following bannerImage")
+      .populate("community", "name description image bannerImage members createdAt category");
   }
 
   if (!post) {
     post = await Post.findOne({ slug: idOrSlug })
-      .populate("author", "username email image")
-      .populate("community", "name");
+      .populate("author", "username email image bio createdAt followers following bannerImage")
+      .populate("community", "name description image bannerImage members createdAt category");
   }
 
   if (!post) {

@@ -506,7 +506,7 @@ const Profile = () => {
                           key={comment._id}
                           className="group overflow-hidden border-border/40 hover:border-primary/30 hover:shadow-md transition-all duration-300 cursor-pointer bg-card/50"
                           onClick={() =>
-                            navigate(`/posts/${comment.postId?._id}`)
+                            navigate(`/post/${comment.postId?._id}`)
                           }
                         >
                           <div className="p-5 flex gap-4">
