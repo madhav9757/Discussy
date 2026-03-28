@@ -207,16 +207,28 @@ export default function Header() {
                 </Button>
 
                 {userInfo ? (
-                  <Button
-                    variant="destructive"
-                    className="w-full justify-start gap-3 bg-destructive/10 text-destructive hover:bg-destructive/20"
-                    onClick={() => {
-                      setMobileOpen(false);
-                      handleLogout();
-                    }}
-                  >
-                    <LogOut size={18} /> Sign Out
-                  </Button>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-3 px-4 py-2 border rounded-xl bg-accent/30 group cursor-pointer" onClick={() => { setMobileOpen(false); navigate(`/profile/${userInfo.username}`); }}>
+                      <Avatar className="h-10 w-10 border shadow-sm">
+                        <AvatarImage src={getAvatarUrl(userInfo)} alt={userInfo.username} />
+                        <AvatarFallback>{userInfo.username?.charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-semibold truncate">u/{userInfo.username}</span>
+                        <span className="text-[11px] text-muted-foreground truncate">{userInfo.email}</span>
+                      </div>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      className="w-full justify-start gap-3 bg-destructive/10 text-destructive hover:bg-destructive/20"
+                      onClick={() => {
+                        setMobileOpen(false);
+                        handleLogout();
+                      }}
+                    >
+                      <LogOut size={18} /> Sign Out
+                    </Button>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
                     <Button

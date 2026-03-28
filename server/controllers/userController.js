@@ -46,6 +46,7 @@ export const register = asyncHandler(async (req, res) => {
         _id: user._id,
         username: user.username,
         email: user.email,
+        image: user.image,
       },
       token,
     });
@@ -83,6 +84,7 @@ export const login = asyncHandler(async (req, res) => {
         _id: user._id,
         username: user.username,
         email: user.email,
+        image: user.image,
       },
       token,
     });

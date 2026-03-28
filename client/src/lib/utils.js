@@ -15,7 +15,8 @@ const DICEBEAR_COMM_URL = "https://api.dicebear.com/9.x/identicon/svg";
 export function getAvatarUrl(user) {
   if (!user) return `${DICEBEAR_USER_URL}?seed=anon`;
 
-  const image = user.image;
+  // Support both 'image' (our model) and 'avatar' (legacy or other sources)
+  const image = user.image || user.avatar;
   if (image && typeof image === "string" && image.trim() !== "") {
     // Return base64 data URIs or already full URLs as is
     if (image.startsWith("data:") || image.startsWith("http")) return image;
