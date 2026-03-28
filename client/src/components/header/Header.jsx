@@ -8,7 +8,14 @@ import { cn, getAvatarUrl } from "@/lib/utils";
 
 // UI Components
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -141,6 +148,12 @@ export default function Header() {
               side="left"
               className="w-72 p-0 flex flex-col border-r bg-background"
             >
+              <SheetHeader className="sr-only">
+                <SheetTitle>Discussly Menu</SheetTitle>
+                <SheetDescription>
+                  Navigation menu for Discussly mobile users.
+                </SheetDescription>
+              </SheetHeader>
               <div className="flex items-center px-6 h-16 border-b shrink-0">
                 <Link to="/" onClick={() => setMobileOpen(false)}>
                   <img

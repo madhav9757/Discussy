@@ -17,8 +17,8 @@ export function getAvatarUrl(user) {
 
   const image = user.image;
   if (image && typeof image === "string" && image.trim() !== "") {
-    // If it's a full URL, return as is
-    if (image.startsWith("https")) return image;
+    // Return base64 data URIs or already full URLs as is
+    if (image.startsWith("data:") || image.startsWith("http")) return image;
 
     // Ensure relative path has leading slash for correct concatenation
     const path = image.startsWith("/") ? image : `/${image}`;
@@ -34,7 +34,7 @@ export function getUserBannerUrl(user) {
 
   const image = user.bannerImage;
   if (image && typeof image === "string" && image.trim() !== "") {
-    if (image.startsWith("https")) return image;
+    if (image.startsWith("data:") || image.startsWith("http")) return image;
 
     const path = image.startsWith("/") ? image : `/${image}`;
     return `${API_BASE_URL}${path}`;
@@ -48,8 +48,7 @@ export function getCommunityIconUrl(community) {
 
   const image = community.image;
   if (image && typeof image === "string" && image.trim() !== "") {
-    // If it's a full URL, return as is
-    if (image.startsWith("https")) return image;
+    if (image.startsWith("data:") || image.startsWith("http")) return image;
 
     // Ensure relative path has leading slash
     const path = image.startsWith("/") ? image : `/${image}`;
@@ -64,7 +63,7 @@ export function getCommunityBannerUrl(community) {
 
   const image = community.bannerImage;
   if (image && typeof image === "string" && image.trim() !== "") {
-    if (image.startsWith("https")) return image;
+    if (image.startsWith("data:") || image.startsWith("http")) return image;
 
     const path = image.startsWith("/") ? image : `/${image}`;
     return `${API_BASE_URL}${path}`;
